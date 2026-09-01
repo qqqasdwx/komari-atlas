@@ -9,6 +9,16 @@ import type {
 } from "@/types/atlas";
 
 const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
+
+// Komari 1.4.3 keeps rollups at 1m/5m/1h/24h for 10h/50h/600h/metric retention.
+// Keep each request inside one backing tier so a newly extended retention policy
+// can still read the finer rollups that already exist.
+const KOMARI_ROLLUP_BOUNDARIES = [
+  { ageMs: 600 * 60 * MINUTE_MS, alignmentMs: 24 * 60 * MINUTE_MS },
+  { ageMs: 50 * 60 * MINUTE_MS, alignmentMs: 60 * MINUTE_MS },
+  { ageMs: 10 * 60 * MINUTE_MS, alignmentMs: 5 * MINUTE_MS },
+];
 
 export const EMPTY_ATLAS_SETTINGS: AtlasSettingsV2 = {
   schema: 2,
@@ -109,6 +119,32 @@ export function resolveBillingWindow(
     start,
     end,
   };
+}
+
+export function splitBillingMetricWindow(
+  start: Date,
+  end: Date,
+): Array<{ start: Date; end: Date }> {
+  if (end.getTime() <= start.getTime()) return [];
+
+  const boundaries = KOMARI_ROLLUP_BOUNDARIES
+    .map(({ ageMs, alignmentMs }) => {
+      const cutoff = end.getTime() - ageMs;
+      return Math.ceil(cutoff / alignmentMs) * alignmentMs;
+    })
+    .filter((boundary) => boundary > start.getTime() && boundary < end.getTime());
+
+  const windows: Array<{ start: Date; end: Date }> = [];
+  let windowStart = start.getTime();
+  for (const boundary of boundaries) {
+    windows.push({
+      start: new Date(windowStart),
+      end: new Date(boundary - 1),
+    });
+    windowStart = boundary;
+  }
+  windows.push({ start: new Date(windowStart), end: new Date(end) });
+  return windows;
 }
 
 export function getTrafficUsed(

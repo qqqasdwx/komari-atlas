@@ -6,6 +6,8 @@ import {
   normalizeAtlasSettings,
   resolveBillingWindow,
   resourceTone,
+  splitBillingMetricWindow,
+  sumMetricSeries,
 } from "./atlas";
 
 describe("normalizeAtlasSettings", () => {
@@ -70,6 +72,66 @@ describe("resolveBillingWindow", () => {
     expect(derived?.resetDay).toBe(23);
     expect(derived?.source).toBe("expiry");
     expect(resolveBillingWindow({ expired_at: "" }, { cardPingTaskIds: [] })).toBeNull();
+  });
+});
+
+describe("splitBillingMetricWindow", () => {
+  it("splits a monthly window at Komari rollup retention boundaries", () => {
+    const windows = splitBillingMetricWindow(
+      new Date("2026-08-01T16:00:00.000Z"),
+      new Date("2026-09-01T14:21:00.000Z"),
+    );
+
+    expect(windows.map((window) => [window.start.toISOString(), window.end.toISOString()])).toEqual([
+      ["2026-08-01T16:00:00.000Z", "2026-08-07T23:59:59.999Z"],
+      ["2026-08-08T00:00:00.000Z", "2026-08-30T12:59:59.999Z"],
+      ["2026-08-30T13:00:00.000Z", "2026-09-01T04:24:59.999Z"],
+      ["2026-09-01T04:25:00.000Z", "2026-09-01T14:21:00.000Z"],
+    ]);
+  });
+
+  it("keeps a recent window as one request", () => {
+    const windows = splitBillingMetricWindow(
+      new Date("2026-09-01T12:00:00.000Z"),
+      new Date("2026-09-01T14:00:00.000Z"),
+    );
+
+    expect(windows).toHaveLength(1);
+    expect(windows[0].start.toISOString()).toBe("2026-09-01T12:00:00.000Z");
+    expect(windows[0].end.toISOString()).toBe("2026-09-01T14:00:00.000Z");
+  });
+});
+
+describe("sumMetricSeries", () => {
+  it("adds matching series from multiple query windows", () => {
+    expect(sumMetricSeries({
+      start: "2026-09-01T12:00:00.000Z",
+      end: "2026-09-01T14:00:00.000Z",
+      count: 3,
+      series: [
+        {
+          metric_key: "traffic.up",
+          entity_id: "node-a",
+          count: 2,
+          points: [
+            { time: "2026-09-01T12:00:00.000Z", value: 10 },
+            { time: "2026-09-01T12:01:00.000Z", value: 20 },
+          ],
+        },
+        {
+          metric_key: "traffic.up",
+          entity_id: "node-a",
+          count: 1,
+          points: [{ time: "2026-09-01T13:00:00.000Z", value: 30 }],
+        },
+        {
+          metric_key: "traffic.down",
+          entity_id: "node-a",
+          count: 1,
+          points: [{ time: "2026-09-01T13:00:00.000Z", value: 99 }],
+        },
+      ],
+    }, "traffic.up")).toEqual({ "node-a": 60 });
   });
 });
 

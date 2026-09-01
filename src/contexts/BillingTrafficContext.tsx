@@ -12,7 +12,12 @@ import React, {
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useNodeList } from "@/contexts/NodeListContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
-import { getTrafficUsed, resolveBillingWindow, sumMetricSeries } from "@/lib/atlas";
+import {
+  getTrafficUsed,
+  resolveBillingWindow,
+  splitBillingMetricWindow,
+  sumMetricSeries,
+} from "@/lib/atlas";
 import type { BillingTrafficState, MetricsResponse } from "@/types/atlas";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
@@ -68,17 +73,27 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
 
     await Promise.all(Array.from(groups.values()).map(async (group) => {
       try {
-        const response = await callViaHTTP<Record<string, unknown>, MetricsResponse>(
-          "public:queryMetrics",
-          {
-            metric_keys: ["traffic.up", "traffic.down"],
-            entity_ids: group.nodeIds,
-            start: group.start.toISOString(),
-            end: now.toISOString(),
-            aggregation: "sum",
-            max_points: 500,
-          },
-        );
+        const queryWindows = splitBillingMetricWindow(group.start, now);
+        const responses = await Promise.all(queryWindows.map((window) =>
+          callViaHTTP<Record<string, unknown>, MetricsResponse>(
+            "public:queryMetrics",
+            {
+              metric_keys: ["traffic.up", "traffic.down"],
+              entity_ids: group.nodeIds,
+              start: window.start.toISOString(),
+              end: window.end.toISOString(),
+              aggregation: "sum",
+              max_points: 500,
+            },
+          ),
+        ));
+        const series = responses.flatMap((item) => item.series || []);
+        const response: MetricsResponse = {
+          start: group.start.toISOString(),
+          end: now.toISOString(),
+          series,
+          count: series.length,
+        };
         const finiteRetention = response.series
           .filter((series) => series.metric_key === "traffic.up" || series.metric_key === "traffic.down")
           .map((series) => series.retention_days)
