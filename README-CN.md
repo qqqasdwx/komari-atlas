@@ -1,184 +1,59 @@
-# Komari-Next
+# Komari Atlas
 
-Komari-Next 是 Komari 监控项目的现代化前端。  
-它基于 **Next.js**、**TypeScript**、**Tailwind CSS** 和 **Shadcn UI** 构建，并打包为可作为 Komari 主题使用的静态站点。
+一个以地图视图为核心、可高度定制的 [Komari Monitor](https://github.com/komari-monitor/komari) 主题。
 
-[English](https://github.com/tonyliuzj/komari-next/blob/main/README.md)
+[English](https://github.com/qqqasdwx/komari-atlas/blob/main/README.md) · [下载最新主题](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
-[演示站点](https://probes.top)
+![Komari Atlas 预览](preview.png)
 
-[下载主题文件](https://github.com/tonyliuzj/komari-next/releases/latest/download/dist-release.zip)
-
-> 本仓库仅包含前端部分。你需要一个正在运行的 Komari 后端实例供该 UI 调用。或者，你也可以下载主题文件，并通过 Komari 管理后台上传；这是推荐的使用方式。
-
-![预览](https://github.com/tonyliuzj/komari-next/blob/main/preview.png?raw=true)
-![深色主题](https://github.com/tonyliuzj/komari-next/blob/main/images/dark-theme.png?raw=true)
+Komari Atlas 是一个使用 Next.js 构建并静态导出的 Komari 主题。主题标识为 `atlas`，浏览器偏好统一存储在 `komari-atlas:*` 命名空间中；Komari Next 或其他主题的设置不会被导入。
 
 ## 功能特性
 
-* 服务器与节点状态的实时仪表盘
-* 实例详情页，包含负载与延迟图表
-* 节点列表与管理视图
-* 基于 `react-i18next` 的国际化（i18n）
-* 使用 Shadcn + Tailwind CSS 的响应式布局与深色模式
-* 适配 Komari 主题系统的主题打包方案
-* **丰富的自定义选项：**
+- 以地图为核心的状态总览，展示地区、流量、网络速度和在线节点
+- 支持搜索、分组筛选的节点网格与表格视图
+- 提供负载、延迟、流量和 Ping 图表的实例详情
+- 六种配色、五种卡片布局，以及多种卡片和图表样式
+- 可配置状态卡片、访客字段、背景、模糊和透明度
+- 支持汇率转换的节点剩余价值计算器
+- 英文、简体中文和繁体中文界面
+- 响应式明暗模式与可安装的 PWA 支持
 
-  * **6 种配色主题：** Default、Ocean、Sunset、Forest、Midnight、Rose
-  * **4 种卡片布局：** Classic、Modern、Minimal、Detailed —— 每种都有独特的视觉设计与元素布局
-  * **4 种图表样式：** Circle、Progress Bar、Bar Chart、Minimal —— 均会跟随所选配色主题
-  * **可自定义状态卡片：** 可在仪表盘中显示/隐藏单项指标
-  * **自带背景图！** 使用图片 URL 将其设置为背景。
-  * **背景模糊：** 可为自定义背景图启用 Soft 或 Glass 模糊效果，并调整模糊强度。
-  * **卡片模糊：** 可启用 Soft 或 Glass 卡片背景，分别调整卡片透明强度与额外模糊强度。
-  * **Ping 统计显示** 在首页即可直接展示数据包信息！
-  * 所有设置会在本地持久化保存，并可在主题切换时同步
+## 安装
 
-## 技术栈
+下载 [`komari-atlas.zip`](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)，在 Komari 管理后台上传，然后将 **Komari Atlas** 设为当前主题。使用本主题需要一个正常运行的 Komari 后端。
 
-* **框架：** Next.js（App Router，静态导出）
-* **语言：** TypeScript、React
-* **UI：** Shadcn UI + Radix UI primitives、Tailwind CSS v4
-* **图表：** Recharts
-* **状态 / 数据：** 自定义 Context、RPC2 客户端、基于 fetch 的 API
+## 本地开发
 
-## 前置要求
-
-* **Node.js** 22 或更高版本（推荐使用 LTS）
-* 一个可从浏览器访问的 **Komari 后端**（API）
-
-## 快速开始
-
-* 直接[下载主题文件](https://github.com/tonyliuzj/komari-next/releases/latest/download/dist-release.zip)，并通过 Komari 管理后台上传，这是推荐方式。
-
-## 开发
-
-克隆本仓库并安装依赖：
+使用 Node.js 22 或更高版本，并安装锁定的依赖：
 
 ```bash
 npm ci
-```
-
-### 配置 API 目标地址
-
-前端通过 `next.config.ts` 中配置的 `/api/*` rewrites 与 Komari 后端通信。
-使用 `NEXT_PUBLIC_API_TARGET` 设置后端基础地址：
-
-在项目根目录创建 `.env.local` 文件：
-
-```env
-NEXT_PUBLIC_API_TARGET=http://127.0.0.1:25774
-```
-
-请根据你的 Komari 后端实例调整该 URL。
-
-Komari 会同时校验 HTTP 和 WebSocket 请求的浏览器 Origin。请在 Komari
-设置中把前端的准确 Origin 加入两个白名单：
-
-```text
-cors_allowed_origins=http://localhost:3000
-ws_allowed_origins=http://localhost:3000
-```
-
-多个 Origin 使用英文逗号分隔。请保留 Origin 校验；即使
-`NEXT_PUBLIC_API_TARGET` 正确，白名单不匹配仍会返回 `403`。
-
-### 本地开发运行
-
-```bash
+cp .env.example .env.local
 npm run dev
 ```
 
-然后在浏览器中打开 `http://localhost:3000`。
+`NEXT_PUBLIC_API_TARGET` 默认指向 `http://127.0.0.1:25774`。当前端运行在 `http://localhost:3000` 时，需要在 Komari 中将该准确地址同时加入 `cors_allowed_origins` 和 `ws_allowed_origins`。开发服务器启动后访问 `http://localhost:3000`。
 
-### 生产构建 / 主题打包
-
-本项目已配置为静态导出（`next.config.ts` 中的 `output: "export"`），构建产物会输出到 `dist/`。
+## 构建与验证
 
 ```bash
+npm run lint
+npm run typecheck
+npm test
 npm run build
 ```
 
-构建完成后：
+`npm run build` 会将静态前端导出到 `dist/`。运行 `./build-theme.sh` 可安装依赖、构建项目，并生成 `dist/komari-atlas-YY.MM.DD-COMMIT.zip`；该脚本还需要系统安装 `zip`。已有 `dist/` 构建可通过 `npm run preview` 在本地预览。
 
-* 使用任意静态 Web 服务器托管 `dist` 目录，**或**
-* 将 `dist` 内容作为 Komari 主题包的一部分使用。
+源代码位于 `src/`，翻译文件位于 `src/i18n/locales/`，静态资源位于 `public/`，主题元数据位于 `komari-theme.json`。贡献规范见 [AGENTS.md](AGENTS.md)。
 
-## Nginx 生产环境优化建议
+## 参与贡献
 
-如果你使用 Nginx 或 OpenResty 作为反向代理，建议参考以下配置以优化性能，并解决 `HEAD` 请求返回 404 的问题。
+每次修改应保持范围聚焦，并附上 lint、类型检查、测试和构建结果。涉及界面变化时请提供截图。问题和建议可通过 [GitHub Issues](https://github.com/qqqasdwx/komari-atlas/issues) 提交。
 
-### 1. 处理 HEAD 请求（推荐）
+## 致谢与许可
 
-Next.js 的预取（Prefetching）机制和部分 CDN（如腾讯云 EdgeOne）可能会频繁发起 HTTP `HEAD` 请求。由于后端目前可能未对 `HEAD` 方法进行完整处理，建议在 Nginx 层将其转换为 `GET` 请求回源，以确保预取功能正常：
+Komari Atlas 基于 [tonyliuzj/komari-next](https://github.com/tonyliuzj/komari-next) 开始开发。感谢 [piphase/komari-nexus](https://github.com/piphase/komari-nexus) 与 [fanchengliu/komari-next-pro](https://github.com/fanchengliu/komari-next-pro) 对 Komari 主题生态的贡献。
 
-```nginx
-location / {
-    # 将 HEAD 转换为 GET 发往后端，解决预取 404
-    if ($request_method = "HEAD") {
-        rewrite_by_lua_block { ngx.req.set_method(ngx.HTTP_GET) } # OpenResty 方案
-        # 或者使用：proxy_method GET;（需注意配置位置）
-    }
-
-    proxy_pass http://127.0.0.1:25774;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-}
-```
-
-### 2. 开启 Gzip 压缩
-
-可显著提升 Next.js 静态资源的加载速度：
-
-```nginx
-gzip on;
-gzip_proxied any;
-gzip_types text/plain text/css application/json application/javascript text/xml;
-gzip_vary on;
-```
-
-### 3. 安全防护建议
-
-建议配合 `fail2ban` 监控 Nginx 日志，防止僵尸网络对 `/api/rpc2` 或 `/instance/` 等路径进行大规模恶意扫描。
-
-这些配置可以改善页面跳转体验，提升套用 EdgeOne、Cloudflare 等 CDN 后的兼容性，并减少控制台和 Nginx 日志中的无效 404 报警。
-
-## 主题开发
-
-本仓库设计为可作为自定义 Komari 主题使用。
-
-1. 根据需要配置并自定义 UI。
-2. 编辑 `komari-theme.json`，匹配你的主题元数据和设置项。
-3. 构建项目：
-
-   ```bash
-   npm run build
-   ```
-
-4. 静态资源会生成到 `dist` 目录。
-   按照 Komari 主题系统要求，将其与 `komari-theme.json` 组合，并根据 Komari 文档进行打包。
-
-## 脚本
-
-* `npm run dev` - 启动 Next.js 开发服务器
-* `npm run build` - 将静态站点构建到 `dist/`
-* `npm run lint` - 对项目运行 ESLint
-* `npm run typecheck` - 执行 TypeScript 类型检查但不生成文件
-* `npm test` - 单次运行 Vitest 单元测试
-* `npm run preview` - 在本地托管生成的 `dist/` 目录
-
-## 贡献
-
-欢迎贡献。
-如果你发现问题或有改进建议，欢迎提交 issue 或 pull request。
-
-## Star History
-
-<a href="https://www.star-history.com/?repos=tonyliuzj%2Fkomari-next&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&theme=dark&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=tonyliuzj/komari-next&type=date&legend=top-left&sealed_token=CCb4HaFrtIea3tojdQVji_QIeCJJHLXCQcsf6DwFBymwadAojyZYZHNNlGA90MkDL1_d92L0HKj-kect88HQMggc_whTLHzsoBEh4ITSC1qGT8QJmyMQEA" />
- </picture>
-</a>
+本项目采用 [MIT License](LICENSE)，并保留原始版权声明。
