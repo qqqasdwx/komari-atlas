@@ -1,7 +1,7 @@
 {
   "name": "Komari Atlas",
   "short_name": "Atlas",
-  "description": "A map-first, customizable theme for Komari Monitor",
+  "description": "A customizable monitoring theme for Komari Monitor",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

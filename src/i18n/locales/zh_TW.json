@@ -289,8 +289,7 @@
     "update": "更新",
     "update_available": "有新版本",
     "updated_successfully": "成功更新",
-    "weight": "權重",
-    "map": "地圖"
+    "weight": "權重"
   },
   "copy": "複製",
   "copy_success": "已複製到剪貼板",
@@ -832,36 +831,6 @@
   },
   "warn_https": "當前連接不是 HTTPS！您的敏感數據存在嚴重風險。請立即採取措施確保連接安全！複製操作可能無法使用！",
   "warn_websocket": "RPC2 請求失敗，請檢查網絡連接或伺服器狀態！",
-  "mapView": {
-    "title": "全球分布",
-    "servers": "{{count}} 台節點",
-    "online": "{{count}} 台在線",
-    "offline": "{{count}} 台離線",
-    "activeCountries": "{{count}} 個活躍國家 / 地區",
-    "ariaLabel": "全球節點分布地圖",
-    "countrySummary": "{{name}}：{{total}} 台節點，{{online}} 台在線，{{offline}} 台離線",
-    "legend": {
-      "online": "全部在線",
-      "partial": "部分在線",
-      "offline": "全部離線"
-    },
-    "status": {
-      "online": "在線",
-      "offline": "離線",
-      "partial": "部分在線"
-    },
-    "unmappedRegions": "未顯示地區",
-    "unmappedCount": "共 {{count}} 項",
-    "regionNodes": "該地區共 {{count}} 台節點",
-    "stats": {
-      "nodes": "節點數"
-    },
-    "unclassified": "暫未分類",
-    "viewDetails": "查看 {{name}} 詳情",
-    "emptySelectionTitle": "目前沒有可顯示的地區",
-    "emptySelectionDescription": "這些節點仍會正常參與統計，只是地區值暫時還沒有命中地圖映射。先看左側「未顯示地區」列表，就能知道具體是哪一項需要補充。",
-    "regionUnknown": "未填寫"
-  },
   "nodeDisplay": {
     "remainingValueCalculator": "剩餘價值計算器",
     "defaultView": "預設檢視",

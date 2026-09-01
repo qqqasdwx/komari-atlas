@@ -50,7 +50,6 @@ export type StatusCardsVisibility = {
   regionOverview: boolean;
   trafficOverview: boolean;
   networkSpeed: boolean;
-  mapView: boolean;
 };
 
 export type GuestDisplaySettings = {
@@ -166,7 +165,6 @@ export const DEFAULT_STATUS_CARDS_VISIBILITY: StatusCardsVisibility = {
   regionOverview: true,
   trafficOverview: true,
   networkSpeed: true,
-  mapView: true,
 };
 
 export const DEFAULT_GUEST_DISPLAY_SETTINGS: GuestDisplaySettings = {

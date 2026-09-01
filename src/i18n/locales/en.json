@@ -289,8 +289,7 @@
     "update": "Update",
     "update_available": "New version available",
     "updated_successfully": "Updated successfully",
-    "weight": "Weight",
-    "map": "Map"
+    "weight": "Weight"
   },
   "copy": "Copy",
   "copy_success": "Copied!",
@@ -832,36 +831,6 @@
   },
   "warn_https": "The current connection is not HTTPS! Your sensitive data is at serious risk. Take immediate action to secure the connection! Copy may not available!",
   "warn_websocket": "RPC2 request failed, please check the network connection or server status!",
-  "mapView": {
-    "title": "Global Distribution",
-    "servers": "{{count}} servers",
-    "online": "{{count}} online",
-    "offline": "{{count}} offline",
-    "activeCountries": "{{count}} active countries / regions",
-    "ariaLabel": "Global node distribution map",
-    "countrySummary": "{{name}}: {{total}} nodes, {{online}} online, {{offline}} offline",
-    "legend": {
-      "online": "Fully online",
-      "partial": "Partially online",
-      "offline": "Fully offline"
-    },
-    "status": {
-      "online": "Online",
-      "offline": "Offline",
-      "partial": "Partially online"
-    },
-    "unmappedRegions": "Unmapped Regions",
-    "unmappedCount": "Total {{count}} items",
-    "regionNodes": "{{count}} nodes in this region",
-    "stats": {
-      "nodes": "Nodes"
-    },
-    "unclassified": "Unclassified",
-    "viewDetails": "View details for {{name}}",
-    "emptySelectionTitle": "No regions can be displayed right now",
-    "emptySelectionDescription": "These nodes are still counted normally, but their region values do not yet match the map mapping.",
-    "regionUnknown": "Not set"
-  },
   "nodeDisplay": {
     "remainingValueCalculator": "Remaining Value Calculator",
     "defaultView": "Default View",

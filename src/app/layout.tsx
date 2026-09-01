@@ -7,7 +7,7 @@ import RemainingValueCalculator from "@/components/RemainingValueCalculator";
 
 export const metadata: Metadata = {
   title: "Komari Atlas",
-  description: "A map-first, customizable theme for Komari Monitor.",
+  description: "A customizable monitoring theme for Komari Monitor.",
 };
 
 export default function RootLayout({

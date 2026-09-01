@@ -179,7 +179,6 @@ const ThemeSwitcher = () => {
     { key: 'regionOverview', label: t('region_overview') },
     { key: 'trafficOverview', label: t('traffic_overview') },
     { key: 'networkSpeed', label: t('network_speed') },
-    { key: 'mapView', label: t('common.map', { defaultValue: 'Map' }) },
   ];
   const configuredGuestDisplay: GuestDisplaySettings = {
     ...DEFAULT_GUEST_DISPLAY_SETTINGS,

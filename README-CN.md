@@ -1,6 +1,6 @@
 # Komari Atlas
 
-一个以地图视图为核心、可高度定制的 [Komari Monitor](https://github.com/komari-monitor/komari) 主题。
+一个可高度定制的 [Komari Monitor](https://github.com/komari-monitor/komari) 监控主题。
 
 [English](https://github.com/qqqasdwx/komari-atlas/blob/main/README.md) · [下载最新主题](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
@@ -10,7 +10,7 @@ Komari Atlas 是一个使用 Next.js 构建并静态导出的 Komari 主题。�
 
 ## 功能特性
 
-- 以地图为核心的状态总览，展示地区、流量、网络速度和在线节点
+- 状态总览展示地区、流量、网络速度和在线节点
 - 支持搜索、分组筛选的节点网格与表格视图
 - 提供负载、延迟、流量和 Ping 图表的实例详情
 - 六种配色、五种卡片布局，以及多种卡片和图表样式

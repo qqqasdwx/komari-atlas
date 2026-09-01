@@ -15,9 +15,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import Loading from "@/components/loading";
 import { CurrentTimeCard } from "@/components/CurrentTimeCard";
 import { Callouts } from "@/components/DashboardCallouts";
-import { NodeMapView } from "@/components/NodeMapView";
 import { useStatusCardsVisibility } from "@/hooks/useStatusCardsVisibility";
-import { useMounted } from "@/hooks/useMounted";
 
 // Intelligent speed formatting function
 const formatSpeed = (bytes: number): string => {
@@ -117,11 +115,10 @@ const renderSpeedStatusValue = ({
 );
 
 export default function DashboardContent() {
-  const mounted = useMounted();
   const [t] = useTranslation();
   const { live_data } = useLiveData();
   const { publicInfo } = usePublicInfo();
-  const { themeConfig, isThemeLoaded } = useTheme();
+  const { themeConfig } = useTheme();
   
   // Sync document title with backend-set custom title
   useEffect(() => {
@@ -292,14 +289,6 @@ export default function DashboardContent() {
               />
             ))}
         </div>
-
-        {mounted && isThemeLoaded && statusCardsVisibility.mapView && (
-          <NodeMapView
-            nodes={nodeList ?? []}
-            liveData={live_data?.data ?? { online: [], data: {} }}
-            mapOnly
-          />
-        )}
       </div>
 
       <Suspense fallback={<div className="p-4">{t("nodes.loading", { defaultValue: "Loading nodes..." })}</div>}>

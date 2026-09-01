@@ -1,7 +1,7 @@
 {
     "name": "Komari Atlas",
     "short": "atlas",
-    "description": "A map-first, customizable theme for Komari Monitor",
+    "description": "A customizable monitoring theme for Komari Monitor",
     "version": "0.1.0",
     "author": "qqqasdwx",
     "url": "https://github.com/qqqasdwx/komari-atlas",
@@ -199,12 +199,6 @@
                 "key": "statusCardsVisibility.networkSpeed",
                 "type": "bool",
                 "label": "Show network speed",
-                "default": true
-            },
-            {
-                "key": "statusCardsVisibility.mapView",
-                "type": "bool",
-                "label": "Show map view",
                 "default": true
             },
             {
@@ -456,15 +450,6 @@
                 "name": {
                     "zh-CN": "显示网络速率",
                     "en-US": "Show Network Speed"
-                },
-                "default": true
-            },
-            {
-                "key": "statusCardsVisibility.mapView",
-                "type": "switch",
-                "name": {
-                    "zh-CN": "显示地图",
-                    "en-US": "Show Map View"
                 },
                 "default": true
             },
@@ -739,15 +724,6 @@
                 "name": {
                     "zh-CN": "显示网络速率",
                     "en-US": "Show Network Speed"
-                },
-                "default": true
-            },
-            {
-                "key": "statusCardsVisibility.mapView",
-                "type": "switch",
-                "name": {
-                    "zh-CN": "显示地图",
-                    "en-US": "Show Map View"
                 },
                 "default": true
             },
@@ -1030,15 +1006,6 @@
                 "default": true
             },
             {
-                "key": "statusCardsVisibility.mapView",
-                "type": "switch",
-                "name": {
-                    "zh-CN": "显示地图",
-                    "en-US": "Show Map View"
-                },
-                "default": true
-            },
-            {
                 "type": "title",
                 "name": {
                     "zh-CN": "游客显示",
@@ -1313,15 +1280,6 @@
                 "name": {
                     "zh-CN": "显示网络速率",
                     "en-US": "Show Network Speed"
-                },
-                "default": true
-            },
-            {
-                "key": "statusCardsVisibility.mapView",
-                "type": "switch",
-                "name": {
-                    "zh-CN": "显示地图",
-                    "en-US": "Show Map View"
                 },
                 "default": true
             },

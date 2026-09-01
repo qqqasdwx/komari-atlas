@@ -264,7 +264,6 @@
     "help": "帮助",
     "home": "主页",
     "long_term": "长期",
-    "map": "地图",
     "monthly": "月",
     "name": "名称",
     "none": "无",
@@ -352,36 +351,6 @@
   },
   "logs": {
     "title": "日志"
-  },
-  "mapView": {
-    "activeCountries": "{{count}} 个活跃国家 / 地区",
-    "ariaLabel": "全球节点分布地图",
-    "countrySummary": "{{name}}：{{total}} 台节点，{{online}} 台在线，{{offline}} 台离线",
-    "emptySelectionDescription": "这些节点仍会正常参与统计，只是地区值暂时还没有命中地图映射。先看左侧“未显示地区”列表，就能知道具体是哪一项需要补充。",
-    "emptySelectionTitle": "当前没有可显示的地区",
-    "legend": {
-      "offline": "全部离线",
-      "online": "全部在线",
-      "partial": "部分在线"
-    },
-    "offline": "{{count}} 台离线",
-    "online": "{{count}} 台在线",
-    "regionNodes": "该地区共 {{count}} 台节点",
-    "regionUnknown": "未填写",
-    "servers": "{{count}} 台节点",
-    "stats": {
-      "nodes": "节点数"
-    },
-    "status": {
-      "offline": "离线",
-      "online": "在线",
-      "partial": "部分在线"
-    },
-    "title": "全球分布",
-    "unclassified": "暂未分类",
-    "unmappedCount": "共 {{count}} 项",
-    "unmappedRegions": "未显示地区",
-    "viewDetails": "查看 {{name}} 详情"
   },
   "network_speed": "网络速率",
   "nodeCard": {

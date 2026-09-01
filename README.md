@@ -1,6 +1,6 @@
 # Komari Atlas
 
-A map-first, customizable theme for [Komari Monitor](https://github.com/komari-monitor/komari).
+A customizable monitoring theme for [Komari Monitor](https://github.com/komari-monitor/komari).
 
 [简体中文](https://github.com/qqqasdwx/komari-atlas/blob/main/README-CN.md) · [Download the latest theme](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
@@ -10,7 +10,7 @@ Komari Atlas is a static Next.js frontend packaged for Komari's theme system. It
 
 ## Features
 
-- Map-focused status overview with region, traffic, network speed, and online-node summaries
+- Status overview with region, traffic, network speed, and online-node summaries
 - Searchable node grid and table views with group filtering
 - Instance details with load, latency, transfer, and ping charts
 - Six color themes, five card layouts, multiple card and graph designs
