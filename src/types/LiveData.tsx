@@ -46,6 +46,18 @@ export type Record = {
   process: number;
   message: string;
   updated_at: string;
+  online?: boolean;
+  ping?: {
+    [taskId: string]: {
+      name: string;
+      latest: number;
+      avg: number;
+      tail: number;
+      loss: number;
+      min: number;
+      max: number;
+    };
+  };
 };
 
 export type LiveDataResponse = {

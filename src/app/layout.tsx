@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import "@/global.css";
 import { Providers } from "@/components/providers";
-import NavBar from "@/components/NavBar";
-import Footer from "@/components/Footer";
-import RemainingValueCalculator from "@/components/RemainingValueCalculator";
 
 export const metadata: Metadata = {
   title: "Komari Atlas",
-  description: "A customizable monitoring theme for Komari Monitor.",
+  description: "A private monitoring console for Komari.",
 };
 
 export default function RootLayout({
@@ -17,15 +14,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased bg-background text-foreground min-h-screen flex flex-col transition-colors duration-300">
-        <Providers>
-          <NavBar />
-          <main className="flex-1 py-4 md:py-12">
-            {children}
-          </main>
-          <Footer />
-          <RemainingValueCalculator />
-        </Providers>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

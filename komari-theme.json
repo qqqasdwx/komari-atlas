@@ -1,8 +1,8 @@
 {
   "name": "Komari Atlas",
   "short": "atlas",
-  "description": "A customizable monitoring theme for Komari Monitor",
-  "version": "0.1.4",
+  "description": "A private monitoring console for Komari",
+  "version": "0.2.0",
   "author": "qqqasdwx",
   "url": "https://github.com/qqqasdwx/komari-atlas",
   "preview": "preview.png"

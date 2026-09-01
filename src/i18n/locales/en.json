@@ -1,4 +1,149 @@
 {
+  "atlas": {
+    "appearance": "Appearance",
+    "assets": {
+      "displayCurrency": "Display currency",
+      "longTerm": "Long term"
+    },
+    "charts": {
+      "cpu": "CPU usage",
+      "disk": "Disk usage",
+      "gpuMemory": "GPU memory",
+      "gpuTemperature": "GPU temperature",
+      "gpuUsage": "GPU usage",
+      "memorySwap": "Memory and swap",
+      "network": "Network rate",
+      "pingLatency": "Ping latency",
+      "pingLoss": "Ping loss",
+      "processConnections": "Processes and connections",
+      "systemLoad": "System load"
+    },
+    "connection": {
+      "degraded": "Live status connection is unavailable; data may be stale",
+      "live": "Live connection",
+      "polling": "HTTP polling"
+    },
+    "detail": {
+      "assets": "Assets",
+      "average": "Average",
+      "back": "Back to nodes",
+      "billingCycle": "Billing cycle",
+      "billingTraffic": "Billing-period traffic",
+      "clientVersion": "Client version",
+      "cpuCores": "CPU cores",
+      "cpuModel": "CPU model",
+      "days": "{{count}} days",
+      "diskTotal": "Disk capacity",
+      "expiry": "Expiry",
+      "followExpiry": "Follow expiry day",
+      "gpuDevice": "GPU {{index}}",
+      "hardwareNetwork": "Hardware and network",
+      "historyCharts": "Historical metrics",
+      "historyError": "Unable to load historical metrics",
+      "homePingDescription": "Selected tasks appear on the home node card. None are shown by default.",
+      "homePingTasks": "Home Ping tasks",
+      "kernel": "Kernel",
+      "liveStatus": "Live status",
+      "loadingHistory": "Loading historical metrics",
+      "memoryTotal": "Memory capacity",
+      "monthDay": "Day {{day}} of each month",
+      "nav": {
+        "assets": "Assets",
+        "charts": "Charts",
+        "hardware": "Hardware",
+        "live": "Live",
+        "ping": "Ping",
+        "settings": "Settings",
+        "traffic": "Traffic"
+      },
+      "noPingTasks": "No Ping tasks are available for this node",
+      "nodeNotFound": "Node not found",
+      "nodeSettings": "Node settings",
+      "pingTask": "Ping task {{id}}",
+      "pingStatus": "Ping status",
+      "price": "Price",
+      "range": "Last {{range}}",
+      "remainingValue": "Current remaining value",
+      "resetDay": "Traffic reset day",
+      "resetDayDescription": "An explicit day takes priority; days 29 to 31 clamp to month end.",
+      "sectionNavigation": "Node detail sections",
+      "swapTotal": "Swap capacity",
+      "system": "System and architecture",
+      "trafficLimit": "Traffic limit",
+      "latest": "Latest",
+      "loss": "Loss",
+      "unlimited": "Unlimited",
+      "uptime": "Uptime",
+      "uptimeDays": "{{days}}d {{hours}}h",
+      "uptimeHours": "{{hours}}h",
+      "virtualization": "Virtualization"
+    },
+    "expiry": {
+      "days": "Expires in {{count}} days",
+      "expired": "Expired"
+    },
+    "language": "Language",
+    "loading": "Loading",
+    "login": {
+      "failed": "Sign in failed",
+      "privateConsole": "Private monitoring console",
+      "signingIn": "Signing in",
+      "twoFactorRequired": "Enter your two-factor authentication code"
+    },
+    "logout": "Sign out",
+    "metricNames": {
+      "connectionsTcp": "TCP connections",
+      "connectionsUdp": "UDP connections",
+      "cpuUsage": "CPU",
+      "diskUsed": "Disk",
+      "gpuDeviceUsage": "GPU",
+      "gpuMemoryTotal": "Memory total",
+      "gpuMemoryUsed": "Memory used",
+      "gpuTemperature": "GPU temperature",
+      "gpuUsage": "GPU average",
+      "loadAverage": "System load",
+      "memoryUsed": "Memory",
+      "netInRate": "Download",
+      "netOutRate": "Upload",
+      "processCount": "Processes",
+      "swapUsed": "Swap"
+    },
+    "metrics": {
+      "disk": "Disk",
+      "download": "Download",
+      "memory": "Memory",
+      "upload": "Upload"
+    },
+    "noData": "No data",
+    "noMatchingNodes": "No matching nodes",
+    "retry": "Retry",
+    "saveState": {
+      "error": "Save failed",
+      "idle": "No changes",
+      "saved": "Saved",
+      "saving": "Saving"
+    },
+    "search": "Search nodes",
+    "status": {
+      "offline": "Offline",
+      "online": "Online"
+    },
+    "summary": {
+      "expiring": "Expiring in 30 days",
+      "offline": "Offline",
+      "online": "Online",
+      "speed": "Current total rate",
+      "title": "Node overview",
+      "total": "Total nodes"
+    },
+    "traffic": {
+      "billingUsage": "Billing-period traffic",
+      "unconfigured": "Set a reset day or expiry date in node settings"
+    },
+    "unavailable": "Unavailable",
+    "unsupportedVersion": "Komari {{current}} is installed; this theme requires {{minimum}} or newer",
+    "versionCheckFailed": "Unable to check the Komari version"
+  },
   "about": {
     "ai": "The development process of the Komari project has been assisted by artificial intelligence tools. These tools are used for tasks such as code generation, refactoring, and debugging to improve development efficiency and code quality. All AI-generated code and suggestions have been reviewed and validated by human developers.",
     "open_source": "Komari is open source under the MIT license and is built using the following open source software:",

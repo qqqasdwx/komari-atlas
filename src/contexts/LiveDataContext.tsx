@@ -74,11 +74,11 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             network: {
               up: rec.net_out ?? 0,
               down: rec.net_in ?? 0,
-              totalUp: rec.net_total_out ?? rec.net_total_up ?? 0,
-              totalDown: rec.net_total_in ?? rec.net_total_down ?? 0,
+              totalUp: rec.net_total_up ?? 0,
+              totalDown: rec.net_total_down ?? 0,
             },
             connections: {
-              tcp: rec.connections ?? 0,
+              tcp: Math.max(0, (rec.connections ?? 0) - (rec.connections_udp ?? 0)),
               udp: rec.connections_udp ?? 0,
             },
             gpu: rec.gpu !== undefined ? { count: 0, average_usage: rec.gpu, detailed_info: [] } : undefined,
@@ -86,6 +86,8 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             process: rec.process ?? 0,
             message: "",
             updated_at: rec.time ?? 0,
+            online: Boolean(rec.online),
+            ping: rec.ping ?? {},
           };
         }
 

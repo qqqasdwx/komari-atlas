@@ -1,7 +1,7 @@
 import React from "react";
 
 // 账户数据类型
-type Account = {
+export type Account = {
   logged_in: boolean;
   sso_id: string;
   sso_type: string;
@@ -24,7 +24,7 @@ interface AccountContextType{
     account: Account | null;
     loading: boolean;
     error: Error | null;
-    refresh: () => void;
+    refresh: () => Promise<void>;
 }
 
 // 创建Context

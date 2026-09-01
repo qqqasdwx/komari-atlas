@@ -1,23 +1,31 @@
 # Komari Atlas
 
-一个可高度定制的 [Komari Monitor](https://github.com/komari-monitor/komari) 监控主题。
+一个面向自用场景的 [Komari Monitor](https://github.com/komari-monitor/komari) 私人监控主题。
 
 [English](https://github.com/qqqasdwx/komari-atlas/blob/main/README.md) · [下载最新主题](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
 ![Komari Atlas 预览](preview.png)
 
-Komari Atlas 是一个使用 Next.js 构建并静态导出的 Komari 主题。主题标识为 `atlas`，浏览器偏好统一存储在 `komari-atlas:*` 命名空间中；Komari Next 或其他主题的设置不会被导入。
+Komari Atlas 是一个使用 Next.js 构建并静态导出的 Komari 主题。0.2 采用固定的响应式界面，以全屏壁纸和克制的玻璃面板组织信息，定位是需要登录的自托管监控台，而不是公开状态页。
 
 ## 功能特性
 
-- 状态总览展示地区、流量、网络速度和在线节点
-- 支持搜索、分组筛选的节点网格与表格视图
-- 提供负载、延迟、流量和 Ping 图表的实例详情
-- 六种配色、五种卡片布局，以及多种卡片和图表样式
-- 可配置状态卡片、访客字段、背景、模糊和透明度
-- 支持汇率转换的节点剩余价值计算器
-- 英文、简体中文和繁体中文界面
-- 响应式明暗模式与可安装的 PWA 支持
+- 全屏登录门禁；仅在登录成功后加载节点数据
+- 紧凑的节点汇总、搜索、分组筛选，并保持 Komari 权重排序
+- 节点卡片展示实时资源、计费周期流量、到期时间、网络速率和选定的 Ping 任务
+- 单页节点详情支持 `1h`、`6h`、`24h`、`7d` 和 `30d` 历史范围
+- CPU、负载、内存、交换空间、磁盘、网络、进程、连接、Ping 和按需 GPU 图表
+- 每个节点可设置流量重置日和首页 Ping 任务，并自动保存
+- 支持在线汇率转换的节点剩余价值汇总
+- 简体中文和英文界面，支持浅色、深色和跟随系统模式
+
+## 使用要求
+
+- Komari `1.4.3` 或更高版本
+- 需要登录的私有 Komari 站点
+- 指标至少保留 35 天，才能完整计算计费周期流量
+
+计费周期按 `Asia/Shanghai` 时区计算。节点显式设置的重置日优先于到期日；每月 29 至 31 日在短月份会自动取月末。0.2 使用独立设置格式，不读取旧版 Atlas 的外观设置。
 
 ## 安装
 

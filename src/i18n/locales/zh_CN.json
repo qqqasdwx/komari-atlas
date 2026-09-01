@@ -1,4 +1,149 @@
 {
+  "atlas": {
+    "appearance": "外观模式",
+    "assets": {
+      "displayCurrency": "显示币种",
+      "longTerm": "长期"
+    },
+    "charts": {
+      "cpu": "CPU 使用率",
+      "disk": "磁盘占用",
+      "gpuMemory": "GPU 显存",
+      "gpuTemperature": "GPU 温度",
+      "gpuUsage": "GPU 使用率",
+      "memorySwap": "内存与交换空间",
+      "network": "网络速率",
+      "pingLatency": "Ping 延迟",
+      "pingLoss": "Ping 丢包率",
+      "processConnections": "进程与连接数",
+      "systemLoad": "系统负载"
+    },
+    "connection": {
+      "degraded": "实时状态连接异常，数据可能暂未更新",
+      "live": "实时连接",
+      "polling": "HTTP 轮询"
+    },
+    "detail": {
+      "assets": "资产信息",
+      "average": "平均",
+      "back": "返回节点列表",
+      "billingCycle": "计费周期",
+      "billingTraffic": "计费周期流量",
+      "clientVersion": "客户端版本",
+      "cpuCores": "CPU 核心",
+      "cpuModel": "CPU 型号",
+      "days": "{{count}} 天",
+      "diskTotal": "磁盘容量",
+      "expiry": "到期时间",
+      "followExpiry": "跟随到期日",
+      "gpuDevice": "GPU {{index}}",
+      "hardwareNetwork": "硬件与网络",
+      "historyCharts": "历史指标",
+      "historyError": "无法加载历史指标",
+      "homePingDescription": "选中的任务会显示在首页节点卡片中，默认不显示。",
+      "homePingTasks": "首页 Ping 任务",
+      "kernel": "内核",
+      "liveStatus": "实时状态",
+      "loadingHistory": "正在加载历史指标",
+      "memoryTotal": "内存容量",
+      "monthDay": "每月 {{day}} 日",
+      "nav": {
+        "assets": "资产",
+        "charts": "图表",
+        "hardware": "硬件",
+        "live": "实时",
+        "ping": "Ping",
+        "settings": "设置",
+        "traffic": "流量"
+      },
+      "noPingTasks": "该节点没有可用的 Ping 任务",
+      "nodeNotFound": "找不到这个节点",
+      "nodeSettings": "节点设置",
+      "pingTask": "Ping 任务 {{id}}",
+      "pingStatus": "Ping 状态",
+      "price": "价格",
+      "range": "最近 {{range}}",
+      "remainingValue": "当前剩余价值",
+      "resetDay": "流量重置日",
+      "resetDayDescription": "显式日期优先；29 至 31 日会自动取当月最后一天。",
+      "sectionNavigation": "节点详情分区",
+      "swapTotal": "交换空间",
+      "system": "系统与架构",
+      "trafficLimit": "流量限额",
+      "latest": "当前",
+      "loss": "丢包",
+      "unlimited": "不限流量",
+      "uptime": "运行时间",
+      "uptimeDays": "{{days}} 天 {{hours}} 小时",
+      "uptimeHours": "{{hours}} 小时",
+      "virtualization": "虚拟化"
+    },
+    "expiry": {
+      "days": "{{count}} 天到期",
+      "expired": "已到期"
+    },
+    "language": "显示语言",
+    "loading": "正在加载",
+    "login": {
+      "failed": "登录失败",
+      "privateConsole": "私人监控控制台",
+      "signingIn": "正在登录",
+      "twoFactorRequired": "请输入双重验证动态口令"
+    },
+    "logout": "退出登录",
+    "metricNames": {
+      "connectionsTcp": "TCP 连接",
+      "connectionsUdp": "UDP 连接",
+      "cpuUsage": "CPU",
+      "diskUsed": "磁盘",
+      "gpuDeviceUsage": "GPU",
+      "gpuMemoryTotal": "显存总量",
+      "gpuMemoryUsed": "显存已用",
+      "gpuTemperature": "GPU 温度",
+      "gpuUsage": "GPU 平均",
+      "loadAverage": "系统负载",
+      "memoryUsed": "内存",
+      "netInRate": "下载",
+      "netOutRate": "上传",
+      "processCount": "进程",
+      "swapUsed": "交换空间"
+    },
+    "metrics": {
+      "disk": "磁盘",
+      "download": "下载",
+      "memory": "内存",
+      "upload": "上传"
+    },
+    "noData": "暂无数据",
+    "noMatchingNodes": "没有符合条件的节点",
+    "retry": "重试",
+    "saveState": {
+      "error": "保存失败",
+      "idle": "尚未修改",
+      "saved": "已保存",
+      "saving": "保存中"
+    },
+    "search": "搜索节点",
+    "status": {
+      "offline": "离线",
+      "online": "在线"
+    },
+    "summary": {
+      "expiring": "30 天内到期",
+      "offline": "离线",
+      "online": "在线",
+      "speed": "当前总速率",
+      "title": "节点概览",
+      "total": "节点总数"
+    },
+    "traffic": {
+      "billingUsage": "本周期流量",
+      "unconfigured": "请在节点设置中配置重置日或到期日"
+    },
+    "unavailable": "暂不可用",
+    "unsupportedVersion": "当前 Komari 版本为 {{current}}，此主题要求 {{minimum}} 或更高版本",
+    "versionCheckFailed": "无法检查 Komari 版本"
+  },
   "about": {
     "ai": "Komari 项目的开发过程得到了人工智能工具的辅助。这些工具被用于执行代码生成、重构和调试等任务，以提高开发效率和代码质量。所有由 AI 生成的代码和建议都经过了人类开发者的审查与验证。",
     "open_source": "Komari 基于 MIT 协议开源，并使用了以下开源软件构建：",

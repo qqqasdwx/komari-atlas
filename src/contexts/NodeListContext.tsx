@@ -2,61 +2,9 @@
 
 import React from "react";
 import { useRPC2Call } from "./RPC2Context";
-import { stringToBytes } from "@/utils/unitHelper";
+import type { AtlasNode } from "@/types/atlas";
 
-export type NodeBasicInfo = {
-  /** 节点唯一标识符 */
-  uuid: string;
-  /** 节点名称 */
-  name: string;
-  /** CPU型号 */
-  cpu_name: string;
-  /** 虚拟化 */
-  virtualization: string;
-  /** 系统架构 */
-  arch: string;
-  /** CPU核心数 */
-  cpu_cores: number;
-  /** 操作系统 */
-  os: string;
-  /** 内核版本 */
-  kernel_version: string;
-  /** GPU型号 */
-  gpu_name: string;
-  /** 地区标识 */
-  region: string;
-  /** 总内存(字节) */
-  mem_total: number;
-  /** 总交换空间(字节) */
-  swap_total: number;
-  /** 总磁盘空间(字节) */
-  disk_total: number;
-  /** 版本号 */
-  version: string;
-  /** 权重 */
-  weight: number;
-  /** 价格 */
-  price: number;
-  tags: string;
-  /** 账单周期（天）*/
-  billing_cycle: number;
-  /** 货币 */
-  currency: string;
-  /** 分组 */
-  group: string;
-  /** 流量阈值 */
-  traffic_limit: number;
-  /** 流量阈值类型 */
-  traffic_limit_type: undefined | "sum" | "max" | "min" | "up" | "down";
-  /** 过期时间 */
-  expired_at: string;
-  /** 创建时间 */
-  created_at: string;
-  /** 更新时间 */
-  updated_at: string;
-  ipv4?: string; 
-  ipv6?: string;
-};
+export type NodeBasicInfo = AtlasNode;
 
 interface NodeListContextType {
   nodeList: NodeBasicInfo[] | null;
@@ -70,38 +18,8 @@ const NodeListContext = React.createContext<NodeListContextType | undefined>(
 );
 
 function normalizeTrafficLimit(value: unknown): number {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (!trimmed) return 0;
-
-    // Strings with units or expressions should always be parsed as byte sizes.
-    if (/[a-zA-Z\s,*]/.test(trimmed)) {
-      return stringToBytes(trimmed);
-    }
-
-    const numeric = Number(trimmed);
-    if (!Number.isFinite(numeric) || numeric <= 0) return 0;
-
-    // Backward compatibility: some payloads appear to send plain GB counts.
-    if (numeric < 1024 ** 2) {
-      return numeric * 1024 ** 3;
-    }
-
-    return numeric;
-  }
-
-  if (typeof value === "number") {
-    if (!Number.isFinite(value) || value <= 0) return 0;
-
-    // Backward compatibility: treat tiny raw numbers as legacy GiB limits.
-    if (value < 1024 ** 2) {
-      return value * 1024 ** 3;
-    }
-
-    return value;
-  }
-
-  return 0;
+  const bytes = Number(value);
+  return Number.isFinite(bytes) && bytes > 0 ? bytes : 0;
 }
 
 export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -124,36 +42,39 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         // 将 { [uuid]: Client } 转换为 NodeBasicInfo[]
         const list: NodeBasicInfo[] = Object.values(result).map((n: any) => ({
-          uuid: n.uuid,
-          name: n.name,
-          cpu_name: n.cpu_name,
-          virtualization: n.virtualization,
-          arch: n.arch,
-          cpu_cores: n.cpu_cores,
-          os: n.os,
-          kernel_version: n.kernel_version,
-          gpu_name: n.gpu_name,
-          region: n.region,
-          mem_total: n.mem_total,
-          swap_total: n.swap_total,
-          disk_total: n.disk_total,
-          // 兼容旧字段，若无版本信息则给空串
-          version: n.version ?? "",
+          uuid: String(n.uuid ?? ""),
+          name: String(n.name ?? n.uuid ?? ""),
+          cpu_name: String(n.cpu_name ?? ""),
+          cpu_physical_cores: n.cpu_physical_cores ?? n.cpu_cores ?? 0,
+          virtualization: String(n.virtualization ?? ""),
+          arch: String(n.arch ?? ""),
+          cpu_cores: Number(n.cpu_cores) || 0,
+          os: String(n.os ?? ""),
+          kernel_version: String(n.kernel_version ?? ""),
+          gpu_name: String(n.gpu_name ?? ""),
+          region: String(n.region ?? ""),
+          mem_total: Number(n.mem_total) || 0,
+          swap_total: Number(n.swap_total) || 0,
+          disk_total: Number(n.disk_total) || 0,
+          version: String(n.version ?? ""),
           weight: n.weight ?? 0,
           price: n.price ?? 0,
-          tags: n.tags ?? "",
+          tags: String(n.tags ?? ""),
           billing_cycle: n.billing_cycle ?? 0,
-          currency: n.currency ?? "",
-          group: n.group ?? "",
+          auto_renewal: Boolean(n.auto_renewal),
+          currency: String(n.currency ?? ""),
+          group: String(n.group ?? ""),
           traffic_limit: normalizeTrafficLimit(n.traffic_limit),
-          traffic_limit_type: n.traffic_limit_type,
-          expired_at: n.expired_at ?? "",
-          created_at: n.created_at ?? "",
-          updated_at: n.updated_at ?? "",
-          ipv4: n.ipv4,
-          ipv6: n.ipv6,
+          traffic_limit_type: n.traffic_limit_type ?? "sum",
+          expired_at: String(n.expired_at ?? ""),
+          created_at: String(n.created_at ?? ""),
+          updated_at: String(n.updated_at ?? ""),
+          ipv4: String(n.ipv4 ?? ""),
+          ipv6: String(n.ipv6 ?? ""),
+          remark: String(n.remark ?? ""),
+          public_remark: String(n.public_remark ?? ""),
         }));
-        setNodeList(list);
+        setNodeList(list.sort((left, right) => right.weight - left.weight));
       })
       .catch((err: any) => {
         setError(err?.message || "An error occurred while fetching data");

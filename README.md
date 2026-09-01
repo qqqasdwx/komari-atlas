@@ -1,23 +1,31 @@
 # Komari Atlas
 
-A customizable monitoring theme for [Komari Monitor](https://github.com/komari-monitor/komari).
+A private monitoring console theme for [Komari Monitor](https://github.com/komari-monitor/komari).
 
 [简体中文](https://github.com/qqqasdwx/komari-atlas/blob/main/README-CN.md) · [Download the latest theme](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
 ![Komari Atlas preview](preview.png)
 
-Komari Atlas is a static Next.js frontend packaged for Komari's theme system. It uses the theme identifier `atlas` and stores browser preferences under `komari-atlas:*`; settings from Komari Next or other themes are not imported.
+Komari Atlas is a static Next.js frontend packaged for Komari's theme system. Version 0.2 uses a fixed, responsive interface built around a full-screen wallpaper and restrained glass panels. It is designed for an authenticated, self-hosted Komari instance rather than a public status page.
 
 ## Features
 
-- Status overview with region, traffic, network speed, and online-node summaries
-- Searchable node grid and table views with group filtering
-- Instance details with load, latency, transfer, and ping charts
-- Six color themes, five card layouts, multiple card and graph designs
-- Configurable status cards, guest fields, backgrounds, blur, and transparency
-- Remaining-value calculator with currency conversion
-- English, Simplified Chinese, and Traditional Chinese interfaces
-- Responsive light and dark modes with installable PWA support
+- Full-screen authentication gate; node data is loaded only after sign-in
+- Compact node summary, search, group filtering, and stable Komari weight order
+- Card overview with live utilization, billing-period traffic, expiry, speed, and selected Ping tasks
+- Long-form node details with `1h`, `6h`, `24h`, `7d`, and `30d` history ranges
+- CPU, load, memory, swap, disk, network, process, connection, Ping, and conditional GPU charts
+- Per-node traffic reset day and home-card Ping selection with automatic saving
+- Remaining-value summary with online exchange-rate conversion
+- Simplified Chinese and English interfaces with light, dark, and system modes
+
+## Requirements
+
+- Komari `1.4.3` or newer
+- An authenticated private Komari site
+- At least 35 days of metric retention for complete billing-period traffic
+
+Billing boundaries use the `Asia/Shanghai` timezone. An explicit per-node reset day takes priority over the node expiry day; days 29 through 31 clamp to the last day of shorter months. Version 0.2 uses its own settings schema and does not read earlier Atlas appearance settings.
 
 ## Installation
 

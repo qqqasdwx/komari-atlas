@@ -1,0 +1,197 @@
+import type {
+  AtlasNode,
+  AtlasNodeSettings,
+  AtlasSettingsV2,
+  BillingWindow,
+  MetricSeries,
+  MetricsResponse,
+  TrafficLimitType,
+} from "@/types/atlas";
+
+const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+export const EMPTY_ATLAS_SETTINGS: AtlasSettingsV2 = {
+  schema: 2,
+  nodes: {},
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function normalizeAtlasSettings(input: unknown): AtlasSettingsV2 {
+  let source = input;
+  if (typeof input === "string") {
+    try {
+      source = JSON.parse(input);
+    } catch {
+      return EMPTY_ATLAS_SETTINGS;
+    }
+  }
+
+  if (!isRecord(source) || source.schema !== 2 || !isRecord(source.nodes)) {
+    return EMPTY_ATLAS_SETTINGS;
+  }
+
+  const nodes: Record<string, AtlasNodeSettings> = {};
+  for (const [uuid, value] of Object.entries(source.nodes)) {
+    if (!uuid.trim() || !isRecord(value)) continue;
+
+    const resetDay = Number(value.trafficResetDay);
+    const pingIds = Array.isArray(value.cardPingTaskIds)
+      ? Array.from(
+          new Set(
+            value.cardPingTaskIds
+              .map(Number)
+              .filter((id) => Number.isInteger(id) && id > 0),
+          ),
+        )
+      : [];
+
+    nodes[uuid] = {
+      ...(Number.isInteger(resetDay) && resetDay >= 1 && resetDay <= 31
+        ? { trafficResetDay: resetDay }
+        : {}),
+      cardPingTaskIds: pingIds,
+    };
+  }
+
+  return { schema: 2, nodes };
+}
+
+function daysInMonth(year: number, monthIndex: number): number {
+  return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
+}
+
+function shanghaiMidnightUtc(year: number, monthIndex: number, day: number): Date {
+  const clampedDay = Math.min(day, daysInMonth(year, monthIndex));
+  return new Date(Date.UTC(year, monthIndex, clampedDay) - SHANGHAI_OFFSET_MS);
+}
+
+function getShanghaiParts(date: Date) {
+  const shifted = new Date(date.getTime() + SHANGHAI_OFFSET_MS);
+  return {
+    year: shifted.getUTCFullYear(),
+    monthIndex: shifted.getUTCMonth(),
+    day: shifted.getUTCDate(),
+  };
+}
+
+function expiryResetDay(expiredAt: string): number | null {
+  if (!expiredAt.trim()) return null;
+  const expiry = new Date(expiredAt);
+  if (!Number.isFinite(expiry.getTime())) return null;
+  return getShanghaiParts(expiry).day;
+}
+
+export function resolveBillingWindow(
+  node: Pick<AtlasNode, "expired_at">,
+  settings: AtlasNodeSettings | undefined,
+  now = new Date(),
+): BillingWindow | null {
+  const configuredDay = settings?.trafficResetDay;
+  const derivedDay = expiryResetDay(node.expired_at);
+  const resetDay = configuredDay ?? derivedDay;
+  if (!resetDay) return null;
+
+  const nowParts = getShanghaiParts(now);
+  let start = shanghaiMidnightUtc(nowParts.year, nowParts.monthIndex, resetDay);
+  if (now.getTime() < start.getTime()) {
+    start = shanghaiMidnightUtc(nowParts.year, nowParts.monthIndex - 1, resetDay);
+  }
+
+  const startParts = getShanghaiParts(start);
+  const end = shanghaiMidnightUtc(startParts.year, startParts.monthIndex + 1, resetDay);
+
+  return {
+    resetDay,
+    source: configuredDay ? "configured" : "expiry",
+    start,
+    end,
+  };
+}
+
+export function getTrafficUsed(
+  up: number,
+  down: number,
+  type: TrafficLimitType,
+): number {
+  switch (type) {
+    case "max":
+      return Math.max(up, down);
+    case "min":
+      return Math.min(up, down);
+    case "up":
+      return up;
+    case "down":
+      return down;
+    case "sum":
+    default:
+      return up + down;
+  }
+}
+
+export function sumMetricSeries(
+  response: MetricsResponse,
+  metricKey: string,
+): Record<string, number> {
+  const totals: Record<string, number> = {};
+  for (const series of response.series || []) {
+    if (series.metric_key !== metricKey || !series.entity_id) continue;
+    totals[series.entity_id] = (totals[series.entity_id] || 0) +
+      (series.points || []).reduce(
+        (sum, point) => sum + (typeof point.value === "number" ? point.value : 0),
+        0,
+      );
+  }
+  return totals;
+}
+
+export function metricSeriesKey(series: MetricSeries, index: number): string {
+  const task = series.tags?.task_id;
+  return task ? `${series.metric_key}:${task}` : `${series.metric_key}:${index}`;
+}
+
+export function percentage(used: number, total: number): number {
+  if (!Number.isFinite(used) || !Number.isFinite(total) || total <= 0) return 0;
+  return Math.max(0, (used / total) * 100);
+}
+
+export type HealthTone = "neutral" | "good" | "warning" | "danger";
+
+export function resourceTone(
+  value: number,
+  warning: number,
+  danger: number,
+): HealthTone {
+  if (!Number.isFinite(value)) return "neutral";
+  if (value >= danger) return "danger";
+  if (value >= warning) return "warning";
+  return "good";
+}
+
+export function expiryTone(expiredAt: string, now = new Date()): HealthTone {
+  const timestamp = new Date(expiredAt).getTime();
+  if (!Number.isFinite(timestamp)) return "neutral";
+  const days = (timestamp - now.getTime()) / (24 * 60 * 60 * 1000);
+  if (days <= 7) return "danger";
+  if (days <= 30) return "warning";
+  return "good";
+}
+
+export function compareVersions(left: string, right: string): number {
+  const parse = (value: string) =>
+    value
+      .replace(/^v/i, "")
+      .split(/[.+-]/)
+      .slice(0, 3)
+      .map((part) => Number.parseInt(part, 10) || 0);
+  const leftParts = parse(left);
+  const rightParts = parse(right);
+  for (let index = 0; index < 3; index++) {
+    if (leftParts[index] !== rightParts[index]) {
+      return leftParts[index] > rightParts[index] ? 1 : -1;
+    }
+  }
+  return 0;
+}
