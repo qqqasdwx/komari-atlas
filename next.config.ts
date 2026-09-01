@@ -21,6 +21,10 @@ const nextConfig: NextConfig = {
               source: "/themes/:path*",
               destination: `${target}/themes/:path*`,
             },
+            {
+              source: "/instance/:uuid",
+              destination: "/",
+            },
           ];
         },
       }
