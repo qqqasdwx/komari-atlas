@@ -74,6 +74,17 @@ NEXT_PUBLIC_API_TARGET=http://127.0.0.1:25774
 
 Adjust the URL to point to your Komari backend instance.
 
+Komari validates browser origins for both HTTP and WebSocket requests. In the
+Komari settings, add the exact frontend origin to both allowlists:
+
+```text
+cors_allowed_origins=http://localhost:3000
+ws_allowed_origins=http://localhost:3000
+```
+
+Separate multiple origins with commas. Keep origin validation enabled; a
+mismatched origin returns `403` even when `NEXT_PUBLIC_API_TARGET` is correct.
+
 ### Run in development
 
 ```bash

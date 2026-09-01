@@ -72,6 +72,17 @@ NEXT_PUBLIC_API_TARGET=http://127.0.0.1:25774
 
 请根据你的 Komari 后端实例调整该 URL。
 
+Komari 会同时校验 HTTP 和 WebSocket 请求的浏览器 Origin。请在 Komari
+设置中把前端的准确 Origin 加入两个白名单：
+
+```text
+cors_allowed_origins=http://localhost:3000
+ws_allowed_origins=http://localhost:3000
+```
+
+多个 Origin 使用英文逗号分隔。请保留 Origin 校验；即使
+`NEXT_PUBLIC_API_TARGET` 正确，白名单不匹配仍会返回 `403`。
+
 ### 本地开发运行
 
 ```bash

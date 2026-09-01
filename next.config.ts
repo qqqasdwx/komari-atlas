@@ -1,12 +1,13 @@
 import type { NextConfig } from "next";
 
+const isDevelopment = process.env.NODE_ENV === "development";
+
 const nextConfig: NextConfig = {
   distDir: "dist",
-  output: "export",
   images: {
     unoptimized: true,
   },
-  ...(process.env.NODE_ENV === "development"
+  ...(isDevelopment
     ? {
         async rewrites() {
           const target =
@@ -23,7 +24,7 @@ const nextConfig: NextConfig = {
           ];
         },
       }
-    : {}),
+    : { output: "export" }),
 };
 
 export default nextConfig;
