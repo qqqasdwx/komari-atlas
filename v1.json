@@ -11,12 +11,12 @@
         "zh-CN": "可自定义的 Komari Monitor 监控主题。",
         "en": "A customizable monitoring theme for Komari Monitor."
       },
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": "qqqasdwx",
       "url": "https://github.com/qqqasdwx/komari-atlas",
       "preview": "https://raw.githubusercontent.com/qqqasdwx/komari-atlas/main/preview.png",
-      "download": "https://github.com/qqqasdwx/komari-atlas/releases/download/v0.1.0/komari-atlas.zip",
-      "sha256": "5221dde03b166ba46dad096fd9731e3e714286be07660e616b45f39dd28f472f"
+      "download": "https://github.com/qqqasdwx/komari-atlas/releases/download/v0.1.1/komari-atlas.zip",
+      "sha256": "27a703b8ca654fe953db3a38ee5606893a83842a33db02cf46a469e2fe1f286a"
     }
   ]
 }
