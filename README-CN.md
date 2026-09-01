@@ -56,7 +56,7 @@ Komari-Next 是 Komari 监控项目的现代化前端。
 克隆本仓库并安装依赖：
 
 ```bash
-npm install
+npm ci
 ```
 
 ### 配置 API 目标地址
@@ -153,6 +153,9 @@ gzip_vary on;
 * `npm run dev` - 启动 Next.js 开发服务器
 * `npm run build` - 将静态站点构建到 `dist/`
 * `npm run lint` - 对项目运行 ESLint
+* `npm run typecheck` - 执行 TypeScript 类型检查但不生成文件
+* `npm test` - 单次运行 Vitest 单元测试
+* `npm run preview` - 在本地托管生成的 `dist/` 目录
 
 ## 贡献
 

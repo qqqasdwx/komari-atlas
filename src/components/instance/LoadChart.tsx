@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
@@ -42,64 +42,52 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const presetViews = [
-    { label: t("chart.hours", { count: 4 }), value: "hours-4", hours: 4 },
-    { label: t("chart.days", { count: 1 }), value: "hours-24", hours: 24 },
-    { label: t("chart.days", { count: 7 }), value: "hours-168", hours: 168 },
-    { label: t("chart.days", { count: 30 }), value: "hours-720", hours: 720 },
-  ];
-  const avaliableView: { label: string; value: string; hours?: number }[] = [
-    { label: t("common.real_time"), value: "real-time" },
-  ];
-  
-  if (
-    typeof max_record_preserve_time === "number" &&
-    max_record_preserve_time > 0
-  ) {
-    for (const v of presetViews) {
-      if (max_record_preserve_time >= v.hours) {
-        avaliableView.push({ label: v.label, value: v.value, hours: v.hours });
-      }
+  const availableViews = useMemo(() => {
+    const views: { label: string; value: string; hours?: number }[] = [
+      { label: t("common.real_time"), value: "real-time" },
+    ];
+    const presetViews = [
+      { label: t("chart.hours", { count: 4 }), value: "hours-4", hours: 4 },
+      { label: t("chart.days", { count: 1 }), value: "hours-24", hours: 24 },
+      { label: t("chart.days", { count: 7 }), value: "hours-168", hours: 168 },
+      { label: t("chart.days", { count: 30 }), value: "hours-720", hours: 720 },
+    ];
+
+    if (max_record_preserve_time <= 0) return views;
+
+    for (const view of presetViews) {
+      if (max_record_preserve_time >= view.hours) views.push(view);
     }
-    const maxPreset = presetViews[presetViews.length - 1];
-    if (max_record_preserve_time > maxPreset.hours) {
-      const dynamicLabel =
-        max_record_preserve_time % 24 === 0
-          ? `${t("chart.days", {
-              count: Math.floor(max_record_preserve_time / 24),
-            })}`
-          : `${t("chart.hours", { count: max_record_preserve_time })}`;
-      avaliableView.push({
-        label: dynamicLabel,
-        value: `hours-${max_record_preserve_time}`,
-        hours: max_record_preserve_time,
-      });
-    } else if (
+
+    const maxPresetHours = presetViews[presetViews.length - 1].hours;
+    if (
       max_record_preserve_time > 4 &&
-      !presetViews.some((v) => v.hours === max_record_preserve_time)
+      (max_record_preserve_time > maxPresetHours ||
+        !presetViews.some((view) => view.hours === max_record_preserve_time))
     ) {
-      const dynamicLabel =
-        max_record_preserve_time % 24 === 0
-          ? `${t("chart.days", {
-              count: Math.floor(max_record_preserve_time / 24),
-            })}`
-          : `${t("chart.hours", { count: max_record_preserve_time })}`;
-      avaliableView.push({
-        label: dynamicLabel,
+      views.push({
+        label:
+          max_record_preserve_time % 24 === 0
+            ? t("chart.days", { count: Math.floor(max_record_preserve_time / 24) })
+            : t("chart.hours", { count: max_record_preserve_time }),
         value: `hours-${max_record_preserve_time}`,
         hours: max_record_preserve_time,
       });
     }
-  }
+
+    return views;
+  }, [max_record_preserve_time, t]);
 
   useEffect(() => {
-    if (avaliableView.length > 0) {
-      setHoursView(avaliableView[0].value);
-    }
-  }, [max_record_preserve_time]);
+    setHoursView((current) =>
+      availableViews.some((view) => view.value === current)
+        ? current
+        : availableViews[0].value
+    );
+  }, [availableViews]);
 
   useEffect(() => {
-    const selected = avaliableView.find((v) => v.value === hoursView);
+    const selected = availableViews.find((view) => view.value === hoursView);
     if (!uuid) return;
     if (!selected || !selected.hours) {
       setRemoteData(null);
@@ -157,7 +145,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
         setError(err.message || "Error");
         setLoading(false);
       });
-  }, [hoursView, uuid]);
+  }, [availableViews, hoursView, uuid]);
 
   const colors = ["#F38181", "#FCE38A", "#EAFFD0", "#95E1D3"];
   const primaryColor = colors[0];
@@ -173,7 +161,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const timeFormatter = (value: any, index: number) => {
     if (index === 0 || index === chartData.length - 1) {
       if (
-        presetViews[0].value === hoursView ||
+        hoursView === "hours-4" ||
         hoursView === "real-time"
       ) {
         return new Date(value).toLocaleTimeString([], {
@@ -230,13 +218,11 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
 
   const chartData = isRealtime
     ? realtimeData
-    : hoursView === presetViews[0].value
+    : hoursView === "hours-4"
     ? fillMissingTimePoints(remoteData ?? [], minute, hour * 4, minute * 2)
     : (() => {
         const selectedHours =
-          presetViews.find((v) => v.value === hoursView)?.hours ||
-          avaliableView.find((v) => v.value === hoursView)?.hours ||
-          24;
+          availableViews.find((view) => view.value === hoursView)?.hours || 24;
         const interval = selectedHours > 120 ? hour : minute * 15;
         const maxGap = interval * 2;
         return fillMissingTimePoints(
@@ -252,7 +238,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
       <div className="w-full overflow-x-auto px-2">
         <div className="w-max mx-auto">
           <SegmentedControl value={hoursView} onValueChange={setHoursView}>
-            {avaliableView.map((view) => (
+            {availableViews.map((view) => (
               <SegmentedControlItem key={view.value}
                 value={view.value}
                 className="capitalize"

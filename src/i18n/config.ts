@@ -52,13 +52,13 @@ export function normalizeLanguage(language: string | null | undefined): string |
     return undefined;
   }
 
-  let decodedLanguage = language;
-  try {
-    decodedLanguage = decodeURIComponent(language);
-  } catch {
-    decodedLanguage = language;
-  }
-  decodedLanguage = decodedLanguage.replace("_", "-");
+  const decodedLanguage = (() => {
+    try {
+      return decodeURIComponent(language);
+    } catch {
+      return language;
+    }
+  })().replace("_", "-");
   if (supportedLanguages.includes(decodedLanguage)) {
     return decodedLanguage;
   }
@@ -83,15 +83,16 @@ export function detectClientLanguage(): string {
   }
 
   const queryLanguage = new URLSearchParams(window.location.search).get("lng");
-  let managedOverrideLanguage: string | null = null;
-  let localStorageLanguage: string | null = null;
-  try {
-    managedOverrideLanguage = window.localStorage?.getItem("komari-language") || null;
-    localStorageLanguage = window.localStorage?.getItem("i18nextLng") || null;
-  } catch {
-    managedOverrideLanguage = null;
-    localStorageLanguage = null;
-  }
+  const [managedOverrideLanguage, localStorageLanguage] = (() => {
+    try {
+      return [
+        window.localStorage?.getItem("komari-language") || null,
+        window.localStorage?.getItem("i18nextLng") || null,
+      ];
+    } catch {
+      return [null, null];
+    }
+  })();
   const cookieLanguage = document.cookie
     .split("; ")
     .find((item) => item.startsWith("i18next="))

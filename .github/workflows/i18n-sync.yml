@@ -1,14 +1,10 @@
 name: i18n sync
 
 on:
-  push:
-    branches: ["**"]
   workflow_dispatch: {}
 
 jobs:
   sync:
-    # 避免由机器人再次触发循环
-    if: ${{ github.actor != 'github-actions[bot]' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -25,13 +21,12 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         shell: bash
-        run: |
-          npm ci --no-audit --no-fund || npm i --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Run i18n sync
         env:

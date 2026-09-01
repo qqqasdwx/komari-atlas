@@ -58,7 +58,7 @@ It is built with **Next.js**, **TypeScript**, **Tailwind CSS** and **Shadcn UI**
 Clone this repository and install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Configure API target
@@ -155,6 +155,9 @@ This repository is designed to be used as a custom Komari theme.
 - `npm run dev` – Start the Next.js development server
 - `npm run build` – Build the static site into `dist/`
 - `npm run lint` – Run ESLint over the project
+- `npm run typecheck` – Check TypeScript without emitting files
+- `npm test` – Run the Vitest unit tests once
+- `npm run preview` – Serve the generated `dist/` directory locally
 
 ## Contributing
 

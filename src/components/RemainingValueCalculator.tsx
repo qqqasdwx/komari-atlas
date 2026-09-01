@@ -1,7 +1,7 @@
 "use client";
 
 import { RefreshCw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
@@ -274,7 +274,7 @@ export default function RemainingValueCalculator() {
     );
   }, [convertedActive, ratesState]);
 
-  const refreshRates = async (forceRefresh = false) => {
+  const refreshRates = useCallback(async (forceRefresh = false) => {
     const sourceCurrencies = Array.from(new Set(snapshot.active.map((item) => item.currencyCode)));
     if (sourceCurrencies.length === 0) {
       return;
@@ -298,9 +298,9 @@ export default function RemainingValueCalculator() {
     } finally {
       setIsRefreshing(false);
     }
-  };
+  }, [displayCurrency, snapshot.active, t]);
 
-  const openPanel = async () => {
+  const openPanel = useCallback(async () => {
     if (!guestDisplay.showPrice || !guestDisplay.showExpiredAt) {
       return;
     }
@@ -313,7 +313,14 @@ export default function RemainingValueCalculator() {
     ) {
       await refreshRates(false);
     }
-  };
+  }, [
+    displayCurrency,
+    guestDisplay.showExpiredAt,
+    guestDisplay.showPrice,
+    ratesState,
+    refreshRates,
+    snapshot.active.length,
+  ]);
 
   const handleOpenChange = async (nextOpen: boolean) => {
     if (!nextOpen) {
@@ -333,7 +340,7 @@ export default function RemainingValueCalculator() {
     return () => {
       window.removeEventListener(OPEN_REMAINING_VALUE_CALCULATOR_EVENT, handleExternalOpen);
     };
-  }, [displayCurrency, guestDisplay.showExpiredAt, guestDisplay.showPrice, ratesState, snapshot.active.length]);
+  }, [openPanel]);
 
   useEffect(() => {
     if (
@@ -344,7 +351,7 @@ export default function RemainingValueCalculator() {
     ) {
       void refreshRates(false);
     }
-  }, [displayCurrency, open, ratesState, snapshot.active.length]);
+  }, [displayCurrency, open, ratesState, refreshRates, snapshot.active.length]);
 
   const filterCounts = {
     all: snapshot.active.length + snapshot.skipped.length + snapshot.expired.length,

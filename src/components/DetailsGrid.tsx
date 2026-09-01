@@ -7,9 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type DetailsGridProps = {
   uuid: string;
-  gap?: string;
-  box?: boolean;
-  align?: "start" | "center" | "end";
 };
 
 const StatCard = ({
@@ -38,7 +35,7 @@ const StatCard = ({
   </Card>
 );
 
-export const DetailsGrid = ({ uuid, gap, box, align }: DetailsGridProps) => {
+export const DetailsGrid = ({ uuid }: DetailsGridProps) => {
   const { t } = useTranslation();
   const { nodeList } = useNodeList();
   const { live_data } = useLiveData();
@@ -46,7 +43,7 @@ export const DetailsGrid = ({ uuid, gap, box, align }: DetailsGridProps) => {
   const data = live_data?.data.data[uuid ?? ""];
 
   return (
-    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-${gap ?? "4"} w-full`}>
+    <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
       {/* CPU */}
       <StatCard
         title="CPU"

@@ -116,7 +116,7 @@ const NodeTable: React.FC<NodeTableProps> = ({ nodes, liveData }) => {
       return a.weight - b.weight;
     }
 
-    let comparison = 0;
+    let comparison: number;
     switch (sortState.field) {
       case 'name':
         comparison = a.name.localeCompare(b.name);
@@ -130,16 +130,18 @@ const NodeTable: React.FC<NodeTableProps> = ({ nodes, liveData }) => {
       case 'cpu':
         comparison = aData.cpu.usage - bData.cpu.usage;
         break;
-      case 'ram':
+      case 'ram': {
         const aRamPercent = a.mem_total ? (aData.ram.used / a.mem_total) * 100 : 0;
         const bRamPercent = b.mem_total ? (bData.ram.used / b.mem_total) * 100 : 0;
         comparison = aRamPercent - bRamPercent;
         break;
-      case 'disk':
+      }
+      case 'disk': {
         const aDiskPercent = a.disk_total ? (aData.disk.used / a.disk_total) * 100 : 0;
         const bDiskPercent = b.disk_total ? (bData.disk.used / b.disk_total) * 100 : 0;
         comparison = aDiskPercent - bDiskPercent;
         break;
+      }
       case 'price':
         comparison = a.price - b.price;
         break;

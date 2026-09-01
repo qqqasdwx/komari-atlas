@@ -21,11 +21,11 @@ export class RPC2Client {
   private pendingRequests = new Map<string | number, {
     resolve: (value: any) => void;
     reject: (reason?: any) => void;
-    timeout?: NodeJS.Timeout;
+    timeout?: ReturnType<typeof setTimeout>;
   }>();
   private reconnectAttempts = 0;
-  private reconnectTimeout?: NodeJS.Timeout;
-  private heartbeatInterval?: NodeJS.Timeout;
+  private reconnectTimeout?: ReturnType<typeof setTimeout>;
+  private heartbeatInterval?: ReturnType<typeof setInterval>;
   private eventListeners: RPC2EventListeners = {};
  
   private readonly baseUrl: string;
@@ -246,7 +246,7 @@ export class RPC2Client {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error(`请求失败: ${method}`);
+      throw new Error(`请求失败: ${method}`, { cause: error });
     }
   }
 
@@ -288,7 +288,7 @@ export class RPC2Client {
       if (error instanceof Error) {
         throw error;
       }
-      throw new Error("批量请求失败");
+      throw new Error("批量请求失败", { cause: error });
     }
   }
 
@@ -312,14 +312,9 @@ export class RPC2Client {
     if (this.connectionState === RPC2ConnectionState.CONNECTED) {
       try {
         return await this.callViaWebSocket(method, params, options);
-      } catch (wsErr) {
-        // 回退一次 HTTP
-        try {
-          return await this.callViaHTTP(method, params, options);
-        } catch (httpErr) {
-          // HTTP 也失败，抛出 HTTP 错误（信息更贴近最终失败原因）
-          throw httpErr;
-        }
+      } catch {
+        // 回退一次 HTTP；若仍失败，让最终请求错误直接向上传递。
+        return this.callViaHTTP(method, params, options);
       }
     }
 
@@ -328,10 +323,6 @@ export class RPC2Client {
   }
 
   private getWebSocketUrl(): string {
-    // Guard against SSR/SSG
-    if (typeof window === 'undefined') {
-      throw new Error('WebSocket connections are not available during server-side rendering');
-    }
     // Guard against SSR/SSG
     if (typeof window === 'undefined') {
       throw new Error('WebSocket connections are not available during server-side rendering');

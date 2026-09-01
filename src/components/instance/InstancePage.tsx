@@ -11,7 +11,7 @@ import { useNodeList } from "@/contexts/NodeListContext";
 import { liveDataToRecords } from "@/utils/RecordHelper";
 import LoadChart from "./LoadChart";
 import PingChart from "./PingChart";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader } from "@/components/ui/card";
 
 // Import DetailsGrid as client-only to prevent hydration mismatch with i18n
 const DetailsGrid = dynamic(
@@ -88,7 +88,7 @@ export default function InstancePage({ uuid }: InstancePageProps) {
       </Card>
 
       {/* Details Grid */}
-      <DetailsGrid box align="center" uuid={uuid ?? ""} />
+      <DetailsGrid uuid={uuid} />
 
       {/* Charts Section */}
       <div className="w-full space-y-6">

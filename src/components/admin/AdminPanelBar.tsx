@@ -1,11 +1,14 @@
+"use client";
+
 import { Cross1Icon, ExitIcon } from "@radix-ui/react-icons";
 import { Button, Callout, Flex, Grid, IconButton, Text } from "@radix-ui/themes";
-import { AnimatePresence, motion } from "framer-motion"; // 引入 Framer Motion
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation /*useNavigate*/ } from "react-router-dom";
 import LanguageSwitch from "../Language";
+import SpaLink from "../SpaLink";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSpaPathname } from "@/hooks/useSpaPathname";
 import menuConfig from "../../config/menuConfig.json";
 import type { MenuItem } from "../../types/menu";
 import { iconMap } from "../../utils/iconHelper";
@@ -30,6 +33,34 @@ interface AdminPanelBarProps {
   content: ReactNode;
 }
 
+interface GithubReleaseInfo {
+  tag_name: string;
+  name?: string;
+  body?: string;
+  html_url: string;
+  published_at?: string;
+  draft?: boolean;
+  prerelease?: boolean;
+}
+
+function parseSemver(input?: string | null): number[] | null {
+  if (!input) return null;
+  const match = String(input).trim().replace(/^v/i, "").match(/^(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function isNewerVersion(latest?: string | null, current?: string | null) {
+  const latestParts = parseSemver(latest);
+  const currentParts = parseSemver(current);
+  if (!latestParts || !currentParts) return false;
+  for (let index = 0; index < 3; index++) {
+    if (latestParts[index] > currentParts[index]) return true;
+    if (latestParts[index] < currentParts[index]) return false;
+  }
+  return false;
+}
+
 const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   const { call } = useRPC2Call();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -38,9 +69,10 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   });
   const { account } = useAccount();
   const isMobile = useIsMobile();
-  const ishttps = window.location.protocol === "https:";
+  const ishttps =
+    typeof window !== "undefined" && window.location.protocol === "https:";
   const [t] = useTranslation();
-  const location = useLocation();
+  const pathname = useSpaPathname();
   const { publicInfo } = usePublicInfo();
   //const navigate = useNavigate();
   // 获取版本信息
@@ -50,15 +82,6 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
   } | null>(null);
 
   // GitHub 最新发布信息与更新检测
-  interface GithubReleaseInfo {
-    tag_name: string;
-    name?: string;
-    body?: string;
-    html_url: string;
-    published_at?: string;
-    draft?: boolean;
-    prerelease?: boolean;
-  }
   const [latestRelease, setLatestRelease] = useState<GithubReleaseInfo | null>(
     null
   );
@@ -126,27 +149,7 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
     };
 
     fetchVersionInfo();
-  }, []);
-
-  // 规范化版本为 [major, minor, patch] 数组，忽略前缀 v 和后缀
-  function parseSemver(input?: string | null): number[] | null {
-    if (!input) return null;
-    const s = String(input).trim().replace(/^v/i, "");
-    const match = s.match(/^(\d+)\.(\d+)\.(\d+)/);
-    if (!match) return null;
-    return [Number(match[1]), Number(match[2]), Number(match[3])];
-  }
-
-  function isNewerVersion(latest?: string | null, current?: string | null) {
-    const a = parseSemver(latest);
-    const b = parseSemver(current);
-    if (!a || !b) return false;
-    for (let i = 0; i < 3; i++) {
-      if (a[i] > b[i]) return true;
-      if (a[i] < b[i]) return false;
-    }
-    return false;
-  }
+  }, [call]);
 
   // 获取 GitHub releases 列表，并筛选出“比当前版本新的所有 release”
   useEffect(() => {
@@ -208,13 +211,12 @@ const AdminPanelBar = ({ content }: AdminPanelBarProps) => {
       if (item.children) {
         newState[item.path] = item.children.some(
           (child: MenuItem) =>
-            location.pathname === child.path ||
-            location.pathname.startsWith(child.path)
+            pathname === child.path || pathname.startsWith(child.path)
         );
       }
     });
     setOpenSubMenus(newState);
-  }, [location.pathname, extraMenuItems]);
+  }, [pathname, extraMenuItems]);
 
   // 侧边栏动画变体
   const sidebarVariants = {
@@ -651,13 +653,12 @@ const SidebarItem = ({
   children: ReactNode;
   newTab?: boolean;
 }) => {
-  const location = useLocation();
+  const pathname = useSpaPathname();
   const isExternalLink = to.startsWith("http://") || to.startsWith("https://");
   const isActive =
     !isExternalLink &&
     to !== "/" &&
-    (location.pathname === to ||
-      (to !== "/admin" && location.pathname.startsWith(to)));
+    (pathname === to || (to !== "/admin" && pathname.startsWith(to)));
   const openInNewTab = newTab === true || (isExternalLink && newTab !== false);
 
   if (openInNewTab) {
@@ -702,8 +703,8 @@ const SidebarItem = ({
   }
 
   return (
-    <Link
-      to={to}
+    <SpaLink
+      href={to}
       onClick={onClick}
       className="group transition-colors duration-200 hover:bg-accent-3 rounded-md"
     >
@@ -737,6 +738,6 @@ const SidebarItem = ({
           {children}
         </Text>
       </Flex>
-    </Link>
+    </SpaLink>
   );
 };

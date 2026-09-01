@@ -56,7 +56,7 @@ check_dependencies() {
 # Install dependencies
 install_dependencies() {
     print_status "Installing dependencies..."
-    npm install
+    npm ci --no-audit --no-fund
     print_success "Dependencies installed"
 }
 

@@ -5,11 +5,11 @@
  * @example
  * stringToBytes('1MB');        // 1048576
  * stringToBytes('1 MB');        // 1048576
- * stringToBytes('5.4MB');      // 5662310.4
- * stringToBytes('6,222,765 MB'); // 6525139624935
+ * stringToBytes('5.4MB');      // 5662310
+ * stringToBytes('6,222,765 MB'); // 6525042032640
  * stringToBytes('128*1024gb'); // 140737488355328
  * stringToBytes('1e3kb');       // 1024000 (1000 * 1024)
- * stringToBytes('0.2gb');       // 214748364.8
+ * stringToBytes('0.2gb');       // 214748365
  * stringToBytes('1024');        // 1024 (默认为字节)
  * stringToBytes('1tb');         // 1099511627776
  */
@@ -44,47 +44,28 @@ export function stringToBytes(str: string): number {
     petabyte: 1024 ** 5,
   };
 
-  // 1. 预处理字符串：转小写，移除逗号和空格
   const cleanStr = str.toLowerCase().replace(/,/g, "").replace(/\s/g, "");
-
-  // 2. 分离单位和数值
-  // 按长度降序排序单位，以优先匹配长单位（如 'kb' 而不是 'b'）
   const unitKeys = Object.keys(units).sort((a, b) => b.length - a.length);
-  const unitRegex = new RegExp(`(${unitKeys.join("|")})$`);
+  const numberPattern = "(?:\\d+(?:\\.\\d+)?|\\.\\d+)(?:e[+-]?\\d+)?";
+  const expressionPattern = `${numberPattern}(?:\\*${numberPattern})*`;
+  const valuePattern = new RegExp(
+    `^(${expressionPattern})?(${unitKeys.join("|")})?$`
+  );
+  const match = cleanStr.match(valuePattern);
 
-  let unit = "b"; // 默认为 byte
-  let numericPart = cleanStr;
-
-  const match = cleanStr.match(unitRegex);
-  if (match) {
-    unit = match[1];
-    // 从字符串中移除单位，得到纯数值部分
-    numericPart = cleanStr.substring(0, cleanStr.length - unit.length);
-  }
-
-  // 如果数值部分为空（例如输入 "kb"），则认为数值是 1
-  if (numericPart === "") {
-    numericPart = "1";
-  }
-
-  try {
-    // 3. 计算数值部分
-    // 使用 Function 构造函数来安全地评估可能包含乘法或科学记数法的表达式
-    // 注意：这仍然假设输入源是可信的，因为它能执行简单的数学运算
-    const value = new Function(`return ${numericPart}`)();
-
-    if (isNaN(value)) {
-      return 0;
-    }
-
-    // 4. 乘以单位对应的倍数
-    const multiplier = units[unit];
-    return Math.round(value * multiplier);
-  } catch (error) {
-    // 如果表达式无效（例如 "abc-gb"），则捕获错误并返回 0
-    console.error(`Error parsing string "${str}":`, error);
+  if (!match || (!match[1] && !match[2])) {
     return 0;
   }
+
+  const numericPart = match[1] || "1";
+  const unit = match[2] || "b";
+  const value = numericPart
+    .split("*")
+    .map(Number)
+    .reduce((product, factor) => product * factor, 1);
+  const bytes = value * units[unit];
+
+  return Number.isFinite(bytes) && bytes >= 0 ? Math.round(bytes) : 0;
 }
 
 export function formatBytes(bytes: number): string {
