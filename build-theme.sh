@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Komari Theme Build Script
-# This script builds the theme package locally
+# Komari Atlas Theme Build Script
+# This script builds the theme package locally.
 
 set -e  # Exit on any error
 
-echo "Building Komari Theme Package..."
+echo "Building Komari Atlas Theme Package..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -67,25 +67,6 @@ build_project() {
     print_success "Project built successfully"
 }
 
-# Update theme configuration
-update_theme_config() {
-    print_status "Updating theme configuration..."
-    
-    # Get current date in YY.MM.DD format
-    VERSION_DATE=$(date +"%y.%m.%d")
-    # Get commit hash (short)
-    if git rev-parse --short HEAD &> /dev/null; then
-        COMMIT_HASH=$(git rev-parse --short HEAD)
-    else
-        COMMIT_HASH="dev"
-        print_warning "Not a git repository, using 'dev' as commit hash"
-    fi
-    
-    echo "Version: $VERSION_DATE"
-    echo "Commit: $COMMIT_HASH"
-
-}
-
 # Verify required files exist
 verify_files() {
     print_status "Verifying required files..."
@@ -128,23 +109,22 @@ create_package() {
     fi
     
     # Create a temporary directory for the package
-    rm -rf theme-package
-    mkdir -p theme-package
+    PROJECT_DIR=$(pwd)
+    PACKAGE_DIR=$(mktemp -d)
+    trap 'rm -rf "$PACKAGE_DIR"' EXIT
     
     # Copy required files
-    cp preview.png theme-package/
-    cp komari-theme.json theme-package/
-    cp -r dist/ theme-package/
+    cp preview.png "$PACKAGE_DIR/"
+    cp komari-theme.json "$PACKAGE_DIR/"
+    cp -r dist/ "$PACKAGE_DIR/"
     
     # Create zip file with version and commit hash
-    ZIP_NAME="komari-theme-v${VERSION_DATE}-${COMMIT_HASH}.zip"
+    ZIP_NAME="komari-atlas-${VERSION_DATE}-${COMMIT_HASH}.zip"
+    OUTPUT_PATH="${PROJECT_DIR}/dist/${ZIP_NAME}"
     
-    cd theme-package
-    zip -r "../dist/${ZIP_NAME}" .
-    cd ..
-    
-    # Clean up
-    rm -rf theme-package
+    cd "$PACKAGE_DIR"
+    zip -r "$OUTPUT_PATH" .
+    cd "$PROJECT_DIR"
     
     print_success "Created package: ${ZIP_NAME}"
     ls -la "dist/${ZIP_NAME}"
@@ -153,7 +133,7 @@ create_package() {
 # Main execution
 main() {
     echo "======================================"
-    echo "  Komari Theme Package Builder"
+    echo "  Komari Atlas Package Builder"
     echo "======================================"
     echo
     
@@ -166,16 +146,13 @@ main() {
     build_project
     echo
     
-    update_theme_config
-    echo
-    
     verify_files
     echo
     
     create_package
     echo
     
-    print_success "Theme package build completed! 🎉"
+    print_success "Theme package build completed!"
     echo
     echo "You can now use the generated zip file as a theme package."
 }
