@@ -252,15 +252,6 @@ body[data-card-blur="true"][data-card-blur-type="glass"] :is(
     inset 0 -1px 0 rgba(255, 255, 255, var(--komari-card-glass-dark-inner-lowlight-alpha, 0.08));
 }
 
-body[data-custom-background="true"][data-card-blur="true"][data-card-blur-type] [data-slot="card"].instance-chart-card {
-  background: color-mix(in oklab, var(--card) 86%, transparent);
-  border-color: color-mix(in oklab, var(--card-foreground) 18%, transparent);
-}
-
-body[data-custom-background="true"] .instance-chart-card .recharts-cartesian-grid line {
-  stroke: color-mix(in oklab, var(--card-foreground) 16%, transparent) !important;
-}
-
 ::-webkit-scrollbar {
   width: 8px;
   background: transparent;
