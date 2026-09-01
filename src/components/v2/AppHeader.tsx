@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, LogOut, Wifi, WifiOff } from "lucide-react";
+import { Activity, LogOut, Settings, Wifi, WifiOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { AppearanceMenu } from "@/components/v2/AppearanceMenu";
@@ -35,6 +35,12 @@ export function AppHeader() {
             {isConnected ? t("atlas.connection.live") : t("atlas.connection.polling")}
           </div>
           <AssetSummary />
+          <Button asChild variant="ghost" size="icon" className="h-9 w-9">
+            <a href="/admin" title={t("atlas.admin")}>
+              <Settings className="h-4 w-4" />
+              <span className="sr-only">{t("atlas.admin")}</span>
+            </a>
+          </Button>
           <AppearanceMenu />
           <LanguageMenu />
           <Button

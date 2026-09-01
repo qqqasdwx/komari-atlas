@@ -1,5 +1,6 @@
 {
   "atlas": {
+    "admin": "Admin console",
     "appearance": "Appearance",
     "assets": {
       "displayCurrency": "Display currency",

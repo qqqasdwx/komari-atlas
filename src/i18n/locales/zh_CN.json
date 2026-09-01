@@ -1,5 +1,6 @@
 {
   "atlas": {
+    "admin": "管理后台",
     "appearance": "外观模式",
     "assets": {
       "displayCurrency": "显示币种",
