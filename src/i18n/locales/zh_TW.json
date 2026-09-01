@@ -652,6 +652,13 @@
   "status_settings": "狀態顯示設置",
   "themeCustomizer": {
     "themeSettings": "主題設定",
+    "saveStatus": {
+      "error": "儲存失敗",
+      "global": "全站設定",
+      "local": "已儲存到本機",
+      "saved": "已儲存",
+      "saving": "儲存中"
+    },
     "colorTheme": "顏色主題",
     "cardLayout": "卡片布局",
     "cardDesign": "卡片設計",

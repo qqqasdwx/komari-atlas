@@ -21,7 +21,22 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Activity, Gauge, Palette, Layout, PieChart, Image, Settings, Grid3X3, Table2 } from 'lucide-react';
+import {
+  Activity,
+  Check,
+  CircleAlert,
+  Cloud,
+  Gauge,
+  Grid3X3,
+  HardDrive,
+  Image,
+  Layout,
+  LoaderCircle,
+  Palette,
+  PieChart,
+  Settings,
+  Table2,
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   type StatusCardsVisibility,
@@ -49,6 +64,7 @@ const ThemeSwitcher = () => {
     setCardTransparentIntensity,
     setCardExtraBlurIntensity,
     isThemeSettingsAdmin,
+    themeSettingsSaveState,
     managedThemeSettings,
     setGuestDisplay,
   } = useTheme();
@@ -202,6 +218,36 @@ const ThemeSwitcher = () => {
     },
   ];
 
+  const saveIndicator = !isThemeSettingsAdmin
+    ? {
+        label: t('themeCustomizer.saveStatus.local', { defaultValue: 'Saved locally' }),
+        icon: <HardDrive className="h-3.5 w-3.5" />,
+        className: 'text-muted-foreground',
+      }
+    : themeSettingsSaveState === 'saving'
+      ? {
+          label: t('themeCustomizer.saveStatus.saving', { defaultValue: 'Saving' }),
+          icon: <LoaderCircle className="h-3.5 w-3.5 animate-spin" />,
+          className: 'text-muted-foreground',
+        }
+      : themeSettingsSaveState === 'error'
+        ? {
+            label: t('themeCustomizer.saveStatus.error', { defaultValue: 'Save failed' }),
+            icon: <CircleAlert className="h-3.5 w-3.5" />,
+            className: 'text-destructive',
+          }
+        : themeSettingsSaveState === 'saved'
+          ? {
+              label: t('themeCustomizer.saveStatus.saved', { defaultValue: 'Saved' }),
+              icon: <Check className="h-3.5 w-3.5" />,
+              className: 'text-emerald-600 dark:text-emerald-400',
+            }
+          : {
+              label: t('themeCustomizer.saveStatus.global', { defaultValue: 'Site settings' }),
+              icon: <Cloud className="h-3.5 w-3.5" />,
+              className: 'text-muted-foreground',
+            };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -214,8 +260,26 @@ const ThemeSwitcher = () => {
       </PopoverTrigger>
       <PopoverContent className="w-80 max-h-[85vh] overflow-y-auto p-4" align="end" sideOffset={8}>
         <div className="flex flex-col gap-4">
+          <div className="sticky -top-4 z-20 -mx-4 -mt-4 flex items-center justify-between gap-3 border-b bg-popover px-4 py-3">
+            <div className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+              <Palette className="h-4 w-4 shrink-0" />
+              <span className="truncate">
+                {t('themeCustomizer.themeSettings', { defaultValue: 'Theme settings' })}
+              </span>
+            </div>
+            <span
+              aria-live="polite"
+              className={cn(
+                'flex min-w-[5rem] shrink-0 items-center justify-end gap-1.5 text-[11px] font-medium',
+                saveIndicator.className
+              )}
+            >
+              {saveIndicator.icon}
+              {saveIndicator.label}
+            </span>
+          </div>
           <div>
-            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 sticky -top-4 bg-popover pb-2 z-10 -mx-4 px-4 pt-4">
+            <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
               <Palette className="h-4 w-4" />
               {t('themeCustomizer.colorTheme', { defaultValue: 'Color Theme' })}
             </h4>

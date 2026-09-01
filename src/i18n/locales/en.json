@@ -652,6 +652,13 @@
   "status_settings": "Status Settings",
   "themeCustomizer": {
     "themeSettings": "Theme settings",
+    "saveStatus": {
+      "error": "Save failed",
+      "global": "Site settings",
+      "local": "Saved locally",
+      "saved": "Saved",
+      "saving": "Saving"
+    },
     "colorTheme": "Color Theme",
     "cardLayout": "Card Layout",
     "cardDesign": "Card Design",

@@ -24,6 +24,7 @@ export type NodeViewMode = "grid" | "table";
 export type BackgroundBlurType = "soft" | "glass";
 export type CardBlurType = BackgroundBlurType;
 export type Appearance = "light" | "dark" | "system";
+export type ThemeSettingsSaveState = "idle" | "saving" | "saved" | "error";
 
 export interface ThemeConfig {
   colorTheme: ColorTheme;
@@ -69,6 +70,7 @@ interface ThemeContextType {
   themeConfig: ThemeConfig;
   managedThemeSettings: ManagedThemeSettings;
   isThemeSettingsAdmin: boolean;
+  themeSettingsSaveState: ThemeSettingsSaveState;
   isThemeLoaded: boolean;
   isLoggedIn: boolean;
   statusCardsVisibility: StatusCardsVisibility;
@@ -723,6 +725,8 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [localLanguageOverride, setLocalLanguageOverride] =
     useState<string | undefined>(readInitialLanguageOverride);
   const [managedThemeSettings, setManagedThemeSettings] = useState<ManagedThemeSettings>({});
+  const [themeSettingsSaveState, setThemeSettingsSaveState] =
+    useState<ThemeSettingsSaveState>("idle");
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
   const [managedSettingsSignature, setManagedSettingsSignature] = useState(
     getManagedSettingsSignature({})
@@ -828,6 +832,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setManagedSettingsSignature(getManagedSettingsSignature(nextRaw));
     clearLocalOverrides();
     queuedSaveRef.current = nextRaw;
+    setThemeSettingsSaveState("saving");
 
     if (savingRef.current) {
       return;
@@ -835,17 +840,21 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     const run = async () => {
       savingRef.current = true;
+      let lastSaveFailed = false;
       while (queuedSaveRef.current) {
         const value = queuedSaveRef.current;
         queuedSaveRef.current = null;
 
         try {
           await updateSettings({ theme_settings: value });
+          lastSaveFailed = false;
         } catch (error) {
+          lastSaveFailed = true;
           console.warn("Failed to save theme settings:", error);
         }
       }
       savingRef.current = false;
+      setThemeSettingsSaveState(lastSaveFailed ? "error" : "saved");
     };
 
     void run();
@@ -1242,6 +1251,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       themeConfig,
       managedThemeSettings,
       isThemeSettingsAdmin: adminState === "yes",
+      themeSettingsSaveState,
       isThemeLoaded,
       isLoggedIn,
       statusCardsVisibility,
@@ -1302,6 +1312,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setStatusCardVisibility,
       setStatusDesign,
       statusCardsVisibility,
+      themeSettingsSaveState,
       themeConfig,
     ]
   );

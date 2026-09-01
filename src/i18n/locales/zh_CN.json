@@ -869,6 +869,13 @@
       "showPriceDescription": "向访客显示节点价格。",
       "title": "游客显示"
     },
+    "saveStatus": {
+      "error": "保存失败",
+      "global": "全站设置",
+      "local": "已保存到本机",
+      "saved": "已保存",
+      "saving": "保存中"
+    },
     "showRamDiskTotal": "显示总内存/磁盘",
     "showRamDiskTotalDescription": "显示内存和磁盘的已用 / 总量。",
     "statusDesign": "状态设计",
