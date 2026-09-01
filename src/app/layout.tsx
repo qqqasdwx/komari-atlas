@@ -6,8 +6,8 @@ import Footer from "@/components/Footer";
 import RemainingValueCalculator from "@/components/RemainingValueCalculator";
 
 export const metadata: Metadata = {
-  title: "Komari Monitor",
-  description: "A simple server monitor tool.",
+  title: "Komari Atlas",
+  description: "A map-first, customizable theme for Komari Monitor.",
 };
 
 export default function RootLayout({

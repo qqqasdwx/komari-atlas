@@ -55,16 +55,16 @@ const Footer = () => {
           </div>
 
           <div className="flex flex-col items-center gap-3">
-            <h4 className="text-sm font-semibold text-foreground">Powered By</h4>
+            <h4 className="text-sm font-semibold text-foreground">Theme</h4>
             <div className="flex flex-col items-center gap-2 text-center">
               <a
-                href="https://github.com/tonyliuzj/komari-next"
+                href="https://github.com/qqqasdwx/komari-atlas"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
               >
                 <Github className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                <span className="font-medium">Komari-Next</span>
+                <span className="font-medium">Komari Atlas</span>
               </a>
               <div className="flex items-center gap-1 text-xs text-muted-foreground justify-center">
                 <span>Made with</span>

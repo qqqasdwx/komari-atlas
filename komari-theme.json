@@ -1,15 +1,15 @@
 {
-    "name": "Komari Next",
-    "short": "next",
-    "description": "NextJS theme for Komari Monitor",
-    "version": "1.4.19",
-    "author": "tonyliuzj",
-    "url": "https://github.com/tonyliuzj/komari-next",
+    "name": "Komari Atlas",
+    "short": "atlas",
+    "description": "A map-first, customizable theme for Komari Monitor",
+    "version": "0.1.0",
+    "author": "qqqasdwx",
+    "url": "https://github.com/qqqasdwx/komari-atlas",
     "preview": "preview.png",
     "configuration": {
         "name": "Theme Settings",
         "icon": "Palette",
-        "description": "Komari Next theme defaults",
+        "description": "Komari Atlas theme defaults",
         "managedFields": [
             {
                 "key": "colorTheme",
