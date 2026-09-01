@@ -1,4 +1,4 @@
-name: Build and Release Assets
+name: Build Release Package
 
 on:
   release:

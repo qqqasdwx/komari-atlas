@@ -1,4 +1,4 @@
-name: i18n sync
+name: Sync Locales
 
 on:
   workflow_dispatch: {}
