@@ -152,10 +152,10 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const secondaryColor = colors[1];
   const cn = "instance-chart-card w-full max-w-full md:max-w-72 md:min-w-72 flex flex-col h-full gap-4";
   const chartMargin = {
-    top: 0,
-    right: 32,
-    bottom: 0,
-    left: 32,
+    top: 4,
+    right: 8,
+    bottom: 4,
+    left: 0,
   };
   const live_data = all_live_data?.data?.data[uuid ?? ""];
   const timeFormatter = (value: any, index: number) => {
@@ -193,6 +193,9 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   };
   const percentageFormatter = (value: number) => {
     return `${value.toFixed(2)}%`;
+  };
+  const bytesAxisFormatter = (value: number) => {
+    return formatBytes(value).replace(" ", "\u00a0");
   };
 
   const ChartTitle = (text: string, rightText: React.ReactNode) => {
@@ -285,6 +288,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
@@ -297,8 +301,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                 }
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -369,6 +373,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
@@ -381,8 +386,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                 }
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -459,6 +464,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
@@ -466,13 +472,11 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                 tickLine={false}
                 axisLine={false}
                 domain={[0, node?.disk_total && node.disk_total > 0 ? node.disk_total : 100]}
-                tickFormatter={(value) =>
-                  `${formatBytes(value)}`
-                }
+                tickFormatter={bytesAxisFormatter}
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -529,19 +533,18 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
               <YAxis
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) =>
-                  `${formatBytes(value)}`
-                }
+                tickFormatter={bytesAxisFormatter}
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -600,6 +603,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
@@ -611,8 +615,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                 }
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -660,6 +664,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval={0}
               />
@@ -672,8 +677,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                 }
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
@@ -776,6 +781,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                   <XAxis
                     dataKey="time"
                     tickLine={false}
+                    tickMargin={8}
                     tickFormatter={timeFormatter}
                     interval={0}
                   />
@@ -788,8 +794,8 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
                     }
                     orientation="left"
                     type="number"
-                    tick={{ dx: -10 }}
-                    mirror={true}
+                    tickMargin={8}
+                    width={80}
                   />
                   <ChartTooltip
                     cursor={false}

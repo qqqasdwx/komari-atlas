@@ -524,11 +524,12 @@ const PingChart = ({ uuid }: { uuid: string }) => {
             <LineChart
               data={chartData}
               accessibilityLayer
-              margin={{ top: 0, right: 32, bottom: 0, left: 32 }}>
+              margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="time"
                 tickLine={false}
+                tickMargin={8}
                 tickFormatter={timeFormatter}
                 interval="preserveStartEnd"
                 minTickGap={30}
@@ -541,8 +542,8 @@ const PingChart = ({ uuid }: { uuid: string }) => {
                 allowDecimals={false}
                 orientation="left"
                 type="number"
-                tick={{ dx: -10 }}
-                mirror={true}
+                tickMargin={8}
+                width={80}
               />
               <ChartTooltip
                 cursor={false}
