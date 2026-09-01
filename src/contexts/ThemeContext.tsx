@@ -13,6 +13,7 @@ import React, {
 import { useTheme as useNextTheme } from "next-themes";
 import { updateSettings } from "@/lib/api";
 import i18n, { detectClientLanguage, normalizeLanguage } from "@/i18n/config";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export type ColorTheme = "default" | "ocean" | "sunset" | "forest" | "midnight" | "rose";
 export type CardLayout = "classic" | "modern" | "minimal" | "detailed" | "compact";
@@ -101,17 +102,14 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const LEGACY_THEME_STORAGE_KEY = "komari-theme-config";
-const THEME_OVERRIDES_STORAGE_KEY = "komari-theme-config-overrides";
-const STATUS_CARDS_STORAGE_KEY = "statusCardsVisibility";
+const THEME_OVERRIDES_STORAGE_KEY = STORAGE_KEYS.themeOverrides;
+const STATUS_CARDS_STORAGE_KEY = STORAGE_KEYS.statusCardsVisibility;
 const STATUS_CARDS_CHANGE_EVENT = "statusCardsVisibilityChange";
-const NODE_VIEW_STORAGE_KEY = "nodeViewMode";
+const NODE_VIEW_STORAGE_KEY = STORAGE_KEYS.nodeViewMode;
 const NODE_VIEW_CHANGE_EVENT = "nodeViewModeChange";
-const APPEARANCE_STORAGE_KEY = "komari-appearance";
-const NEXT_THEMES_STORAGE_KEY = "theme";
-const LANGUAGE_STORAGE_KEY = "komari-language";
-const I18NEXT_STORAGE_KEY = "i18nextLng";
-const LOCAL_OVERRIDE_BASE_SIGNATURE_KEY = "komari-theme-local-override-base";
+const APPEARANCE_STORAGE_KEY = STORAGE_KEYS.appearance;
+const LANGUAGE_STORAGE_KEY = STORAGE_KEYS.language;
+const LOCAL_OVERRIDE_BASE_SIGNATURE_KEY = STORAGE_KEYS.localOverrideBaseSignature;
 
 const COLOR_THEMES: ColorTheme[] = ["default", "ocean", "sunset", "forest", "midnight", "rose"];
 const CARD_LAYOUTS: CardLayout[] = ["classic", "modern", "minimal", "detailed", "compact"];
@@ -245,18 +243,8 @@ function writeStringStorage(key: string, value: string) {
   window.localStorage.setItem(key, value);
 }
 
-function clearI18nLanguageCache() {
-  removeStorage(I18NEXT_STORAGE_KEY);
-
-  if (typeof document !== "undefined") {
-    document.cookie = "i18next=; Max-Age=0; path=/";
-  }
-}
-
 function writeThemeOverrides(value: Partial<ThemeConfig>) {
   writeJsonStorage(THEME_OVERRIDES_STORAGE_KEY, value);
-
-  removeStorage(LEGACY_THEME_STORAGE_KEY);
 }
 
 function parseThemeSettings(input: unknown): Record<string, unknown> {
@@ -605,26 +593,8 @@ function normalizeManagedThemeSettings(input: unknown): ManagedThemeSettings {
   return result;
 }
 
-function extractLegacyThemeOverrides(input: unknown): Partial<ThemeConfig> {
-  const config = normalizeThemeConfigOverrides(input);
-  const result: Partial<ThemeConfig> = {};
-
-  (Object.keys(config) as Array<keyof ThemeConfig>).forEach((key) => {
-    if (config[key] !== DEFAULT_THEME_CONFIG[key]) {
-      result[key] = config[key] as never;
-    }
-  });
-
-  return result;
-}
-
 function readInitialThemeOverrides(): Partial<ThemeConfig> {
-  const current = normalizeThemeConfigOverrides(readJsonStorage(THEME_OVERRIDES_STORAGE_KEY));
-  if (Object.keys(current).length > 0) {
-    return current;
-  }
-
-  return extractLegacyThemeOverrides(readJsonStorage(LEGACY_THEME_STORAGE_KEY));
+  return normalizeThemeConfigOverrides(readJsonStorage(THEME_OVERRIDES_STORAGE_KEY));
 }
 
 function readInitialStatusCardsOverrides(): Partial<StatusCardsVisibility> {
@@ -646,7 +616,6 @@ function readInitialLanguageOverride(): string | undefined {
 function hasLocalOverrides() {
   return (
     Object.keys(normalizeThemeConfigOverrides(readJsonStorage(THEME_OVERRIDES_STORAGE_KEY))).length > 0 ||
-    Object.keys(extractLegacyThemeOverrides(readJsonStorage(LEGACY_THEME_STORAGE_KEY))).length > 0 ||
     Object.keys(normalizeStatusCardsVisibilityOverrides(readJsonStorage(STATUS_CARDS_STORAGE_KEY))).length > 0 ||
     readInitialNodeViewOverride() !== undefined ||
     readInitialAppearanceOverride() !== undefined ||
@@ -833,9 +802,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     writeJsonStorage(STATUS_CARDS_STORAGE_KEY, {});
     writeJsonStorage(NODE_VIEW_STORAGE_KEY, undefined);
     removeStorage(APPEARANCE_STORAGE_KEY);
-    removeStorage(NEXT_THEMES_STORAGE_KEY);
     removeStorage(LANGUAGE_STORAGE_KEY);
-    clearI18nLanguageCache();
     removeStorage(LOCAL_OVERRIDE_BASE_SIGNATURE_KEY);
   }, []);
 

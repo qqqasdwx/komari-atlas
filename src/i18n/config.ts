@@ -1,6 +1,6 @@
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
-import LanguageDetector from "i18next-browser-languagedetector";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import en from "./locales/en.json";
 import zh_CN from "./locales/zh_CN.json";
 import zh_TW from "./locales/zh_TW.json";
@@ -83,35 +83,24 @@ export function detectClientLanguage(): string {
   }
 
   const queryLanguage = new URLSearchParams(window.location.search).get("lng");
-  const [managedOverrideLanguage, localStorageLanguage] = (() => {
+  const storedLanguage = (() => {
     try {
-      return [
-        window.localStorage?.getItem("komari-language") || null,
-        window.localStorage?.getItem("i18nextLng") || null,
-      ];
+      return window.localStorage?.getItem(STORAGE_KEYS.language) || null;
     } catch {
-      return [null, null];
+      return null;
     }
   })();
-  const cookieLanguage = document.cookie
-    .split("; ")
-    .find((item) => item.startsWith("i18next="))
-    ?.split("=")[1];
   const navigatorLanguage = window.navigator.languages?.[0] || window.navigator.language;
 
   return (
     normalizeLanguage(queryLanguage) ||
-    normalizeLanguage(managedOverrideLanguage) ||
-    // "auto" should follow the browser, not i18next's previous fallback cache.
+    normalizeLanguage(storedLanguage) ||
     normalizeLanguage(navigatorLanguage) ||
-    normalizeLanguage(localStorageLanguage) ||
-    normalizeLanguage(cookieLanguage) ||
     "en"
   );
 }
 
 i18next
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
@@ -121,11 +110,6 @@ i18next
     load: "currentOnly",
     interpolation: {
       escapeValue: false, // React handles XSS
-    },
-    detection: {
-      order: ["querystring", "localStorage", "cookie", "navigator", "htmlTag"],
-      // ThemeContext persists explicit local choices in komari-language.
-      caches: [],
     },
   });
 

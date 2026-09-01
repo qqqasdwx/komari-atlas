@@ -1,3 +1,5 @@
+import { STORAGE_KEYS } from "@/lib/storageKeys";
+
 export type RateMap = Record<string, number>;
 
 export type CachedRates = {
@@ -28,7 +30,7 @@ type FrankfurterRateRow = {
   rate: number;
 };
 
-const CACHE_KEY = "remainingValueRatesCacheV1";
+const CACHE_KEY = STORAGE_KEYS.exchangeRates;
 const CACHE_TTL_MS = 60 * 60 * 1000;
 const API_BASE = "https://api.frankfurter.dev/v2/rates";
 const PROVIDER = "frankfurter" as const;

@@ -14,6 +14,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import { cn } from "@/lib/utils";
 
 interface NodeDisplayProps {
@@ -26,7 +27,7 @@ const NodeDisplay: React.FC<NodeDisplayProps> = ({ nodes, liveData }) => {
   const [viewMode, setViewMode] = useNodeViewMode();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGroup, setSelectedGroup] = useLocalStorage<string>(
-    "nodeSelectedGroup",
+    STORAGE_KEYS.nodeSelectedGroup,
     "all"
   );
   const searchRef = useRef<HTMLInputElement>(null);

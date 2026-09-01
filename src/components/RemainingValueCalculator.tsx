@@ -25,6 +25,7 @@ import { useMounted } from "@/hooks/useMounted";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { type LoadedRates, convertAmount, loadRates } from "@/lib/exchangeRates";
 import { OPEN_REMAINING_VALUE_CALCULATOR_EVENT } from "@/lib/remainingValueEvents";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
 import {
   buildRemainingValueSnapshot,
   type RemainingValueNode,
@@ -200,7 +201,7 @@ export default function RemainingValueCalculator() {
   const { guestDisplay } = useTheme();
   const [open, setOpen] = useState(false);
   const [displayCurrency, setDisplayCurrency] =
-    useLocalStorage<DisplayCurrency>("remainingValueDisplayCurrency", "USD");
+    useLocalStorage<DisplayCurrency>(STORAGE_KEYS.remainingValueDisplayCurrency, "USD");
   const [detailFilter, setDetailFilter] = useState<DetailFilter>("all");
   const [ratesState, setRatesState] = useState<LoadedRates | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
