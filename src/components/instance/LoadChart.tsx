@@ -150,7 +150,7 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const colors = ["#F38181", "#FCE38A", "#EAFFD0", "#95E1D3"];
   const primaryColor = colors[0];
   const secondaryColor = colors[1];
-  const cn = "w-full max-w-full md:max-w-72 md:min-w-72 flex flex-col h-full gap-4";
+  const cn = "instance-chart-card w-full max-w-full md:max-w-72 md:min-w-72 flex flex-col h-full gap-4";
   const chartMargin = {
     top: 0,
     right: 32,

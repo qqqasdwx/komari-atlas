@@ -152,10 +152,19 @@
 }
 
 body[data-custom-background="true"] {
+  --komari-chart-contrast-foreground: oklch(0.16 0 0);
+  --komari-chart-contrast-outline: oklch(1 0 0 / 92%);
+  --komari-chart-contrast-grid: oklch(0.16 0 0 / 48%);
   position: relative;
   z-index: 0;
   isolation: isolate;
   background-image: none !important;
+}
+
+.dark body[data-custom-background="true"] {
+  --komari-chart-contrast-foreground: oklch(0.98 0 0);
+  --komari-chart-contrast-outline: oklch(0.08 0 0 / 92%);
+  --komari-chart-contrast-grid: oklch(0.98 0 0 / 48%);
 }
 
 body[data-custom-background="true"]::before {
@@ -187,6 +196,36 @@ body[data-custom-background="true"]::after {
 
 .dark body[data-custom-background="true"]::after {
   background-color: black;
+}
+
+body[data-custom-background="true"] .instance-chart-card {
+  color: var(--komari-chart-contrast-foreground);
+  text-shadow:
+    -1px 0 var(--komari-chart-contrast-outline),
+    0 1px var(--komari-chart-contrast-outline),
+    1px 0 var(--komari-chart-contrast-outline),
+    0 -1px var(--komari-chart-contrast-outline);
+}
+
+body[data-custom-background="true"] .instance-chart-card :is(
+  .text-foreground,
+  .text-card-foreground,
+  .text-muted-foreground
+) {
+  color: var(--komari-chart-contrast-foreground);
+}
+
+body[data-custom-background="true"] .instance-chart-card .recharts-cartesian-axis-tick text {
+  fill: var(--komari-chart-contrast-foreground) !important;
+  stroke: var(--komari-chart-contrast-outline);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
+}
+
+body[data-custom-background="true"] .instance-chart-card .recharts-cartesian-grid line {
+  filter: drop-shadow(0 0 1px var(--komari-chart-contrast-outline));
+  stroke: var(--komari-chart-contrast-grid) !important;
 }
 
 body[data-card-blur="true"] :is(
