@@ -153,9 +153,9 @@ const LoadChart = ({ uuid, data = [] }: LoadChartProps) => {
   const cn = "w-full max-w-full md:max-w-72 md:min-w-72 flex flex-col h-full gap-4";
   const chartMargin = {
     top: 0,
-    right: 16,
+    right: 32,
     bottom: 0,
-    left: 16,
+    left: 32,
   };
   const live_data = all_live_data?.data?.data[uuid ?? ""];
   const timeFormatter = (value: any, index: number) => {

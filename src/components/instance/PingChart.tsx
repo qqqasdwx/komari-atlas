@@ -524,7 +524,7 @@ const PingChart = ({ uuid }: { uuid: string }) => {
             <LineChart
               data={chartData}
               accessibilityLayer
-              margin={{ top: 0, right: 16, bottom: 0, left: 16 }}>
+              margin={{ top: 0, right: 32, bottom: 0, left: 32 }}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="time"
