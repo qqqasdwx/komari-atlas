@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Cable, CalendarDays, Radio } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
@@ -212,29 +212,22 @@ export function NodeCard({
               />
             </div>
 
-            <section className="grid grid-cols-2 gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-xs">
-              <div>
+            <section className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,.7fr)_minmax(0,.7fr)] gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-[11px]">
+              <div className="min-w-0">
                 <div className="flex items-center gap-1 text-muted-foreground"><ArrowUp className="h-3 w-3" />{t("atlas.metrics.upload")}</div>
-                <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.up)}/s` : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{live ? `${formatBytes(live.network.up)}/s` : "--"}</div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1 text-muted-foreground"><ArrowDown className="h-3 w-3" />{t("atlas.metrics.download")}</div>
-                <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
               </div>
-              <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/45 pt-2">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Cable className="h-3 w-3" />
-                  {t("atlas.metrics.connections")}
-                </div>
-                <div className="flex items-center gap-2 font-medium tabular-nums">
-                  {live ? (
-                    <>
-                      <span>TCP {live.connections.tcp}</span>
-                      <span className="text-muted-foreground">/</span>
-                      <span>UDP {live.connections.udp}</span>
-                    </>
-                  ) : "--"}
-                </div>
+              <div className="min-w-0">
+                <div className="text-muted-foreground">TCP</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{live ? live.connections.tcp : "--"}</div>
+              </div>
+              <div className="min-w-0">
+                <div className="text-muted-foreground">UDP</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{live ? live.connections.udp : "--"}</div>
               </div>
             </section>
 
