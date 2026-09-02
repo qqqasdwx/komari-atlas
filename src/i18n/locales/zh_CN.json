@@ -48,6 +48,8 @@
       "loadingHistory": "正在加载历史指标",
       "memoryTotal": "内存容量",
       "monthDay": "每月 {{day}} 日",
+      "movePingTaskDown": "下移 Ping 任务",
+      "movePingTaskUp": "上移 Ping 任务",
       "nav": {
         "assets": "资产",
         "charts": "图表",

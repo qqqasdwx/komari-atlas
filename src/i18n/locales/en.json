@@ -48,6 +48,8 @@
       "loadingHistory": "Loading historical metrics",
       "memoryTotal": "Memory capacity",
       "monthDay": "Day {{day}} of each month",
+      "movePingTaskDown": "Move Ping task down",
+      "movePingTaskUp": "Move Ping task up",
       "nav": {
         "assets": "Assets",
         "charts": "Charts",

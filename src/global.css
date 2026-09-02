@@ -195,26 +195,6 @@
   backdrop-filter: blur(18px) saturate(115%);
 }
 
-.atlas-metric-ring {
-  display: grid;
-  width: 3.5rem;
-  height: 3.5rem;
-  flex: 0 0 3.5rem;
-  place-items: center;
-  border-radius: 50%;
-  background: conic-gradient(currentColor var(--metric-value), color-mix(in srgb, currentColor 13%, transparent) 0);
-}
-
-.atlas-metric-ring__center {
-  display: grid;
-  width: 2.8rem;
-  height: 2.8rem;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--foreground);
-  background: var(--atlas-panel-strong);
-}
-
 .atlas-login-shell,
 .atlas-state-screen {
   position: relative;

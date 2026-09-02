@@ -53,10 +53,10 @@ describe("resolveCardPingTaskIds", () => {
 
   it("uses the saved selection and excludes tasks unavailable to the node", () => {
     expect(resolveCardPingTaskIds(
-      { cardPingTaskIds: [7, 9] },
+      { cardPingTaskIds: [7, 3, 9] },
       tasks,
       "node-a",
-    )).toEqual([7]);
+    )).toEqual([7, 3]);
     expect(resolveCardPingTaskIds({ cardPingTaskIds: [] }, tasks, "node-a")).toEqual([]);
   });
 });

@@ -127,11 +127,32 @@ export function NodeDetail({ uuid }: { uuid: string }) {
     uuid,
   );
   const nodeSettings = persistedNodeSettings || { cardPingTaskIds: selectedPingTaskIds };
+  const selectedPingTaskIdSet = new Set(selectedPingTaskIds);
+  const availablePingTasksById = new Map(availablePingTasks.map((task) => [task.id, task]));
+  const orderedAvailablePingTasks = [
+    ...selectedPingTaskIds.flatMap((taskId) => {
+      const task = availablePingTasksById.get(taskId);
+      return task ? [task] : [];
+    }),
+    ...availablePingTasks.filter((task) => !selectedPingTaskIdSet.has(task.id)),
+  ];
   const traffic = trafficByNode[uuid] || { status: "loading" as const };
   const cpu = live?.cpu.usage ?? 0;
   const ramPercent = live ? percentage(live.ram.used, node.mem_total) : 0;
   const diskPercent = live ? percentage(live.disk.used, node.disk_total) : 0;
   const remaining = buildRemainingValueSnapshot([node]).active[0];
+  const movePingTask = (taskId: number, offset: -1 | 1) => {
+    const currentIndex = selectedPingTaskIds.indexOf(taskId);
+    const targetIndex = currentIndex + offset;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= selectedPingTaskIds.length) return;
+
+    const reorderedIds = [...selectedPingTaskIds];
+    [reorderedIds[currentIndex], reorderedIds[targetIndex]] = [
+      reorderedIds[targetIndex],
+      reorderedIds[currentIndex],
+    ];
+    updateNodeSettings(uuid, { cardPingTaskIds: reorderedIds });
+  };
   const sections = [
     ["live", t("atlas.detail.nav.live")],
     ["hardware", t("atlas.detail.nav.hardware")],
@@ -335,20 +356,51 @@ export function NodeDetail({ uuid }: { uuid: string }) {
               <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {availablePingTasks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</p>
-                ) : availablePingTasks.map((task) => {
+                ) : orderedAvailablePingTasks.map((task) => {
                   const checked = selectedPingTaskIds.includes(task.id);
+                  const selectedIndex = selectedPingTaskIds.indexOf(task.id);
                   return (
-                    <label key={task.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-border/60 bg-background/25 px-3 py-2 text-sm">
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
-                          cardPingTaskIds: nextChecked
-                            ? [...selectedPingTaskIds, task.id]
-                            : selectedPingTaskIds.filter((id) => id !== task.id),
-                        })}
-                      />
-                      <span className="min-w-0 truncate">{task.name}</span>
-                    </label>
+                    <div key={task.id} className="flex min-h-11 items-center gap-1 rounded-md border border-border/60 bg-background/25 px-2 py-1.5 text-sm">
+                      <label className="flex min-w-0 cursor-pointer items-center gap-3 px-1 py-1">
+                        <Checkbox
+                          checked={checked}
+                          onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
+                            cardPingTaskIds: nextChecked
+                              ? [...selectedPingTaskIds, task.id]
+                              : selectedPingTaskIds.filter((id) => id !== task.id),
+                          })}
+                        />
+                        <span className="min-w-0 truncate">{task.name}</span>
+                      </label>
+                      {checked && (
+                        <div className="flex shrink-0 items-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            disabled={selectedIndex === 0}
+                            onClick={() => movePingTask(task.id, -1)}
+                            title={t("atlas.detail.movePingTaskUp")}
+                          >
+                            <ArrowUp className="h-3.5 w-3.5" />
+                            <span className="sr-only">{t("atlas.detail.movePingTaskUp")}</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            disabled={selectedIndex === selectedPingTaskIds.length - 1}
+                            onClick={() => movePingTask(task.id, 1)}
+                            title={t("atlas.detail.movePingTaskDown")}
+                          >
+                            <ArrowDown className="h-3.5 w-3.5" />
+                            <span className="sr-only">{t("atlas.detail.movePingTaskDown")}</span>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>

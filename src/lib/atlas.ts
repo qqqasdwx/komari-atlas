@@ -81,8 +81,8 @@ export function resolveCardPingTaskIds(
 
   if (!nodeSettings) return availableIds;
 
-  const selectedIds = new Set(nodeSettings.cardPingTaskIds);
-  return availableIds.filter((taskId) => selectedIds.has(taskId));
+  const availableIdSet = new Set(availableIds);
+  return nodeSettings.cardPingTaskIds.filter((taskId) => availableIdSet.has(taskId));
 }
 
 function daysInMonth(year: number, monthIndex: number): number {
