@@ -171,153 +171,160 @@ export function NodeCard({
           </span>
         </div>
 
-        <div className="space-y-4 p-4">
-          <div className="space-y-3">
-            <ResourceBar label="CPU" value={cpu} tone={cpuTone} />
-            <ResourceBar
-              label={t("atlas.metrics.memory")}
-              value={ram}
-              tone={ramTone}
-              detail={`${live ? formatBytes(live.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
-            />
-            <ResourceBar
-              label={t("atlas.metrics.disk")}
-              value={disk}
-              tone={diskTone}
-              detail={`${live ? formatBytes(live.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
-            />
-            <ResourceBar
-              label={t("atlas.metrics.swap")}
-              value={swap}
-              tone={swapTone}
-              detail={`${live ? formatBytes(live.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
-            />
-          </div>
-
-          <section className="grid grid-cols-2 gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-xs">
-            <div>
-              <div className="flex items-center gap-1 text-muted-foreground"><ArrowUp className="h-3 w-3" />{t("atlas.metrics.upload")}</div>
-              <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.up)}/s` : "--"}</div>
+        <div className="atlas-node-card-body grid gap-4 p-4 sm:grid-cols-2 sm:gap-0">
+          <div className="space-y-4 sm:pr-4">
+            <div className="space-y-3">
+              <ResourceBar label="CPU" value={cpu} tone={cpuTone} />
+              <ResourceBar
+                label={t("atlas.metrics.memory")}
+                value={ram}
+                tone={ramTone}
+                detail={`${live ? formatBytes(live.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
+              />
+              <ResourceBar
+                label={t("atlas.metrics.disk")}
+                value={disk}
+                tone={diskTone}
+                detail={`${live ? formatBytes(live.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
+              />
+              <ResourceBar
+                label={t("atlas.metrics.swap")}
+                value={swap}
+                tone={swapTone}
+                detail={`${live ? formatBytes(live.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
+              />
             </div>
-            <div>
-              <div className="flex items-center gap-1 text-muted-foreground"><ArrowDown className="h-3 w-3" />{t("atlas.metrics.download")}</div>
-              <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
-            </div>
-          </section>
 
-          <section className="space-y-1.5">
-            <div className="flex items-start justify-between gap-2 text-xs">
-              <span className="text-muted-foreground">
-                {t("atlas.traffic.billingUsage")}
-                {trafficResetDay && (
-                  <span className="mt-0.5 block text-[10px]">
-                    {t("atlas.traffic.resetOnDay", { day: trafficResetDay })}
+            <section className="grid grid-cols-2 gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-xs">
+              <div>
+                <div className="flex items-center gap-1 text-muted-foreground"><ArrowUp className="h-3 w-3" />{t("atlas.metrics.upload")}</div>
+                <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.up)}/s` : "--"}</div>
+              </div>
+              <div>
+                <div className="flex items-center gap-1 text-muted-foreground"><ArrowDown className="h-3 w-3" />{t("atlas.metrics.download")}</div>
+                <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
+              </div>
+            </section>
+
+            <section className="space-y-1.5">
+              <div className="flex items-start justify-between gap-2 text-xs">
+                <span className="text-muted-foreground">
+                  {t("atlas.traffic.billingUsage")}
+                  {trafficResetDay && (
+                    <span className="mt-0.5 block text-[10px]">
+                      {t("atlas.traffic.resetOnDay", { day: trafficResetDay })}
+                    </span>
+                  )}
+                </span>
+                {traffic.status === "ready" && (
+                  <span className={cn("font-medium tabular-nums", toneClass[trafficTone])}>
+                    {formatBytes(traffic.used)}{node.traffic_limit > 0 ? ` / ${formatBytes(node.traffic_limit)}` : " / ∞"}
                   </span>
                 )}
-              </span>
-              {traffic.status === "ready" && (
-                <span className={cn("font-medium tabular-nums", toneClass[trafficTone])}>
-                  {formatBytes(traffic.used)}{node.traffic_limit > 0 ? ` / ${formatBytes(node.traffic_limit)}` : " / ∞"}
-                </span>
+              </div>
+              {traffic.status === "ready" ? (
+                <>
+                  {node.traffic_limit > 0 && <MetricBar value={trafficPercent} tone={trafficTone} />}
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>↑ {formatBytes(traffic.up)}</span>
+                    <span>↓ {formatBytes(traffic.down)}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-md border border-dashed px-2 py-1.5 text-[11px] text-muted-foreground">
+                  {traffic.status === "loading"
+                    ? t("atlas.loading")
+                    : traffic.status === "unconfigured"
+                      ? t("atlas.traffic.unconfigured")
+                      : t("atlas.unavailable")}
+                </div>
               )}
-            </div>
-            {traffic.status === "ready" ? (
-              <>
-                {node.traffic_limit > 0 && <MetricBar value={trafficPercent} tone={trafficTone} />}
-                <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>↑ {formatBytes(traffic.up)}</span>
-                  <span>↓ {formatBytes(traffic.down)}</span>
-                </div>
-              </>
-            ) : (
-              <div className="rounded-md border border-dashed px-2 py-1.5 text-[11px] text-muted-foreground">
-                {traffic.status === "loading"
-                  ? t("atlas.loading")
-                  : traffic.status === "unconfigured"
-                    ? t("atlas.traffic.unconfigured")
-                    : t("atlas.unavailable")}
-              </div>
-            )}
-          </section>
-
-          {selectedPing.length > 0 && (
-            <section className="space-y-3 border-t border-border/50 pt-3">
-              {selectedPing.map(({ taskId, name, history }, index) => (
-                <div key={taskId} className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-3 text-xs">
-                    <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
-                      <span className="flex min-w-0 items-center gap-1.5">
-                        <Radio className="h-3 w-3 shrink-0" />
-                        <span className="truncate">{name}</span>
-                      </span>
-                      <div className="relative z-30 flex shrink-0 items-center">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5 rounded-sm"
-                          disabled={index === 0}
-                          onClick={() => movePingTask(taskId, -1)}
-                          title={t("atlas.detail.movePingTaskUp")}
-                        >
-                          <ArrowUp className="h-3 w-3" />
-                          <span className="sr-only">{t("atlas.detail.movePingTaskUp")}</span>
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-5 w-5 rounded-sm"
-                          disabled={index === selectedPing.length - 1}
-                          onClick={() => movePingTask(taskId, 1)}
-                          title={t("atlas.detail.movePingTaskDown")}
-                        >
-                          <ArrowDown className="h-3 w-3" />
-                          <span className="sr-only">{t("atlas.detail.movePingTaskDown")}</span>
-                        </Button>
-                      </div>
-                    </div>
-                    <span className="shrink-0 text-[10px] text-muted-foreground">
-                      {t("atlas.ping.window24h")}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <PingHistoryStrip
-                      label={t("atlas.ping.latency")}
-                      buckets={history?.buckets}
-                      metric="latency"
-                    />
-                    <PingHistoryStrip
-                      label={t("atlas.ping.loss")}
-                      buckets={history?.buckets}
-                      metric="loss"
-                    />
-                  </div>
-                </div>
-              ))}
             </section>
-          )}
+          </div>
 
-          <div
-            className="grid grid-cols-2 gap-3 border-t border-border/50 pt-3 text-[11px]"
-            title={ratesUnavailable && assetValue?.remainingValue == null
-              ? t("remainingValue.errorRatesUnavailable")
-              : undefined}
-          >
-            <div className="min-w-0">
-              <div className="text-muted-foreground">{t("remainingValue.monthlyCost")}</div>
-              <div className="mt-0.5 truncate font-medium tabular-nums">{monthlyCost}</div>
-            </div>
-            <div className="min-w-0 text-right">
-              <div className="text-muted-foreground">{t("atlas.detail.remainingValue")}</div>
-              <div className="mt-0.5 truncate font-medium tabular-nums">{remainingValue}</div>
-            </div>
-            <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/40 pt-2.5">
-              <div className="flex items-center gap-1.5 text-muted-foreground">
-                <CalendarDays className="h-3 w-3" />
-                {t("atlas.detail.expiry")}
+          <div className="space-y-4 border-t border-border/50 pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+            {selectedPing.length > 0 && (
+              <section className="space-y-3">
+                {selectedPing.map(({ taskId, name, history }, index) => (
+                  <div key={taskId} className="space-y-1.5">
+                    <div className="flex items-center justify-between gap-3 text-xs">
+                      <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <Radio className="h-3 w-3 shrink-0" />
+                          <span className="truncate">{name}</span>
+                        </span>
+                        <div className="relative z-30 flex shrink-0 items-center">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 rounded-sm"
+                            disabled={index === 0}
+                            onClick={() => movePingTask(taskId, -1)}
+                            title={t("atlas.detail.movePingTaskUp")}
+                          >
+                            <ArrowUp className="h-3 w-3" />
+                            <span className="sr-only">{t("atlas.detail.movePingTaskUp")}</span>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 rounded-sm"
+                            disabled={index === selectedPing.length - 1}
+                            onClick={() => movePingTask(taskId, 1)}
+                            title={t("atlas.detail.movePingTaskDown")}
+                          >
+                            <ArrowDown className="h-3 w-3" />
+                            <span className="sr-only">{t("atlas.detail.movePingTaskDown")}</span>
+                          </Button>
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">
+                        {t("atlas.ping.window24h")}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <PingHistoryStrip
+                        label={t("atlas.ping.latency")}
+                        buckets={history?.buckets}
+                        metric="latency"
+                      />
+                      <PingHistoryStrip
+                        label={t("atlas.ping.loss")}
+                        buckets={history?.buckets}
+                        metric="loss"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </section>
+            )}
+
+            <div
+              className={cn(
+                "grid grid-cols-2 gap-3 text-[11px]",
+                selectedPing.length > 0 && "border-t border-border/50 pt-3",
+              )}
+              title={ratesUnavailable && assetValue?.remainingValue == null
+                ? t("remainingValue.errorRatesUnavailable")
+                : undefined}
+            >
+              <div className="min-w-0">
+                <div className="text-muted-foreground">{t("remainingValue.monthlyCost")}</div>
+                <div className="mt-0.5 truncate font-medium tabular-nums">{monthlyCost}</div>
               </div>
-              <div className="font-medium tabular-nums">{expiryDate}</div>
+              <div className="min-w-0 text-right">
+                <div className="text-muted-foreground">{t("atlas.detail.remainingValue")}</div>
+                <div className="mt-0.5 truncate font-medium tabular-nums">{remainingValue}</div>
+              </div>
+              <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/40 pt-2.5">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <CalendarDays className="h-3 w-3" />
+                  {t("atlas.detail.expiry")}
+                </div>
+                <div className="font-medium tabular-nums">{expiryDate}</div>
+              </div>
             </div>
           </div>
         </div>
