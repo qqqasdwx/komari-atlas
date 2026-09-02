@@ -55,6 +55,7 @@
         "charts": "图表",
         "hardware": "硬件",
         "live": "实时",
+        "overview": "概览",
         "ping": "Ping",
         "settings": "设置",
         "traffic": "流量"
@@ -147,6 +148,7 @@
     },
     "traffic": {
       "billingUsage": "本周期流量",
+      "resetOnDay": "每月 {{day}} 日重置",
       "unconfigured": "请在节点设置中配置重置日或到期日"
     },
     "unavailable": "暂不可用",

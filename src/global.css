@@ -257,7 +257,7 @@
   padding-block: 0.45rem;
 }
 
-.atlas-detail-nav-link,
+.atlas-detail-tab,
 .atlas-range-button {
   display: inline-flex;
   min-height: 2rem;
@@ -271,7 +271,7 @@
   transition: color 150ms ease, background-color 150ms ease;
 }
 
-.atlas-detail-nav-link:hover,
+.atlas-detail-tab:hover,
 .atlas-range-button:hover,
 .atlas-range-button.is-active {
   color: var(--foreground);
@@ -281,6 +281,12 @@
 .atlas-range-button.is-active {
   color: var(--primary-foreground);
   background: var(--primary);
+}
+
+.atlas-detail-tab[data-state="active"] {
+  color: var(--primary-foreground);
+  background: var(--primary);
+  box-shadow: none;
 }
 
 .atlas-status-badge {
@@ -424,10 +430,6 @@
   .atlas-detail-nav > div {
     display: block;
     overflow-x: auto;
-  }
-
-  .atlas-detail-nav > div > div:last-child {
-    margin-top: 0.3rem;
   }
 
   .atlas-section-heading {

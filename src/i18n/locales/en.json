@@ -55,6 +55,7 @@
         "charts": "Charts",
         "hardware": "Hardware",
         "live": "Live",
+        "overview": "Overview",
         "ping": "Ping",
         "settings": "Settings",
         "traffic": "Traffic"
@@ -147,6 +148,7 @@
     },
     "traffic": {
       "billingUsage": "Billing-period traffic",
+      "resetOnDay": "Resets monthly on day {{day}}",
       "unconfigured": "Set a reset day or expiry date in node settings"
     },
     "unavailable": "Unavailable",

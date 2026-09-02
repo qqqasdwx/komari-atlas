@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { LoginScreen } from "@/components/v2/LoginScreen";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "@/contexts/AccountContext";
+import { AssetValueProvider } from "@/contexts/AssetValueContext";
 import { AtlasSettingsProvider } from "@/contexts/AtlasSettingsContext";
 import { BillingTrafficProvider } from "@/contexts/BillingTrafficContext";
 import { CardPingHistoryProvider } from "@/contexts/CardPingHistoryContext";
@@ -79,15 +80,17 @@ function AuthenticatedProviders({ children }: { children: React.ReactNode }) {
     <RPC2Provider>
       <VersionGate>
         <NodeListProvider>
-          <LiveDataProvider>
-            <AtlasSettingsProvider>
-              <CardPingHistoryProvider>
-                <BillingTrafficProvider>
-                  {children}
-                </BillingTrafficProvider>
-              </CardPingHistoryProvider>
-            </AtlasSettingsProvider>
-          </LiveDataProvider>
+          <AssetValueProvider>
+            <LiveDataProvider>
+              <AtlasSettingsProvider>
+                <CardPingHistoryProvider>
+                  <BillingTrafficProvider>
+                    {children}
+                  </BillingTrafficProvider>
+                </CardPingHistoryProvider>
+              </AtlasSettingsProvider>
+            </LiveDataProvider>
+          </AssetValueProvider>
         </NodeListProvider>
       </VersionGate>
     </RPC2Provider>

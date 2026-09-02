@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
             process.env.NEXT_PUBLIC_API_TARGET || "http://127.0.0.1:25774";
           return [
             {
+              source: "/api/admin/settings",
+              destination: `${target}/api/admin/settings/`,
+            },
+            {
               source: "/api/:path*",
               destination: `${target}/api/:path*`,
             },

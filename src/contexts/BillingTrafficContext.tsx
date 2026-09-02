@@ -43,7 +43,7 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
     const groups = new Map<string, {
       start: Date;
       nodeIds: string[];
-      windows: Record<string, { start: Date; end: Date }>;
+      windows: Record<string, { start: Date; end: Date; resetDay: number }>;
     }>();
 
     for (const node of nodes) {
@@ -53,11 +53,15 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
         continue;
       }
 
-      nextState[node.uuid] = { status: "loading" };
+      nextState[node.uuid] = { status: "loading", resetDay: window.resetDay };
       const key = window.start.toISOString();
       const group = groups.get(key) || { start: window.start, nodeIds: [], windows: {} };
       group.nodeIds.push(node.uuid);
-      group.windows[node.uuid] = { start: window.start, end: window.end };
+      group.windows[node.uuid] = {
+        start: window.start,
+        end: window.end,
+        resetDay: window.resetDay,
+      };
       groups.set(key, group);
     }
 
@@ -120,6 +124,7 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
               up,
               down,
               used: getTrafficUsed(up, down, node.traffic_limit_type),
+              resetDay: window.resetDay,
               start: window.start.toISOString(),
               end: window.end.toISOString(),
             };
@@ -131,7 +136,11 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
         setTrafficByNode((previous) => {
           const updated = { ...previous };
           for (const uuid of group.nodeIds) {
-            updated[uuid] = { status: "error", message };
+            updated[uuid] = {
+              status: "error",
+              message,
+              resetDay: group.windows[uuid]?.resetDay,
+            };
           }
           return updated;
         });

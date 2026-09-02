@@ -111,14 +111,15 @@ export interface BillingWindow {
 }
 
 export type BillingTrafficState =
-  | { status: "loading" }
+  | { status: "loading"; resetDay?: number }
   | { status: "unconfigured" }
-  | { status: "error"; message: string }
+  | { status: "error"; message: string; resetDay?: number }
   | {
       status: "ready";
       up: number;
       down: number;
       used: number;
+      resetDay: number;
       start: string;
       end: string;
     };

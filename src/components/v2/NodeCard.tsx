@@ -1,11 +1,13 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Radio } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
 import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useAssetValues } from "@/contexts/AssetValueContext";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
 import { useCardPingHistory } from "@/contexts/CardPingHistoryContext";
@@ -16,7 +18,6 @@ import {
   type HealthTone,
 } from "@/lib/atlas";
 import { cardPingHistoryKey } from "@/lib/pingHistory";
-import { buildRemainingValueSnapshot } from "@/lib/remainingValue";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { Record as LiveRecord } from "@/types/LiveData";
@@ -77,8 +78,9 @@ export function NodeCard({
   node: NodeBasicInfo;
   live: LiveRecord | undefined;
 }) {
-  const { t } = useTranslation();
-  const { settings, pingTasks } = useAtlasSettings();
+  const { t, i18n } = useTranslation();
+  const { cnyByNode, ratesUnavailable } = useAssetValues();
+  const { settings, pingTasks, updateNodeSettings } = useAtlasSettings();
   const { trafficByNode } = useBillingTraffic();
   const { historiesByKey } = useCardPingHistory();
   const online = Boolean(live?.online);
@@ -96,13 +98,19 @@ export function NodeCard({
   const ramTone = ram === null ? "neutral" : resourceTone(ram, 75, 90);
   const swapTone = swap === null ? "neutral" : resourceTone(swap, 75, 90);
   const diskTone = disk === null ? "neutral" : resourceTone(disk, 80, 90);
-  const assetSnapshot = buildRemainingValueSnapshot([node]);
-  const assetValue = assetSnapshot.active[0] || assetSnapshot.expired[0];
-  const monthlyCost = assetValue && assetValue.billingCycle > 0
-    ? `${assetValue.currencyCode} ${assetValue.monthlyCostOriginal.toFixed(2)}`
-    : "--";
-  const remainingValue = assetValue
-    ? `${assetValue.currencyCode} ${assetValue.remainingValueOriginal.toFixed(2)}`
+  const locale = i18n.resolvedLanguage || i18n.language;
+  const assetValue = cnyByNode[node.uuid];
+  const formatCny = (value: number | null | undefined) => value == null
+    ? "--"
+    : new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: "CNY",
+        currencyDisplay: "symbol",
+      }).format(value);
+  const monthlyCost = formatCny(assetValue?.monthlyCost);
+  const remainingValue = formatCny(assetValue?.remainingValue);
+  const expiryDate = node.expired_at && Number.isFinite(new Date(node.expired_at).getTime())
+    ? new Date(node.expired_at).toLocaleDateString(locale)
     : "--";
   const selectedPingIds = resolveCardPingTaskIds(
     settings.nodes[node.uuid],
@@ -120,10 +128,28 @@ export function NodeCard({
     ? percentage(traffic.used, node.traffic_limit)
     : 0;
   const trafficTone = resourceTone(trafficPercent, 80, 95);
+  const trafficResetDay = traffic.status === "unconfigured" ? undefined : traffic.resetDay;
+  const movePingTask = (taskId: number, offset: -1 | 1) => {
+    const currentIndex = selectedPingIds.indexOf(taskId);
+    const targetIndex = currentIndex + offset;
+    if (currentIndex < 0 || targetIndex < 0 || targetIndex >= selectedPingIds.length) return;
+
+    const reorderedIds = [...selectedPingIds];
+    [reorderedIds[currentIndex], reorderedIds[targetIndex]] = [
+      reorderedIds[targetIndex],
+      reorderedIds[currentIndex],
+    ];
+    updateNodeSettings(node.uuid, { cardPingTaskIds: reorderedIds });
+  };
 
   return (
-    <SpaLink href={`/instance/${node.uuid}`} className="block h-full focus-visible:outline-none">
-      <Card className="atlas-node-card h-full overflow-hidden border-border/60 p-0 transition duration-200 hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary">
+    <Card className="atlas-node-card relative h-full overflow-hidden border-border/60 p-0 transition duration-200 hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-lg focus-within:ring-2 focus-within:ring-primary">
+      <SpaLink
+        href={`/instance/${node.uuid}`}
+        className="absolute inset-0 z-20 rounded-[inherit] focus-visible:outline-none"
+        aria-label={node.name}
+      />
+      <div>
         <div className="flex items-start justify-between gap-3 border-b border-border/55 px-4 py-3">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -180,8 +206,15 @@ export function NodeCard({
           </section>
 
           <section className="space-y-1.5">
-            <div className="flex items-center justify-between gap-2 text-xs">
-              <span className="text-muted-foreground">{t("atlas.traffic.billingUsage")}</span>
+            <div className="flex items-start justify-between gap-2 text-xs">
+              <span className="text-muted-foreground">
+                {t("atlas.traffic.billingUsage")}
+                {trafficResetDay && (
+                  <span className="mt-0.5 block text-[10px]">
+                    {t("atlas.traffic.resetOnDay", { day: trafficResetDay })}
+                  </span>
+                )}
+              </span>
               {traffic.status === "ready" && (
                 <span className={cn("font-medium tabular-nums", toneClass[trafficTone])}>
                   {formatBytes(traffic.used)}{node.traffic_limit > 0 ? ` / ${formatBytes(node.traffic_limit)}` : " / ∞"}
@@ -209,13 +242,41 @@ export function NodeCard({
 
           {selectedPing.length > 0 && (
             <section className="space-y-3 border-t border-border/50 pt-3">
-              {selectedPing.map(({ taskId, name, history }) => (
+              {selectedPing.map(({ taskId, name, history }, index) => (
                 <div key={taskId} className="space-y-1.5">
                   <div className="flex items-center justify-between gap-3 text-xs">
-                    <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
-                      <Radio className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{name}</span>
-                    </span>
+                    <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <Radio className="h-3 w-3 shrink-0" />
+                        <span className="truncate">{name}</span>
+                      </span>
+                      <div className="relative z-30 flex shrink-0 items-center">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 rounded-sm"
+                          disabled={index === 0}
+                          onClick={() => movePingTask(taskId, -1)}
+                          title={t("atlas.detail.movePingTaskUp")}
+                        >
+                          <ArrowUp className="h-3 w-3" />
+                          <span className="sr-only">{t("atlas.detail.movePingTaskUp")}</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 rounded-sm"
+                          disabled={index === selectedPing.length - 1}
+                          onClick={() => movePingTask(taskId, 1)}
+                          title={t("atlas.detail.movePingTaskDown")}
+                        >
+                          <ArrowDown className="h-3 w-3" />
+                          <span className="sr-only">{t("atlas.detail.movePingTaskDown")}</span>
+                        </Button>
+                      </div>
+                    </div>
                     <span className="shrink-0 text-[10px] text-muted-foreground">
                       {t("atlas.ping.window24h")}
                     </span>
@@ -237,7 +298,12 @@ export function NodeCard({
             </section>
           )}
 
-          <div className="grid grid-cols-2 gap-3 border-t border-border/50 pt-3 text-[11px]">
+          <div
+            className="grid grid-cols-2 gap-3 border-t border-border/50 pt-3 text-[11px]"
+            title={ratesUnavailable && assetValue?.remainingValue == null
+              ? t("remainingValue.errorRatesUnavailable")
+              : undefined}
+          >
             <div className="min-w-0">
               <div className="text-muted-foreground">{t("remainingValue.monthlyCost")}</div>
               <div className="mt-0.5 truncate font-medium tabular-nums">{monthlyCost}</div>
@@ -246,9 +312,16 @@ export function NodeCard({
               <div className="text-muted-foreground">{t("atlas.detail.remainingValue")}</div>
               <div className="mt-0.5 truncate font-medium tabular-nums">{remainingValue}</div>
             </div>
+            <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/40 pt-2.5">
+              <div className="flex items-center gap-1.5 text-muted-foreground">
+                <CalendarDays className="h-3 w-3" />
+                {t("atlas.detail.expiry")}
+              </div>
+              <div className="font-medium tabular-nums">{expiryDate}</div>
+            </div>
           </div>
         </div>
-      </Card>
-    </SpaLink>
+      </div>
+    </Card>
   );
 }
