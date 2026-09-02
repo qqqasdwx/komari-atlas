@@ -97,19 +97,52 @@ export function countryCodeFromRegion(region: string | null | undefined): string
   return countryCode ?? null;
 }
 
-export type OperatingSystemKind = "linux" | "macos" | "router" | "server" | "windows";
+export type OperatingSystemLogo =
+  | "almalinux"
+  | "alpine"
+  | "arch"
+  | "centos"
+  | "debian"
+  | "fedora"
+  | "freebsd"
+  | "gentoo"
+  | "linux"
+  | "linuxmint"
+  | "macos"
+  | "manjaro"
+  | "nixos"
+  | "opensuse"
+  | "openwrt"
+  | "proxmox"
+  | "redhat"
+  | "rocky"
+  | "server"
+  | "ubuntu"
+  | "windows";
 
-export function operatingSystemKind(os: string | null | undefined): OperatingSystemKind {
+export function operatingSystemLogo(os: string | null | undefined): OperatingSystemLogo {
   const normalized = os?.trim().toLowerCase() ?? "";
 
-  if (/openwrt|immortalwrt|pfsense|opnsense|router/.test(normalized)) return "router";
-  if (/windows|microsoft/.test(normalized)) return "windows";
+  if (/proxmox/.test(normalized)) return "proxmox";
+  if (/openwrt|immortalwrt/.test(normalized)) return "openwrt";
+  if (/ubuntu|elementary/.test(normalized)) return "ubuntu";
+  if (/debian|\bdeb\b/.test(normalized)) return "debian";
+  if (/alpine/.test(normalized)) return "alpine";
+  if (/almalinux|alma linux|\balma\b/.test(normalized)) return "almalinux";
+  if (/rocky/.test(normalized)) return "rocky";
+  if (/centos|cent os/.test(normalized)) return "centos";
+  if (/fedora/.test(normalized)) return "fedora";
+  if (/red\s?hat|rhel/.test(normalized)) return "redhat";
+  if (/opensuse|open suse|\bsuse\b/.test(normalized)) return "opensuse";
+  if (/archlinux|arch linux|\barch\b/.test(normalized)) return "arch";
+  if (/manjaro/.test(normalized)) return "manjaro";
+  if (/linux\s?mint|\bmint\b/.test(normalized)) return "linuxmint";
+  if (/gentoo/.test(normalized)) return "gentoo";
+  if (/nixos|nix os/.test(normalized)) return "nixos";
+  if (/freebsd|free bsd/.test(normalized)) return "freebsd";
   if (/mac\s?os|darwin/.test(normalized)) return "macos";
-  if (
-    /linux|ubuntu|debian|alpine|arch|centos|fedora|freebsd|gentoo|alma|rocky|red hat|rhel|suse|nixos|armbian/.test(normalized)
-  ) {
-    return "linux";
-  }
+  if (/windows|microsoft/.test(normalized)) return "windows";
+  if (/linux|armbian|astra|opencloud|euler|aliyun/.test(normalized)) return "linux";
 
   return "server";
 }

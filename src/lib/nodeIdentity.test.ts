@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { countryCodeFromRegion, operatingSystemKind } from "./nodeIdentity";
+import { countryCodeFromRegion, operatingSystemLogo } from "./nodeIdentity";
 
 describe("countryCodeFromRegion", () => {
   it("resolves ISO codes, flag emoji, and common region names", () => {
@@ -19,12 +19,14 @@ describe("countryCodeFromRegion", () => {
   });
 });
 
-describe("operatingSystemKind", () => {
-  it("maps common server systems to a stable icon family", () => {
-    expect(operatingSystemKind("Debian GNU/Linux 12")).toBe("linux");
-    expect(operatingSystemKind("Windows Server 2025")).toBe("windows");
-    expect(operatingSystemKind("macOS 15")).toBe("macos");
-    expect(operatingSystemKind("OpenWrt 24")).toBe("router");
-    expect(operatingSystemKind("Custom OS")).toBe("server");
+describe("operatingSystemLogo", () => {
+  it("identifies Linux distributions instead of only their platform", () => {
+    expect(operatingSystemLogo("Debian GNU/Linux 12")).toBe("debian");
+    expect(operatingSystemLogo("Ubuntu 24.04 LTS")).toBe("ubuntu");
+    expect(operatingSystemLogo("Alpine Linux 3.21")).toBe("alpine");
+    expect(operatingSystemLogo("Rocky Linux 9")).toBe("rocky");
+    expect(operatingSystemLogo("OpenWrt 24")).toBe("openwrt");
+    expect(operatingSystemLogo("Custom Linux")).toBe("linux");
+    expect(operatingSystemLogo("Custom OS")).toBe("server");
   });
 });

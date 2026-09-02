@@ -18,6 +18,7 @@ import {
   resourceTone,
   type HealthTone,
 } from "@/lib/atlas";
+import { resolveExpiry } from "@/lib/expiry";
 import { cardPingHistoryKey } from "@/lib/pingHistory";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
@@ -110,9 +111,17 @@ export function NodeCard({
       }).format(value);
   const monthlyCost = formatCny(assetValue?.monthlyCost);
   const remainingValue = formatCny(assetValue?.remainingValue);
-  const expiryDate = node.expired_at && Number.isFinite(new Date(node.expired_at).getTime())
-    ? new Date(node.expired_at).toLocaleDateString(locale)
-    : "--";
+  const expiry = resolveExpiry(node.expired_at);
+  const expiryDate = expiry.kind === "long-term"
+    ? t("atlas.assets.longTerm")
+    : expiry.kind === "unset"
+      ? "--"
+      : new Date(expiry.timestamp).toLocaleDateString(locale);
+  const expiryStatus = expiry.kind === "scheduled"
+    ? t("atlas.expiry.days", { count: expiry.daysRemaining })
+    : expiry.kind === "expired"
+      ? t("atlas.expiry.expired")
+      : null;
   const selectedPingIds = resolveCardPingTaskIds(
     settings.nodes[node.uuid],
     pingTasks,
@@ -346,7 +355,10 @@ export function NodeCard({
                   <CalendarDays className="h-3 w-3" />
                   {t("atlas.detail.expiry")}
                 </div>
-                <div className="font-medium tabular-nums">{expiryDate}</div>
+                <div className="flex flex-wrap justify-end gap-x-1.5 font-medium tabular-nums">
+                  <span>{expiryDate}</span>
+                  {expiryStatus && <span className="text-muted-foreground">· {expiryStatus}</span>}
+                </div>
               </div>
             </div>
           </div>

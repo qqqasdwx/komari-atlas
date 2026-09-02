@@ -43,6 +43,7 @@ import {
   resourceTone,
   type HealthTone,
 } from "@/lib/atlas";
+import { resolveExpiry } from "@/lib/expiry";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/utils/unitHelper";
 
@@ -182,6 +183,16 @@ export function NodeDetail({ uuid }: { uuid: string }) {
         currency: "CNY",
         currencyDisplay: "symbol",
       }).format(assetValue.remainingValue);
+  const expiry = resolveExpiry(node.expired_at);
+  const expiryLabel = expiry.kind === "long-term"
+    ? t("atlas.assets.longTerm")
+    : expiry.kind === "unset"
+      ? "--"
+      : `${new Date(expiry.timestamp).toLocaleDateString(locale)} · ${
+          expiry.kind === "scheduled"
+            ? t("atlas.expiry.days", { count: expiry.daysRemaining })
+            : t("atlas.expiry.expired")
+        }`;
   const detailTabs = [
     ["overview", t("atlas.detail.nav.overview")],
     ["charts", t("atlas.detail.nav.charts")],
@@ -273,7 +284,7 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                   : undefined}
               >
                 <DetailMetric icon={WalletCards} label={t("atlas.detail.price")} value={node.price > 0 ? `${node.currency} ${node.price.toFixed(2)}` : "--"} />
-                <DetailMetric icon={CalendarDays} label={t("atlas.detail.expiry")} value={node.expired_at ? new Date(node.expired_at).toLocaleDateString(locale) : "--"} />
+                <DetailMetric icon={CalendarDays} label={t("atlas.detail.expiry")} value={expiryLabel} />
                 <DetailMetric icon={Gauge} label={t("atlas.detail.billingCycle")} value={node.billing_cycle === -1 ? t("atlas.assets.longTerm") : node.billing_cycle > 0 ? t("atlas.detail.days", { count: node.billing_cycle }) : "--"} />
                 <DetailMetric icon={WalletCards} label={t("atlas.detail.remainingValue")} value={remainingValue} />
               </div>

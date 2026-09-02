@@ -157,7 +157,9 @@ export function AssetSummary() {
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground sm:text-right">
-                  {item.expiresAt ? new Date(item.expiresAt).toLocaleDateString() : t("atlas.assets.longTerm")}
+                  {item.isLongTerm || !item.expiresAt
+                    ? t("atlas.assets.longTerm")
+                    : new Date(item.expiresAt).toLocaleDateString()}
                 </div>
                 <div className="text-sm font-semibold tabular-nums sm:text-right">
                   {money(displayCurrency, item.remaining)}
