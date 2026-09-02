@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowDown, ArrowUp, CalendarDays, Radio } from "lucide-react";
+import { ArrowDown, ArrowUp, Cable, CalendarDays, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
+import { CountryFlag, OperatingSystemIcon } from "@/components/v2/NodeIdentity";
 import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -156,10 +157,17 @@ export function NodeCard({
               <span className={cn("h-2 w-2 shrink-0 rounded-full", online ? "bg-emerald-400" : "bg-red-500")} />
               <h2 className="truncate text-sm font-semibold">{node.name}</h2>
             </div>
-            <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-              {node.region && <span>{node.region}</span>}
-              {node.os && <span className="truncate">{node.os}</span>}
-            </div>
+            {(node.region || node.os) && (
+              <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                {node.region && <CountryFlag region={node.region} />}
+                {node.os && (
+                  <span className="flex min-w-0 items-center gap-1.5" title={node.os}>
+                    <OperatingSystemIcon os={node.os} />
+                    <span className="truncate">{node.os}</span>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <span className={cn(
             "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium",
@@ -203,6 +211,21 @@ export function NodeCard({
               <div>
                 <div className="flex items-center gap-1 text-muted-foreground"><ArrowDown className="h-3 w-3" />{t("atlas.metrics.download")}</div>
                 <div className="mt-1 font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
+              </div>
+              <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/45 pt-2">
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <Cable className="h-3 w-3" />
+                  {t("atlas.metrics.connections")}
+                </div>
+                <div className="flex items-center gap-2 font-medium tabular-nums">
+                  {live ? (
+                    <>
+                      <span>TCP {live.connections.tcp}</span>
+                      <span className="text-muted-foreground">/</span>
+                      <span>UDP {live.connections.udp}</span>
+                    </>
+                  ) : "--"}
+                </div>
               </div>
             </section>
 

@@ -118,6 +118,7 @@
       "swapUsed": "Swap"
     },
     "metrics": {
+      "connections": "Connections",
       "disk": "Disk",
       "download": "Download",
       "memory": "Memory",

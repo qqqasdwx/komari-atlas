@@ -118,6 +118,7 @@
       "swapUsed": "交换空间"
     },
     "metrics": {
+      "connections": "连接数",
       "disk": "磁盘",
       "download": "下载",
       "memory": "内存",

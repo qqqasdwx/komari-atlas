@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/global.css";
+import "flag-icons/css/flag-icons.min.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
