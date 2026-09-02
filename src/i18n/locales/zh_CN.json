@@ -140,6 +140,20 @@
       "saving": "保存中"
     },
     "search": "搜索节点",
+    "sort": {
+      "ascending": "正序",
+      "cpu": "CPU 使用率",
+      "default": "默认顺序",
+      "descending": "倒序",
+      "disk": "硬盘使用率",
+      "download": "下载速度",
+      "expiry": "到期时间",
+      "label": "节点排序",
+      "memory": "内存使用率",
+      "monthlyCost": "月成本",
+      "tcp": "TCP 连接数",
+      "upload": "上传速度"
+    },
     "status": {
       "offline": "离线",
       "online": "在线"

@@ -140,6 +140,20 @@
       "saving": "Saving"
     },
     "search": "Search nodes",
+    "sort": {
+      "ascending": "Ascending",
+      "cpu": "CPU usage",
+      "default": "Default order",
+      "descending": "Descending",
+      "disk": "Disk usage",
+      "download": "Download speed",
+      "expiry": "Expiry",
+      "label": "Sort nodes",
+      "memory": "Memory usage",
+      "monthlyCost": "Monthly cost",
+      "tcp": "TCP connections",
+      "upload": "Upload speed"
+    },
     "status": {
       "offline": "Offline",
       "online": "Online"

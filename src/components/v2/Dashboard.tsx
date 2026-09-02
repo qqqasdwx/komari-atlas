@@ -1,15 +1,38 @@
 "use client";
 
-import { Activity, AlertTriangle, ArrowDown, ArrowUp, Search, Server, X } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  ChevronDown,
+  Search,
+  Server,
+  X,
+} from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { NodeCard } from "@/components/v2/NodeCard";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAssetValues } from "@/contexts/AssetValueContext";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useNodeList } from "@/contexts/NodeListContext";
+import {
+  sortDashboardNodeIds,
+  type DashboardSortDirection,
+  type DashboardSortKey,
+} from "@/lib/dashboardSort";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/utils/unitHelper";
 
@@ -24,8 +47,12 @@ export function Dashboard() {
   const { t } = useTranslation();
   const { nodeList, isLoading, error, refresh } = useNodeList();
   const { live_data, showCallout } = useLiveData();
+  const { cnyByNode } = useAssetValues();
   const [search, setSearch] = useState("");
   const [group, setGroup] = useState("all");
+  const [sortKey, setSortKey] = useState<DashboardSortKey>("default");
+  const [sortDirection, setSortDirection] = useState<DashboardSortDirection>("asc");
+  const [sortedNodeIds, setSortedNodeIds] = useState<string[] | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const nodes = useMemo(() => nodeList || [], [nodeList]);
   const live = useMemo(() => live_data?.data.data || {}, [live_data]);
@@ -43,6 +70,21 @@ export function Dashboard() {
         .some((value) => value.toLowerCase().includes(term));
     });
   }, [group, nodes, search]);
+
+  const displayedNodes = useMemo(() => {
+    if (!sortedNodeIds) return filteredNodes;
+
+    const rankById = new Map(sortedNodeIds.map((uuid, index) => [uuid, index]));
+    return filteredNodes
+      .map((node, index) => ({ node, index, rank: rankById.get(node.uuid) }))
+      .sort((left, right) => {
+        if (left.rank === undefined && right.rank === undefined) return left.index - right.index;
+        if (left.rank === undefined) return 1;
+        if (right.rank === undefined) return -1;
+        return left.rank - right.rank;
+      })
+      .map((item) => item.node);
+  }, [filteredNodes, sortedNodeIds]);
 
   const totals = useMemo(() => {
     const online = nodes.filter((node) => live[node.uuid]?.online);
@@ -76,6 +118,32 @@ export function Dashboard() {
     { label: t("atlas.summary.expiring"), value: totals.expiring, icon: AlertTriangle, tone: totals.expiring ? "text-amber-500" : "text-muted-foreground" },
     { label: t("atlas.summary.speed"), value: `↑ ${formatBytes(totals.up)}/s  ↓ ${formatBytes(totals.down)}/s`, icon: ArrowUp },
   ];
+  const sortOptions: Array<{ value: DashboardSortKey; label: string }> = [
+    { value: "default", label: t("atlas.sort.default") },
+    { value: "cpu", label: t("atlas.sort.cpu") },
+    { value: "memory", label: t("atlas.sort.memory") },
+    { value: "disk", label: t("atlas.sort.disk") },
+    { value: "tcp", label: t("atlas.sort.tcp") },
+    { value: "upload", label: t("atlas.sort.upload") },
+    { value: "download", label: t("atlas.sort.download") },
+    { value: "monthlyCost", label: t("atlas.sort.monthlyCost") },
+    { value: "expiry", label: t("atlas.sort.expiry") },
+  ];
+  const activeSortLabel = sortOptions.find((option) => option.value === sortKey)?.label
+    || t("atlas.sort.default");
+  const applySort = (nextKey: DashboardSortKey, nextDirection: DashboardSortDirection) => {
+    setSortKey(nextKey);
+    setSortDirection(nextDirection);
+    setSortedNodeIds(
+      nextKey === "default"
+        ? null
+        : sortDashboardNodeIds(nodes, live, cnyByNode, nextKey, nextDirection),
+    );
+  };
+  const toggleSortDirection = () => {
+    const nextDirection = sortDirection === "asc" ? "desc" : "asc";
+    applySort(sortKey, nextDirection);
+  };
 
   return (
     <main className="atlas-content space-y-5 py-5 sm:py-7">
@@ -125,30 +193,76 @@ export function Dashboard() {
           )}
         </div>
 
-        {groups.length > 0 && (
-          <div className="max-w-full overflow-x-auto pb-1">
-            <Tabs value={group} onValueChange={setGroup}>
-              <TabsList className="h-10 w-max border bg-card/65 p-1 backdrop-blur-md">
-                <TabsTrigger value="all">{t("common.all")}</TabsTrigger>
-                {groups.map((item) => <TabsTrigger key={item} value={item}>{item}</TabsTrigger>)}
-              </TabsList>
-            </Tabs>
+        <div className="flex w-full min-w-0 items-center justify-end gap-2 lg:w-auto">
+          {groups.length > 0 && (
+            <div className="min-w-0 flex-1 overflow-x-auto pb-1 lg:flex-none">
+              <Tabs value={group} onValueChange={setGroup}>
+                <TabsList className="h-10 w-max border bg-card/65 p-1 backdrop-blur-md">
+                  <TabsTrigger value="all">{t("common.all")}</TabsTrigger>
+                  {groups.map((item) => <TabsTrigger key={item} value={item}>{item}</TabsTrigger>)}
+                </TabsList>
+              </Tabs>
+            </div>
+          )}
+
+          <div className="flex shrink-0 items-center gap-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="h-10 max-w-44 justify-between gap-2 bg-card/70 px-3 backdrop-blur-md sm:max-w-48"
+                  aria-label={t("atlas.sort.label")}
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  <span className="truncate">{activeSortLabel}</span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-44">
+                <DropdownMenuRadioGroup value={sortKey}>
+                  {sortOptions.map((option) => (
+                    <DropdownMenuRadioItem
+                      key={option.value}
+                      value={option.value}
+                      onSelect={() => applySort(option.value, sortDirection)}
+                    >
+                      {option.label}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="outline"
+              className="h-10 w-10 gap-1.5 bg-card/70 px-0 backdrop-blur-md sm:w-auto sm:px-3"
+              disabled={sortKey === "default"}
+              onClick={toggleSortDirection}
+              aria-label={sortDirection === "asc" ? t("atlas.sort.ascending") : t("atlas.sort.descending")}
+              title={sortDirection === "asc" ? t("atlas.sort.ascending") : t("atlas.sort.descending")}
+            >
+              {sortDirection === "asc"
+                ? <ArrowUp className="h-4 w-4" />
+                : <ArrowDown className="h-4 w-4" />}
+              <span className="hidden sm:inline">
+                {sortDirection === "asc" ? t("atlas.sort.ascending") : t("atlas.sort.descending")}
+              </span>
+            </Button>
           </div>
-        )}
+        </div>
       </section>
 
-      {filteredNodes.length === 0 ? (
+      {displayedNodes.length === 0 ? (
         <section className="atlas-glass-panel py-16 text-center text-sm text-muted-foreground">
           {t("atlas.noMatchingNodes")}
         </section>
       ) : (
         <section className="atlas-node-grid">
-          {filteredNodes.map((node) => (
+          {displayedNodes.map((node) => (
             <NodeCard key={node.uuid} node={node} live={live[node.uuid]} />
           ))}
         </section>
       )}
-      <ArrowDown className="sr-only" />
     </main>
   );
 }
