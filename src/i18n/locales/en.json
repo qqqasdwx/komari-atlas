@@ -41,7 +41,7 @@
       "hardwareNetwork": "Hardware and network",
       "historyCharts": "Historical metrics",
       "historyError": "Unable to load historical metrics",
-      "homePingDescription": "Selected tasks appear on the home node card. None are shown by default.",
+      "homePingDescription": "All available tasks appear on the home node card by default. Deselect any tasks you want to hide.",
       "homePingTasks": "Home Ping tasks",
       "kernel": "Kernel",
       "liveStatus": "Live status",

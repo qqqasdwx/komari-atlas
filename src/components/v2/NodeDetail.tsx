@@ -29,7 +29,12 @@ import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useNodeList } from "@/contexts/NodeListContext";
-import { percentage, resourceTone, type HealthTone } from "@/lib/atlas";
+import {
+  percentage,
+  resolveCardPingTaskIds,
+  resourceTone,
+  type HealthTone,
+} from "@/lib/atlas";
 import { buildRemainingValueSnapshot } from "@/lib/remainingValue";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/utils/unitHelper";
@@ -115,7 +120,13 @@ export function NodeDetail({ uuid }: { uuid: string }) {
     );
   }
 
-  const nodeSettings = settings.nodes[uuid] || { cardPingTaskIds: [] };
+  const persistedNodeSettings = settings.nodes[uuid];
+  const selectedPingTaskIds = resolveCardPingTaskIds(
+    persistedNodeSettings,
+    pingTasks,
+    uuid,
+  );
+  const nodeSettings = persistedNodeSettings || { cardPingTaskIds: selectedPingTaskIds };
   const traffic = trafficByNode[uuid] || { status: "loading" as const };
   const cpu = live?.cpu.usage ?? 0;
   const ramPercent = live ? percentage(live.ram.used, node.mem_total) : 0;
@@ -325,15 +336,15 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 {availablePingTasks.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</p>
                 ) : availablePingTasks.map((task) => {
-                  const checked = nodeSettings.cardPingTaskIds.includes(task.id);
+                  const checked = selectedPingTaskIds.includes(task.id);
                   return (
                     <label key={task.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-border/60 bg-background/25 px-3 py-2 text-sm">
                       <Checkbox
                         checked={checked}
                         onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
                           cardPingTaskIds: nextChecked
-                            ? [...nodeSettings.cardPingTaskIds, task.id]
-                            : nodeSettings.cardPingTaskIds.filter((id) => id !== task.id),
+                            ? [...selectedPingTaskIds, task.id]
+                            : selectedPingTaskIds.filter((id) => id !== task.id),
                         })}
                       />
                       <span className="min-w-0 truncate">{task.name}</span>

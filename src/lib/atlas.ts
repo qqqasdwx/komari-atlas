@@ -5,6 +5,7 @@ import type {
   BillingWindow,
   MetricSeries,
   MetricsResponse,
+  PingTask,
   TrafficLimitType,
 } from "@/types/atlas";
 
@@ -67,6 +68,21 @@ export function normalizeAtlasSettings(input: unknown): AtlasSettingsV2 {
   }
 
   return { schema: 2, nodes };
+}
+
+export function resolveCardPingTaskIds(
+  nodeSettings: AtlasNodeSettings | undefined,
+  pingTasks: PingTask[],
+  nodeId: string,
+): number[] {
+  const availableIds = pingTasks
+    .filter((task) => task.clients.includes(nodeId))
+    .map((task) => task.id);
+
+  if (!nodeSettings) return availableIds;
+
+  const selectedIds = new Set(nodeSettings.cardPingTaskIds);
+  return availableIds.filter((taskId) => selectedIds.has(taskId));
 }
 
 function daysInMonth(year: number, monthIndex: number): number {

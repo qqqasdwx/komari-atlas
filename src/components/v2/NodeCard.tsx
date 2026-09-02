@@ -9,7 +9,13 @@ import { Card } from "@/components/ui/card";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
 import { useCardPingHistory } from "@/contexts/CardPingHistoryContext";
-import { expiryTone, percentage, resourceTone, type HealthTone } from "@/lib/atlas";
+import {
+  expiryTone,
+  percentage,
+  resolveCardPingTaskIds,
+  resourceTone,
+  type HealthTone,
+} from "@/lib/atlas";
 import { cardPingHistoryKey } from "@/lib/pingHistory";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
@@ -90,7 +96,11 @@ export function NodeCard({
   const ramTone = ram === null ? "neutral" : resourceTone(ram, 75, 90);
   const diskTone = disk === null ? "neutral" : resourceTone(disk, 80, 90);
   const expiry = expiryLabel(node.expired_at, i18n.resolvedLanguage || "en");
-  const selectedPingIds = settings.nodes[node.uuid]?.cardPingTaskIds || [];
+  const selectedPingIds = resolveCardPingTaskIds(
+    settings.nodes[node.uuid],
+    pingTasks,
+    node.uuid,
+  );
   const selectedPing = selectedPingIds.map((taskId) => ({
     taskId,
     name: pingTasks.find((task) => task.id === taskId)?.name

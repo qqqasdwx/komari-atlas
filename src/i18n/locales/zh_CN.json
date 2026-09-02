@@ -41,7 +41,7 @@
       "hardwareNetwork": "硬件与网络",
       "historyCharts": "历史指标",
       "historyError": "无法加载历史指标",
-      "homePingDescription": "选中的任务会显示在首页节点卡片中，默认不显示。",
+      "homePingDescription": "首页节点卡片默认显示全部可用任务，可以取消不需要显示的任务。",
       "homePingTasks": "首页 Ping 任务",
       "kernel": "内核",
       "liveStatus": "实时状态",

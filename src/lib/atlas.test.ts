@@ -5,6 +5,7 @@ import {
   getTrafficUsed,
   normalizeAtlasSettings,
   resolveBillingWindow,
+  resolveCardPingTaskIds,
   resourceTone,
   splitBillingMetricWindow,
   sumMetricSeries,
@@ -36,6 +37,27 @@ describe("normalizeAtlasSettings", () => {
         },
       },
     });
+  });
+});
+
+describe("resolveCardPingTaskIds", () => {
+  const tasks = [
+    { id: 3, weight: 3, name: "Global", clients: ["node-a", "node-b"], default_on: false, type: "icmp", interval: 60 },
+    { id: 7, weight: 2, name: "Node A", clients: ["node-a"], default_on: false, type: "icmp", interval: 60 },
+    { id: 9, weight: 1, name: "Node B", clients: ["node-b"], default_on: false, type: "icmp", interval: 60 },
+  ];
+
+  it("selects every available task for a node without saved settings", () => {
+    expect(resolveCardPingTaskIds(undefined, tasks, "node-a")).toEqual([3, 7]);
+  });
+
+  it("uses the saved selection and excludes tasks unavailable to the node", () => {
+    expect(resolveCardPingTaskIds(
+      { cardPingTaskIds: [7, 9] },
+      tasks,
+      "node-a",
+    )).toEqual([7]);
+    expect(resolveCardPingTaskIds({ cardPingTaskIds: [] }, tasks, "node-a")).toEqual([]);
   });
 });
 

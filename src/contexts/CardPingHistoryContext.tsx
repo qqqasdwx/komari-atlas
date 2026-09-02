@@ -9,7 +9,9 @@ import React, {
 } from "react";
 
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
+import { useNodeList } from "@/contexts/NodeListContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
+import { resolveCardPingTaskIds } from "@/lib/atlas";
 import { buildCardPingHistories } from "@/lib/pingHistory";
 import type { CardPingHistory, MetricsResponse } from "@/types/atlas";
 
@@ -24,23 +26,25 @@ interface CardPingHistoryContextValue {
 const CardPingHistoryContext = createContext<CardPingHistoryContextValue | null>(null);
 
 export function CardPingHistoryProvider({ children }: { children: React.ReactNode }) {
-  const { settings } = useAtlasSettings();
+  const { settings, pingTasks } = useAtlasSettings();
+  const { nodeList } = useNodeList();
   const { callViaHTTP } = useRPC2Call();
   const [historiesByKey, setHistoriesByKey] = useState<Record<string, CardPingHistory>>({});
 
   const queries = useMemo(() => {
     const entitiesByTask = new Map<number, Set<string>>();
-    for (const [entityId, nodeSettings] of Object.entries(settings.nodes)) {
-      for (const taskId of nodeSettings.cardPingTaskIds) {
+    for (const node of nodeList || []) {
+      const taskIds = resolveCardPingTaskIds(settings.nodes[node.uuid], pingTasks, node.uuid);
+      for (const taskId of taskIds) {
         const entityIds = entitiesByTask.get(taskId) || new Set<string>();
-        entityIds.add(entityId);
+        entityIds.add(node.uuid);
         entitiesByTask.set(taskId, entityIds);
       }
     }
     return [...entitiesByTask]
       .sort(([left], [right]) => left - right)
       .map(([taskId, entityIds]) => ({ taskId, entityIds: [...entityIds].sort() }));
-  }, [settings.nodes]);
+  }, [nodeList, pingTasks, settings.nodes]);
 
   useEffect(() => {
     if (queries.length === 0) {
