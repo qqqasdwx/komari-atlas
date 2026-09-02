@@ -110,6 +110,12 @@ export interface BillingWindow {
   end: Date;
 }
 
+export interface BillingTrafficDay {
+  date: string;
+  up: number;
+  down: number;
+}
+
 export type BillingTrafficState =
   | { status: "loading"; resetDay?: number }
   | { status: "unconfigured" }
@@ -122,6 +128,7 @@ export type BillingTrafficState =
       resetDay: number;
       start: string;
       end: string;
+      daily: BillingTrafficDay[];
     };
 
 export interface MetricPoint {

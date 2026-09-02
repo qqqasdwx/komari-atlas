@@ -2,6 +2,7 @@ import type {
   AtlasNode,
   AtlasNodeSettings,
   AtlasSettingsV2,
+  BillingTrafficDay,
   BillingWindow,
   MetricSeries,
   MetricsResponse,
@@ -11,6 +12,7 @@ import type {
 
 const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
+const DAY_MS = 24 * 60 * MINUTE_MS;
 
 // Komari 1.4.3 keeps rollups at 1m/5m/1h/24h for 10h/50h/600h/metric retention.
 // Keep each request inside one backing tier so a newly extended retention policy
@@ -197,6 +199,40 @@ export function sumMetricSeries(
       );
   }
   return totals;
+}
+
+export function buildDailyTrafficSeries(
+  response: MetricsResponse,
+  entityId: string,
+  start: Date,
+  end: Date,
+): BillingTrafficDay[] {
+  const days = new Map<string, BillingTrafficDay>();
+  for (let time = start.getTime(); time <= end.getTime(); time += DAY_MS) {
+    const parts = getShanghaiParts(new Date(time));
+    const date = `${parts.year}-${String(parts.monthIndex + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+    days.set(date, { date, up: 0, down: 0 });
+  }
+
+  for (const series of response.series || []) {
+    if (
+      series.entity_id !== entityId ||
+      (series.metric_key !== "traffic.up" && series.metric_key !== "traffic.down")
+    ) continue;
+
+    for (const point of series.points || []) {
+      if (typeof point.value !== "number" || !Number.isFinite(point.value)) continue;
+      const pointTime = new Date(point.time);
+      if (!Number.isFinite(pointTime.getTime())) continue;
+      const parts = getShanghaiParts(pointTime);
+      const date = `${parts.year}-${String(parts.monthIndex + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+      const day = days.get(date);
+      if (!day) continue;
+      day[series.metric_key === "traffic.up" ? "up" : "down"] += Math.max(0, point.value);
+    }
+  }
+
+  return Array.from(days.values());
 }
 
 export function metricSeriesKey(series: MetricSeries, index: number): string {

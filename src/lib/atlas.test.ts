@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildDailyTrafficSeries,
   compareVersions,
   getTrafficUsed,
   normalizeAtlasSettings,
@@ -154,6 +155,44 @@ describe("sumMetricSeries", () => {
         },
       ],
     }, "traffic.up")).toEqual({ "node-a": 60 });
+  });
+});
+
+describe("buildDailyTrafficSeries", () => {
+  it("groups upload and download by day in Asia/Shanghai and fills empty days", () => {
+    const response = {
+      start: "2026-08-31T16:00:00.000Z",
+      end: "2026-09-02T10:00:00.000Z",
+      count: 3,
+      series: [
+        {
+          metric_key: "traffic.up",
+          entity_id: "node-a",
+          count: 3,
+          points: [
+            { time: "2026-08-31T16:30:00.000Z", value: 10 },
+            { time: "2026-09-01T15:59:00.000Z", value: 20 },
+            { time: "2026-09-01T16:01:00.000Z", value: 30 },
+          ],
+        },
+        {
+          metric_key: "traffic.down",
+          entity_id: "node-a",
+          count: 1,
+          points: [{ time: "2026-09-01T17:00:00.000Z", value: 40 }],
+        },
+      ],
+    };
+
+    expect(buildDailyTrafficSeries(
+      response,
+      "node-a",
+      new Date("2026-08-31T16:00:00.000Z"),
+      new Date("2026-09-02T10:00:00.000Z"),
+    )).toEqual([
+      { date: "2026-09-01", up: 30, down: 0 },
+      { date: "2026-09-02", up: 30, down: 40 },
+    ]);
   });
 });
 

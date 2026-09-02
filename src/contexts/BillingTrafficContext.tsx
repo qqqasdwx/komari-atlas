@@ -13,6 +13,7 @@ import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useNodeList } from "@/contexts/NodeListContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import {
+  buildDailyTrafficSeries,
   getTrafficUsed,
   resolveBillingWindow,
   splitBillingMetricWindow,
@@ -127,6 +128,7 @@ export function BillingTrafficProvider({ children }: { children: React.ReactNode
               resetDay: window.resetDay,
               start: window.start.toISOString(),
               end: window.end.toISOString(),
+              daily: buildDailyTrafficSeries(response, uuid, window.start, now),
             };
           }
           return updated;

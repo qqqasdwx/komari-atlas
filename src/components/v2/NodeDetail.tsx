@@ -7,6 +7,7 @@ import {
   CalendarDays,
   CheckCircle2,
   CircleAlert,
+  Clock3,
   Cpu,
   Gauge,
   HardDrive,
@@ -22,7 +23,12 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
-import { HistoricalCharts, type HistoryRange } from "@/components/v2/HistoricalCharts";
+import { DailyTrafficChart } from "@/components/v2/DailyTrafficChart";
+import {
+  HistoricalCharts,
+  LatencyCharts,
+  type HistoryRange,
+} from "@/components/v2/HistoricalCharts";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,6 +97,40 @@ function pingTone(value: number, warning: number, danger: number) {
       : "text-emerald-500";
 }
 
+function HistoryRangeToolbar({
+  range,
+  label,
+  onChange,
+}: {
+  range: HistoryRange;
+  label: string;
+  onChange: (range: HistoryRange) => void;
+}) {
+  return (
+    <div
+      className="atlas-range-toolbar atlas-glass-panel sticky top-[6.75rem] z-[35] mb-3 flex min-h-11 w-max max-w-full items-center gap-1 p-1 sm:top-[7.25rem]"
+      role="group"
+      aria-label={label}
+    >
+      <Clock3 className="ml-1 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <div className="min-w-0 overflow-x-auto">
+        <div className="flex w-max items-center gap-1">
+          {RANGES.map((item) => (
+            <button
+              key={item}
+              type="button"
+              className={cn("atlas-range-button", range === item && "is-active")}
+              onClick={() => onChange(item)}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function NodeDetail({ uuid }: { uuid: string }) {
   const { t, i18n } = useTranslation();
   const { nodeList, isLoading } = useNodeList();
@@ -147,7 +187,6 @@ export function NodeDetail({ uuid }: { uuid: string }) {
     ["charts", t("atlas.detail.nav.charts")],
     ["ping", t("atlas.detail.nav.ping")],
     ["traffic", t("atlas.detail.nav.traffic")],
-    ["assets", t("atlas.detail.nav.assets")],
     ["settings", t("atlas.detail.nav.settings")],
   ];
 
@@ -224,33 +263,41 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 </dl>
               </div>
             </section>
+
+            <section className="atlas-detail-section">
+              <div className="atlas-section-heading"><div><span className="atlas-section-index">03</span><h2>{t("atlas.detail.assets")}</h2></div></div>
+              <div
+                className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+                title={ratesUnavailable && assetValue?.remainingValue == null
+                  ? t("remainingValue.errorRatesUnavailable")
+                  : undefined}
+              >
+                <DetailMetric icon={WalletCards} label={t("atlas.detail.price")} value={node.price > 0 ? `${node.currency} ${node.price.toFixed(2)}` : "--"} />
+                <DetailMetric icon={CalendarDays} label={t("atlas.detail.expiry")} value={node.expired_at ? new Date(node.expired_at).toLocaleDateString(locale) : "--"} />
+                <DetailMetric icon={Gauge} label={t("atlas.detail.billingCycle")} value={node.billing_cycle === -1 ? t("atlas.assets.longTerm") : node.billing_cycle > 0 ? t("atlas.detail.days", { count: node.billing_cycle }) : "--"} />
+                <DetailMetric icon={WalletCards} label={t("atlas.detail.remainingValue")} value={remainingValue} />
+              </div>
+            </section>
           </TabsContent>
 
           <TabsContent value="charts" className="mt-0">
             <section className="atlas-detail-section">
               <div className="atlas-section-heading">
-                <div><span className="atlas-section-index">03</span><h2>{t("atlas.detail.historyCharts")}</h2></div>
+                <div><span className="atlas-section-index">04</span><h2>{t("atlas.detail.historyCharts")}</h2></div>
                 <span>{t("atlas.detail.range", { range })}</span>
               </div>
-              <div className="mb-3 max-w-full overflow-x-auto pb-1">
-                <div className="flex w-max items-center gap-1">
-                  {RANGES.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      className={cn("atlas-range-button", range === item && "is-active")}
-                      onClick={() => setRange(item)}
-                    >{item}</button>
-                  ))}
-                </div>
-              </div>
+              <HistoryRangeToolbar
+                range={range}
+                label={t("atlas.detail.historyRange")}
+                onChange={setRange}
+              />
               <HistoricalCharts node={node} range={range} />
             </section>
           </TabsContent>
 
-          <TabsContent value="ping" className="mt-0">
+          <TabsContent value="ping" className="mt-0 space-y-7 sm:space-y-9">
             <section className="atlas-detail-section">
-              <div className="atlas-section-heading"><div><span className="atlas-section-index">04</span><h2>{t("atlas.detail.pingStatus")}</h2></div></div>
+              <div className="atlas-section-heading"><div><span className="atlas-section-index">05</span><h2>{t("atlas.detail.pingStatus")}</h2></div></div>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {availablePingTasks.length === 0 ? (
                   <div className="atlas-glass-panel p-5 text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</div>
@@ -285,12 +332,25 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 })}
               </div>
             </section>
+
+            <section className="atlas-detail-section">
+              <div className="atlas-section-heading">
+                <div><span className="atlas-section-index">06</span><h2>{t("atlas.detail.latencyHistory")}</h2></div>
+                <span>{t("atlas.detail.range", { range })}</span>
+              </div>
+              <HistoryRangeToolbar
+                range={range}
+                label={t("atlas.detail.historyRange")}
+                onChange={setRange}
+              />
+              <LatencyCharts node={node} range={range} />
+            </section>
           </TabsContent>
 
           <TabsContent value="traffic" className="mt-0">
             <section className="atlas-detail-section">
               <div className="atlas-section-heading">
-                <div><span className="atlas-section-index">05</span><h2>{t("atlas.detail.billingTraffic")}</h2></div>
+                <div><span className="atlas-section-index">07</span><h2>{t("atlas.detail.billingTraffic")}</h2></div>
                 {trafficResetDay && <span>{t("atlas.traffic.resetOnDay", { day: trafficResetDay })}</span>}
               </div>
               <div className="atlas-glass-panel p-4 sm:p-5">
@@ -314,30 +374,18 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                   </p>
                 )}
               </div>
-            </section>
-          </TabsContent>
-
-          <TabsContent value="assets" className="mt-0">
-            <section className="atlas-detail-section">
-              <div className="atlas-section-heading"><div><span className="atlas-section-index">06</span><h2>{t("atlas.detail.assets")}</h2></div></div>
-              <div
-                className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
-                title={ratesUnavailable && assetValue?.remainingValue == null
-                  ? t("remainingValue.errorRatesUnavailable")
-                  : undefined}
-              >
-                <DetailMetric icon={WalletCards} label={t("atlas.detail.price")} value={node.price > 0 ? `${node.currency} ${node.price.toFixed(2)}` : "--"} />
-                <DetailMetric icon={CalendarDays} label={t("atlas.detail.expiry")} value={node.expired_at ? new Date(node.expired_at).toLocaleDateString(locale) : "--"} />
-                <DetailMetric icon={Gauge} label={t("atlas.detail.billingCycle")} value={node.billing_cycle === -1 ? t("atlas.assets.longTerm") : node.billing_cycle > 0 ? t("atlas.detail.days", { count: node.billing_cycle }) : "--"} />
-                <DetailMetric icon={WalletCards} label={t("atlas.detail.remainingValue")} value={remainingValue} />
-              </div>
+              {traffic.status === "ready" && (
+                <div className="mt-3">
+                  <DailyTrafficChart days={traffic.daily} />
+                </div>
+              )}
             </section>
           </TabsContent>
 
           <TabsContent value="settings" className="mt-0">
             <section className="atlas-detail-section">
               <div className="atlas-section-heading">
-                <div><span className="atlas-section-index">07</span><h2>{t("atlas.detail.nodeSettings")}</h2></div>
+                <div><span className="atlas-section-index">08</span><h2>{t("atlas.detail.nodeSettings")}</h2></div>
                 <span className={cn(
                   "flex items-center gap-1.5",
                   saveState === "error" ? "text-red-500" : saveState === "saved" ? "text-emerald-500" : "",

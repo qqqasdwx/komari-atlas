@@ -16,7 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
-import { percentage } from "@/lib/atlas";
+import { metricSeriesKey, percentage } from "@/lib/atlas";
+import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { MetricSeries, MetricsResponse } from "@/types/atlas";
 import { formatBytes } from "@/utils/unitHelper";
@@ -31,7 +32,7 @@ const RANGE_HOURS: Record<HistoryRange, number> = {
   "30d": 30 * 24,
 };
 
-const METRIC_KEYS = [
+const SYSTEM_METRIC_KEYS = [
   "cpu.usage",
   "load.average",
   "memory.used",
@@ -42,14 +43,14 @@ const METRIC_KEYS = [
   "process.count",
   "connections.tcp",
   "connections.udp",
-  "ping.latency_ms",
-  "ping.loss",
   "gpu.usage",
   "gpu.device.usage",
   "gpu.memory.used",
   "gpu.memory.total",
   "gpu.temperature",
 ] as const;
+
+const PING_METRIC_KEYS = ["ping.latency_ms", "ping.loss"] as const;
 
 const CHART_COLORS = [
   "#38bdf8",
@@ -83,6 +84,7 @@ const METRIC_TRANSLATION_KEYS: Record<string, string> = {
 type ValueKind = "percent" | "bytes" | "rate" | "count" | "latency" | "loss" | "temperature";
 
 type SeriesLine = {
+  id: string;
   dataKey: string;
   label: string;
   color: string;
@@ -135,6 +137,7 @@ function buildChart(
   selected.forEach((series, index) => {
     const dataKey = `series${index}`;
     lines.push({
+      id: metricSeriesKey(series, index),
       dataKey,
       label: metricLabel(series, index, taskNames, t),
       color: CHART_COLORS[index % CHART_COLORS.length],
@@ -182,6 +185,7 @@ function MetricChart({
   kind,
   node,
   taskNames,
+  toggleable = false,
 }: {
   title: string;
   series: MetricSeries[];
@@ -189,6 +193,7 @@ function MetricChart({
   kind: ValueKind;
   node: NodeBasicInfo;
   taskNames: Map<string, string>;
+  toggleable?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const chart = useMemo(
@@ -196,6 +201,16 @@ function MetricChart({
     [keys, node, series, t, taskNames],
   );
   const locale = i18n.resolvedLanguage || i18n.language;
+  const [hiddenLineIds, setHiddenLineIds] = useState<Set<string>>(() => new Set());
+
+  const toggleLine = (lineId: string) => {
+    setHiddenLineIds((previous) => {
+      const next = new Set(previous);
+      if (next.has(lineId)) next.delete(lineId);
+      else next.add(lineId);
+      return next;
+    });
+  };
 
   return (
     <article className="atlas-chart-panel">
@@ -203,10 +218,27 @@ function MetricChart({
         <h3 className="text-sm font-semibold">{title}</h3>
         <div className="flex max-w-[70%] flex-wrap justify-end gap-x-3 gap-y-1">
           {chart.lines.map((line) => (
-            <span key={line.dataKey} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: line.color }} />
-              {line.label}
-            </span>
+            toggleable ? (
+              <button
+                key={line.id}
+                type="button"
+                className={cn(
+                  "atlas-chart-series-toggle inline-flex max-w-40 items-center gap-1 text-[10px] text-muted-foreground transition-opacity hover:text-foreground focus-visible:text-foreground",
+                  hiddenLineIds.has(line.id) && "opacity-50 line-through",
+                )}
+                aria-pressed={!hiddenLineIds.has(line.id)}
+                title={t(hiddenLineIds.has(line.id) ? "atlas.charts.showSeries" : "atlas.charts.hideSeries", { name: line.label })}
+                onClick={() => toggleLine(line.id)}
+              >
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: line.color }} />
+                <span className="truncate">{line.label}</span>
+              </button>
+            ) : (
+              <span key={line.id} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: line.color }} />
+                {line.label}
+              </span>
+            )
           ))}
         </div>
       </div>
@@ -265,6 +297,7 @@ function MetricChart({
                   dot={false}
                   connectNulls={false}
                   isAnimationActive={false}
+                  hide={hiddenLineIds.has(line.id)}
                 />
               ))}
             </LineChart>
@@ -275,7 +308,15 @@ function MetricChart({
   );
 }
 
-export function HistoricalCharts({ node, range }: { node: NodeBasicInfo; range: HistoryRange }) {
+function MetricHistoryCharts({
+  node,
+  range,
+  mode,
+}: {
+  node: NodeBasicInfo;
+  range: HistoryRange;
+  mode: "system" | "ping";
+}) {
   const { t } = useTranslation();
   const { pingTasks } = useAtlasSettings();
   const { callViaHTTP } = useRPC2Call();
@@ -292,7 +333,7 @@ export function HistoricalCharts({ node, range }: { node: NodeBasicInfo; range: 
     const start = new Date(end.getTime() - RANGE_HOURS[range] * 60 * 60 * 1000);
     setState((previous) => ({ ...previous, loading: true, error: null }));
     callViaHTTP<Record<string, unknown>, MetricsResponse>("public:queryMetrics", {
-      metric_keys: METRIC_KEYS,
+      metric_keys: mode === "ping" ? PING_METRIC_KEYS : SYSTEM_METRIC_KEYS,
       entity_ids: [node.uuid],
       start: start.toISOString(),
       end: end.toISOString(),
@@ -315,7 +356,7 @@ export function HistoricalCharts({ node, range }: { node: NodeBasicInfo; range: 
     return () => {
       active = false;
     };
-  }, [attempt, callViaHTTP, node.uuid, range, t]);
+  }, [attempt, callViaHTTP, mode, node.uuid, range, t]);
 
   const taskNames = useMemo(
     () => new Map(pingTasks.map((task) => [String(task.id), task.name])),
@@ -348,21 +389,36 @@ export function HistoricalCharts({ node, range }: { node: NodeBasicInfo; range: 
 
   return (
     <div className="atlas-chart-grid" aria-busy={state.loading}>
-      <MetricChart title={t("atlas.charts.cpu")} series={state.series} keys={["cpu.usage"]} kind="percent" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.systemLoad")} series={state.series} keys={["load.average"]} kind="count" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.memorySwap")} series={state.series} keys={["memory.used", "swap.used"]} kind="percent" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.disk")} series={state.series} keys={["disk.used"]} kind="percent" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.network")} series={state.series} keys={["net.in.rate", "net.out.rate"]} kind="rate" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.processConnections")} series={state.series} keys={["process.count", "connections.tcp", "connections.udp"]} kind="count" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.pingLatency")} series={state.series} keys={["ping.latency_ms"]} kind="latency" node={node} taskNames={taskNames} />
-      <MetricChart title={t("atlas.charts.pingLoss")} series={state.series} keys={["ping.loss"]} kind="loss" node={node} taskNames={taskNames} />
-      {hasGpu && (
+      {mode === "ping" ? (
         <>
-          <MetricChart title={t("atlas.charts.gpuUsage")} series={state.series} keys={["gpu.usage", "gpu.device.usage"]} kind="percent" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.gpuMemory")} series={state.series} keys={["gpu.memory.used", "gpu.memory.total"]} kind="bytes" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.gpuTemperature")} series={state.series} keys={["gpu.temperature"]} kind="temperature" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.pingLatency")} series={state.series} keys={["ping.latency_ms"]} kind="latency" node={node} taskNames={taskNames} toggleable />
+          <MetricChart title={t("atlas.charts.pingLoss")} series={state.series} keys={["ping.loss"]} kind="loss" node={node} taskNames={taskNames} toggleable />
+        </>
+      ) : (
+        <>
+          <MetricChart title={t("atlas.charts.cpu")} series={state.series} keys={["cpu.usage"]} kind="percent" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.systemLoad")} series={state.series} keys={["load.average"]} kind="count" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.memorySwap")} series={state.series} keys={["memory.used", "swap.used"]} kind="percent" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.disk")} series={state.series} keys={["disk.used"]} kind="percent" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.network")} series={state.series} keys={["net.in.rate", "net.out.rate"]} kind="rate" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.processConnections")} series={state.series} keys={["process.count", "connections.tcp", "connections.udp"]} kind="count" node={node} taskNames={taskNames} />
+          {hasGpu && (
+            <>
+              <MetricChart title={t("atlas.charts.gpuUsage")} series={state.series} keys={["gpu.usage", "gpu.device.usage"]} kind="percent" node={node} taskNames={taskNames} />
+              <MetricChart title={t("atlas.charts.gpuMemory")} series={state.series} keys={["gpu.memory.used", "gpu.memory.total"]} kind="bytes" node={node} taskNames={taskNames} />
+              <MetricChart title={t("atlas.charts.gpuTemperature")} series={state.series} keys={["gpu.temperature"]} kind="temperature" node={node} taskNames={taskNames} />
+            </>
+          )}
         </>
       )}
     </div>
   );
+}
+
+export function HistoricalCharts({ node, range }: { node: NodeBasicInfo; range: HistoryRange }) {
+  return <MetricHistoryCharts node={node} range={range} mode="system" />;
+}
+
+export function LatencyCharts({ node, range }: { node: NodeBasicInfo; range: HistoryRange }) {
+  return <MetricHistoryCharts node={node} range={range} mode="ping" />;
 }
