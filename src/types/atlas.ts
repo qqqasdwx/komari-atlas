@@ -80,6 +80,17 @@ export interface PingTask {
   interval: number;
 }
 
+export interface CardPingHistoryBucket {
+  start: string;
+  end: string;
+  latency: number | null;
+  loss: number | null;
+}
+
+export interface CardPingHistory {
+  buckets: CardPingHistoryBucket[];
+}
+
 export interface AtlasNodeSettings {
   trafficResetDay?: number;
   cardPingTaskIds: number[];

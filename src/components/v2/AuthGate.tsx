@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useAccount } from "@/contexts/AccountContext";
 import { AtlasSettingsProvider } from "@/contexts/AtlasSettingsContext";
 import { BillingTrafficProvider } from "@/contexts/BillingTrafficContext";
+import { CardPingHistoryProvider } from "@/contexts/CardPingHistoryContext";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
 import { NodeListProvider } from "@/contexts/NodeListContext";
 import { RPC2Provider, useRPC2Call } from "@/contexts/RPC2Context";
@@ -80,9 +81,11 @@ function AuthenticatedProviders({ children }: { children: React.ReactNode }) {
         <NodeListProvider>
           <LiveDataProvider>
             <AtlasSettingsProvider>
-              <BillingTrafficProvider>
-                {children}
-              </BillingTrafficProvider>
+              <CardPingHistoryProvider>
+                <BillingTrafficProvider>
+                  {children}
+                </BillingTrafficProvider>
+              </CardPingHistoryProvider>
             </AtlasSettingsProvider>
           </LiveDataProvider>
         </NodeListProvider>

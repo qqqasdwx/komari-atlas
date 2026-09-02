@@ -117,6 +117,11 @@
     },
     "noData": "No data",
     "noMatchingNodes": "No matching nodes",
+    "ping": {
+      "latency": "Latency",
+      "loss": "Loss",
+      "window24h": "Last 24h"
+    },
     "retry": "Retry",
     "saveState": {
       "error": "Save failed",

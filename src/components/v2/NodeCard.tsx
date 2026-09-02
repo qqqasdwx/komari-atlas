@@ -4,10 +4,13 @@ import { ArrowDown, ArrowUp, CalendarDays, Clock3, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
+import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
 import { Card } from "@/components/ui/card";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
+import { useCardPingHistory } from "@/contexts/CardPingHistoryContext";
 import { expiryTone, percentage, resourceTone, type HealthTone } from "@/lib/atlas";
+import { cardPingHistoryKey } from "@/lib/pingHistory";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { Record as LiveRecord } from "@/types/LiveData";
@@ -76,8 +79,9 @@ export function NodeCard({
   live: LiveRecord | undefined;
 }) {
   const { t, i18n } = useTranslation();
-  const { settings } = useAtlasSettings();
+  const { settings, pingTasks } = useAtlasSettings();
   const { trafficByNode } = useBillingTraffic();
+  const { historiesByKey } = useCardPingHistory();
   const online = Boolean(live?.online);
   const cpu = live ? live.cpu.usage : null;
   const ram = live ? percentage(live.ram.used, node.mem_total || live.ram.used) : null;
@@ -87,9 +91,12 @@ export function NodeCard({
   const diskTone = disk === null ? "neutral" : resourceTone(disk, 80, 90);
   const expiry = expiryLabel(node.expired_at, i18n.resolvedLanguage || "en");
   const selectedPingIds = settings.nodes[node.uuid]?.cardPingTaskIds || [];
-  const selectedPing = selectedPingIds
-    .map((taskId) => [taskId, live?.ping?.[String(taskId)]] as const)
-    .filter((entry): entry is readonly [number, NonNullable<typeof entry[1]>] => Boolean(entry[1]));
+  const selectedPing = selectedPingIds.map((taskId) => ({
+    taskId,
+    name: pingTasks.find((task) => task.id === taskId)?.name
+      || t("atlas.detail.pingTask", { id: taskId }),
+    history: historiesByKey[cardPingHistoryKey(node.uuid, taskId) || ""],
+  }));
   const traffic = trafficByNode[node.uuid] || { status: "loading" as const };
   const trafficPercent = traffic.status === "ready" && node.traffic_limit > 0
     ? percentage(traffic.used, node.traffic_limit)
@@ -179,24 +186,32 @@ export function NodeCard({
           </section>
 
           {selectedPing.length > 0 && (
-            <section className="space-y-1.5 border-t border-border/50 pt-3">
-              {selectedPing.map(([taskId, ping]) => {
-                const latencyTone = resourceTone(ping.latest, 150, 300);
-                const lossTone = resourceTone(ping.loss, 1, 5);
-                return (
-                  <div key={taskId} className="flex items-center justify-between gap-3 text-xs">
+            <section className="space-y-3 border-t border-border/50 pt-3">
+              {selectedPing.map(({ taskId, name, history }) => (
+                <div key={taskId} className="space-y-1.5">
+                  <div className="flex items-center justify-between gap-3 text-xs">
                     <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
                       <Radio className="h-3 w-3 shrink-0" />
-                      <span className="truncate">{ping.name}</span>
+                      <span className="truncate">{name}</span>
                     </span>
-                    <span className="shrink-0 tabular-nums">
-                      <span className={toneClass[latencyTone]}>{ping.latest < 0 ? "--" : `${ping.latest} ms`}</span>
-                      <span className="mx-1 text-border">/</span>
-                      <span className={toneClass[lossTone]}>{ping.loss.toFixed(1)}%</span>
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
+                      {t("atlas.ping.window24h")}
                     </span>
                   </div>
-                );
-              })}
+                  <div className="grid grid-cols-2 gap-3">
+                    <PingHistoryStrip
+                      label={t("atlas.ping.latency")}
+                      buckets={history?.buckets}
+                      metric="latency"
+                    />
+                    <PingHistoryStrip
+                      label={t("atlas.ping.loss")}
+                      buckets={history?.buckets}
+                      metric="loss"
+                    />
+                  </div>
+                </div>
+              ))}
             </section>
           )}
 
