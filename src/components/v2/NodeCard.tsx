@@ -90,10 +90,16 @@ export function NodeCard({
   const { historiesByKey } = useCardPingHistory();
   const online = Boolean(live?.online);
   const cpu = live ? live.cpu.usage : null;
-  const ram = live ? percentage(live.ram.used, node.mem_total || live.ram.used) : null;
+  const ram = live && node.mem_total > 0
+    ? percentage(live.ram.used, node.mem_total)
+    : null;
+  const swap = live && node.swap_total > 0
+    ? percentage(live.swap.used, node.swap_total)
+    : null;
   const disk = live ? percentage(live.disk.used, node.disk_total || live.disk.used) : null;
   const cpuTone = cpu === null ? "neutral" : resourceTone(cpu, 75, 90);
   const ramTone = ram === null ? "neutral" : resourceTone(ram, 75, 90);
+  const swapTone = swap === null ? "neutral" : resourceTone(swap, 75, 90);
   const diskTone = disk === null ? "neutral" : resourceTone(disk, 80, 90);
   const expiry = expiryLabel(node.expired_at, i18n.resolvedLanguage || "en");
   const selectedPingIds = resolveCardPingTaskIds(
@@ -140,7 +146,12 @@ export function NodeCard({
         <div className="space-y-4 p-4">
           <div className="grid grid-cols-2 gap-3">
             <MetricRing label="CPU" value={cpu} tone={cpuTone} />
-            <MetricRing label={t("atlas.metrics.memory")} value={ram} tone={ramTone} />
+            <div className="min-w-0">
+              <MetricRing label={t("atlas.metrics.memory")} value={ram} tone={ramTone} />
+              <div className="mt-1 text-right text-[10px] text-muted-foreground">
+                {live ? `${formatBytes(live.ram.used)} / ${formatBytes(node.mem_total)}` : "--"}
+              </div>
+            </div>
           </div>
 
           <section className="space-y-1.5">
@@ -153,6 +164,19 @@ export function NodeCard({
             <MetricBar value={disk || 0} tone={diskTone} />
             <div className="text-right text-[10px] text-muted-foreground">
               {live ? `${formatBytes(live.disk.used)} / ${formatBytes(node.disk_total)}` : "--"}
+            </div>
+          </section>
+
+          <section className="space-y-1.5">
+            <div className="flex items-center justify-between gap-2 text-xs">
+              <span className="text-muted-foreground">{t("atlas.metrics.swap")}</span>
+              <span className={cn("font-medium tabular-nums", toneClass[swapTone])}>
+                {swap === null ? "--" : `${swap.toFixed(1)}%`}
+              </span>
+            </div>
+            {swap !== null && <MetricBar value={swap} tone={swapTone} />}
+            <div className="text-right text-[10px] text-muted-foreground">
+              {live ? `${formatBytes(live.swap.used)} / ${formatBytes(node.swap_total)}` : "--"}
             </div>
           </section>
 

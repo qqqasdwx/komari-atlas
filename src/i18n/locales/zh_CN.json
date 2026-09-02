@@ -113,6 +113,7 @@
       "disk": "磁盘",
       "download": "下载",
       "memory": "内存",
+      "swap": "交换空间",
       "upload": "上传"
     },
     "noData": "暂无数据",

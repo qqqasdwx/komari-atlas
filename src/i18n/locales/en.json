@@ -113,6 +113,7 @@
       "disk": "Disk",
       "download": "Download",
       "memory": "Memory",
+      "swap": "Swap",
       "upload": "Upload"
     },
     "noData": "No data",
