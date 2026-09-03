@@ -31,6 +31,16 @@ import {
 } from "@/components/v2/HistoricalCharts";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAssetValues } from "@/contexts/AssetValueContext";
@@ -52,7 +62,7 @@ import {
 } from "@/lib/pingThresholds";
 import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
-import type { PingMetricThresholds } from "@/types/atlas";
+import type { PingMetricThresholds, PingTaskThresholds } from "@/types/atlas";
 import { formatBytes } from "@/utils/unitHelper";
 
 const RANGES: HistoryRange[] = ["1h", "6h", "24h", "7d", "30d"];
@@ -221,6 +231,135 @@ function PingThresholdRow({
   );
 }
 
+function formatThresholdValue(value: number, unit: string) {
+  return unit === "%" ? `${value}%` : `${value} ${unit}`;
+}
+
+function PingThresholdSummary({
+  label,
+  thresholds,
+  unit,
+}: {
+  label: string;
+  thresholds: PingMetricThresholds;
+  unit: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1 text-[11px]">
+      <span className="w-8 shrink-0 text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-1 text-emerald-500">
+        <span className="h-1.5 w-1.5 rounded-[2px] bg-current" />
+        {t("color.green")} ≤{formatThresholdValue(thresholds.greenMax, unit)}
+      </span>
+      <span className="flex items-center gap-1 text-amber-500">
+        <span className="h-1.5 w-1.5 rounded-[2px] bg-current" />
+        {t("color.yellow")} ≤{formatThresholdValue(thresholds.yellowMax, unit)}
+      </span>
+      <span className="flex items-center gap-1 text-red-500">
+        <span className="h-1.5 w-1.5 rounded-[2px] bg-current" />
+        {t("color.red")} &gt;{formatThresholdValue(thresholds.yellowMax, unit)}
+      </span>
+    </div>
+  );
+}
+
+function PingThresholdDialog({
+  taskName,
+  thresholds,
+  onSave,
+}: {
+  taskName: string;
+  thresholds: PingTaskThresholds;
+  onSave: (thresholds: PingTaskThresholds) => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(() => normalizePingTaskThresholds(thresholds));
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setDraft(normalizePingTaskThresholds(thresholds));
+    setOpen(nextOpen);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto">
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          {t("atlas.ping.editThresholds")}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto border-border/70 bg-card/95 backdrop-blur-xl">
+        <DialogHeader>
+          <DialogTitle>{t("atlas.ping.editThresholdsTitle", { name: taskName })}</DialogTitle>
+          <DialogDescription>{t("atlas.detail.pingThresholdDescription")}</DialogDescription>
+        </DialogHeader>
+        <form
+          className="space-y-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSave(normalizePingTaskThresholds(draft));
+            setOpen(false);
+          }}
+        >
+          <div className="grid gap-5 sm:grid-cols-2">
+            <PingThresholdRow
+              label={t("atlas.ping.latency")}
+              thresholds={draft.latency}
+              maximum={PING_THRESHOLD_MAXIMUMS.latency}
+              step={1}
+              unit="ms"
+              greenLabel={t("atlas.ping.greenMaximum")}
+              yellowLabel={t("atlas.ping.yellowMaximum")}
+              redLabel={t("atlas.ping.redAbove", {
+                value: draft.latency.yellowMax,
+                unit: "ms",
+              })}
+              onChange={(latency) => setDraft((current) => ({ ...current, latency }))}
+            />
+            <PingThresholdRow
+              label={t("atlas.ping.loss")}
+              thresholds={draft.loss}
+              maximum={PING_THRESHOLD_MAXIMUMS.loss}
+              step={0.1}
+              unit="%"
+              greenLabel={t("atlas.ping.greenMaximum")}
+              yellowLabel={t("atlas.ping.yellowMaximum")}
+              redLabel={t("atlas.ping.redAbove", {
+                value: draft.loss.yellowMax,
+                unit: "%",
+              })}
+              onChange={(loss) => setDraft((current) => ({ ...current, loss }))}
+            />
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-2 border-t border-border/50 pt-3 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-[2px] bg-muted-foreground/20" />
+              {t("atlas.ping.noDataColor")}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span
+                className="h-2 w-2 rounded-[2px] bg-amber-500 ring-1 ring-inset ring-amber-300/90"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(135deg, transparent 0 2px, rgb(252 211 77 / 0.9) 2px 3px)",
+                }}
+              />
+              {t("atlas.ping.partialDataColor")}
+            </span>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="ghost">{t("common.cancel")}</Button>
+            </DialogClose>
+            <Button type="submit">{t("common.save")}</Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function HistoryRangeToolbar({
   range,
   label,
@@ -295,18 +434,12 @@ export function NodeDetail({ uuid }: { uuid: string }) {
   const nodeSettings = persistedNodeSettings || { cardPingTaskIds: selectedPingTaskIds };
   const updatePingThresholds = (
     taskId: number,
-    metric: "latency" | "loss",
-    metricThresholds: PingMetricThresholds,
+    thresholds: PingTaskThresholds,
   ) => {
-    const currentThresholds = resolvePingTaskThresholds(nodeSettings, taskId);
-    const nextThresholds = normalizePingTaskThresholds({
-      ...currentThresholds,
-      [metric]: metricThresholds,
-    });
     updateNodeSettings(uuid, {
       pingThresholds: {
         ...nodeSettings.pingThresholds,
-        [String(taskId)]: nextThresholds,
+        [String(taskId)]: normalizePingTaskThresholds(thresholds),
       },
     });
   };
@@ -567,85 +700,71 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 <div className="p-4 sm:p-5">
                   <h3 className="text-sm font-medium">{t("atlas.detail.homePingTasks")}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">{t("atlas.detail.homePingDescription")}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{t("atlas.detail.pingThresholdDescription")}</p>
-                  <div className="mt-4 divide-y divide-border/50">
+                  <div className="mt-4">
                     {availablePingTasks.length === 0 ? (
                       <p className="text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</p>
-                    ) : availablePingTasks.map((task) => {
-                      const checked = selectedPingTaskIds.includes(task.id);
-                      const thresholds = resolvePingTaskThresholds(nodeSettings, task.id);
-                      return (
-                        <div key={task.id} className="py-4 first:pt-0 last:pb-0">
-                          <label className="flex min-h-9 cursor-pointer items-center gap-3 text-sm font-medium">
-                            <Checkbox
-                              checked={checked}
-                              onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
-                                cardPingTaskIds: nextChecked
-                                  ? [...selectedPingTaskIds, task.id]
-                                  : selectedPingTaskIds.filter((id) => id !== task.id),
-                              })}
-                            />
-                            <span className="min-w-0 truncate">{task.name}</span>
-                          </label>
-                          <div className="mt-3 grid gap-4 sm:grid-cols-2 sm:pl-7">
-                            <PingThresholdRow
-                              label={t("atlas.ping.latency")}
-                              thresholds={thresholds.latency}
-                              maximum={PING_THRESHOLD_MAXIMUMS.latency}
-                              step={1}
-                              unit="ms"
-                              greenLabel={t("atlas.ping.greenMaximum")}
-                              yellowLabel={t("atlas.ping.yellowMaximum")}
-                              redLabel={t("atlas.ping.redAbove", {
-                                value: thresholds.latency.yellowMax,
-                                unit: "ms",
-                              })}
-                              onChange={(nextThresholds) => updatePingThresholds(
-                                task.id,
-                                "latency",
-                                nextThresholds,
-                              )}
-                            />
-                            <PingThresholdRow
-                              label={t("atlas.ping.loss")}
-                              thresholds={thresholds.loss}
-                              maximum={PING_THRESHOLD_MAXIMUMS.loss}
-                              step={0.1}
-                              unit="%"
-                              greenLabel={t("atlas.ping.greenMaximum")}
-                              yellowLabel={t("atlas.ping.yellowMaximum")}
-                              redLabel={t("atlas.ping.redAbove", {
-                                value: thresholds.loss.yellowMax,
-                                unit: "%",
-                              })}
-                              onChange={(nextThresholds) => updatePingThresholds(
-                                task.id,
-                                "loss",
-                                nextThresholds,
-                              )}
-                            />
-                          </div>
+                    ) : (
+                      <div className="divide-y divide-border/50">
+                        <div className="hidden grid-cols-[minmax(8rem,1fr)_8rem_minmax(18rem,1.6fr)_auto] gap-4 pb-2 text-[10px] font-medium text-muted-foreground lg:grid">
+                          <span>{t("atlas.ping.task")}</span>
+                          <span>{t("atlas.ping.displayOnHome")}</span>
+                          <span>{t("atlas.ping.currentThresholds")}</span>
+                          <span className="sr-only">{t("common.action")}</span>
                         </div>
-                      );
-                    })}
+                        {availablePingTasks.map((task) => {
+                          const checked = selectedPingTaskIds.includes(task.id);
+                          const thresholds = resolvePingTaskThresholds(nodeSettings, task.id);
+                          return (
+                            <div
+                              key={task.id}
+                              className="grid gap-3 py-4 last:pb-0 lg:grid-cols-[minmax(8rem,1fr)_8rem_minmax(18rem,1.6fr)_auto] lg:items-center lg:gap-4"
+                            >
+                              <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
+                                <Radio className="h-3.5 w-3.5 shrink-0 text-primary" />
+                                <span className="truncate">{task.name}</span>
+                              </div>
+                              <label className="flex min-h-8 cursor-pointer items-center gap-2 text-xs">
+                                <Checkbox
+                                  checked={checked}
+                                  onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
+                                    cardPingTaskIds: nextChecked
+                                      ? [...selectedPingTaskIds, task.id]
+                                      : selectedPingTaskIds.filter((id) => id !== task.id),
+                                  })}
+                                />
+                                <span>{t("atlas.ping.displayOnHome")}</span>
+                              </label>
+                              <div className="min-w-0 space-y-1.5">
+                                <div className="text-[10px] font-medium text-muted-foreground lg:hidden">
+                                  {t("atlas.ping.currentThresholds")}
+                                </div>
+                                <PingThresholdSummary
+                                  label={t("atlas.ping.latency")}
+                                  thresholds={thresholds.latency}
+                                  unit="ms"
+                                />
+                                <PingThresholdSummary
+                                  label={t("atlas.ping.loss")}
+                                  thresholds={thresholds.loss}
+                                  unit="%"
+                                />
+                              </div>
+                              <div className="lg:justify-self-end">
+                                <PingThresholdDialog
+                                  taskName={task.name}
+                                  thresholds={thresholds}
+                                  onSave={(nextThresholds) => updatePingThresholds(
+                                    task.id,
+                                    nextThresholds,
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
-                  {availablePingTasks.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border/50 pt-3 text-[10px] text-muted-foreground">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-[2px] bg-muted-foreground/20" />
-                        {t("atlas.ping.noDataColor")}
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span
-                          className="h-2 w-2 rounded-[2px] bg-amber-500 ring-1 ring-inset ring-amber-300/90"
-                          style={{
-                            backgroundImage: "repeating-linear-gradient(135deg, transparent 0 2px, rgb(252 211 77 / 0.9) 2px 3px)",
-                          }}
-                        />
-                        {t("atlas.ping.partialDataColor")}
-                      </span>
-                    </div>
-                  )}
                 </div>
               </div>
             </section>
