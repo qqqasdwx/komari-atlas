@@ -91,7 +91,8 @@ type SeriesLine = {
   color: string;
 };
 
-type ChartDatum = Record<string, number | string | null> & { time: string };
+type ChartDatum = Record<string, number | string | null> & { time: number };
+type TimeDomain = [number, number];
 
 function metricLabel(
   series: MetricSeries,
@@ -132,7 +133,7 @@ function buildChart(
   t: (key: string, options?: Record<string, unknown>) => string,
 ) {
   const selected = allSeries.filter((series) => keys.includes(series.metric_key) && series.points.length > 0);
-  const rows = new Map<string, ChartDatum>();
+  const rows = new Map<number, ChartDatum>();
   const lines: SeriesLine[] = [];
 
   selected.forEach((series, index) => {
@@ -144,19 +145,18 @@ function buildChart(
       color: CHART_COLORS[index % CHART_COLORS.length],
     });
     for (const point of insertMetricGapMarkers(series)) {
-      const row = rows.get(point.time) || { time: point.time };
+      const pointTime = Date.parse(point.time);
+      const row = rows.get(pointTime) || { time: pointTime };
       row[dataKey] = typeof point.value === "number"
         ? transformValue(series.metric_key, point.value, node)
         : null;
-      rows.set(point.time, row);
+      rows.set(pointTime, row);
     }
   });
 
   return {
     lines,
-    data: Array.from(rows.values()).sort(
-      (left, right) => new Date(left.time).getTime() - new Date(right.time).getTime(),
-    ),
+    data: Array.from(rows.values()).sort((left, right) => left.time - right.time),
   };
 }
 
@@ -186,6 +186,7 @@ function MetricChart({
   kind,
   node,
   taskNames,
+  timeDomain,
   toggleable = false,
 }: {
   title: string;
@@ -194,6 +195,7 @@ function MetricChart({
   kind: ValueKind;
   node: NodeBasicInfo;
   taskNames: Map<string, string>;
+  timeDomain: TimeDomain | null;
   toggleable?: boolean;
 }) {
   const { t, i18n } = useTranslation();
@@ -254,6 +256,10 @@ function MetricChart({
               <CartesianGrid stroke="var(--atlas-chart-grid)" vertical={false} />
               <XAxis
                 dataKey="time"
+                type="number"
+                scale="time"
+                domain={timeDomain || ["dataMin", "dataMax"]}
+                allowDataOverflow
                 tick={{ fill: "var(--muted-foreground)", fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
@@ -326,7 +332,8 @@ function MetricHistoryCharts({
     loading: boolean;
     error: string | null;
     series: MetricSeries[];
-  }>({ loading: true, error: null, series: [] });
+    timeDomain: TimeDomain | null;
+  }>({ loading: true, error: null, series: [], timeDomain: null });
 
   useEffect(() => {
     let active = true;
@@ -343,7 +350,17 @@ function MetricHistoryCharts({
       max_points: 360,
     })
       .then((response) => {
-        if (active) setState({ loading: false, error: null, series: response.series || [] });
+        if (!active) return;
+        const responseStart = Date.parse(response.start);
+        const responseEnd = Date.parse(response.end);
+        setState({
+          loading: false,
+          error: null,
+          series: response.series || [],
+          timeDomain: Number.isFinite(responseStart) && Number.isFinite(responseEnd) && responseEnd > responseStart
+            ? [responseStart, responseEnd]
+            : [start.getTime(), end.getTime()],
+        });
       })
       .catch((error) => {
         if (active) {
@@ -351,6 +368,7 @@ function MetricHistoryCharts({
             loading: false,
             error: error instanceof Error ? error.message : t("atlas.detail.historyError"),
             series: [],
+            timeDomain: [start.getTime(), end.getTime()],
           });
         }
       });
@@ -392,22 +410,22 @@ function MetricHistoryCharts({
     <div className="atlas-chart-grid" aria-busy={state.loading}>
       {mode === "ping" ? (
         <>
-          <MetricChart title={t("atlas.charts.pingLatency")} series={state.series} keys={["ping.latency_ms"]} kind="latency" node={node} taskNames={taskNames} toggleable />
-          <MetricChart title={t("atlas.charts.pingLoss")} series={state.series} keys={["ping.loss"]} kind="loss" node={node} taskNames={taskNames} toggleable />
+          <MetricChart title={t("atlas.charts.pingLatency")} series={state.series} keys={["ping.latency_ms"]} kind="latency" node={node} taskNames={taskNames} timeDomain={state.timeDomain} toggleable />
+          <MetricChart title={t("atlas.charts.pingLoss")} series={state.series} keys={["ping.loss"]} kind="loss" node={node} taskNames={taskNames} timeDomain={state.timeDomain} toggleable />
         </>
       ) : (
         <>
-          <MetricChart title={t("atlas.charts.cpu")} series={state.series} keys={["cpu.usage"]} kind="percent" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.systemLoad")} series={state.series} keys={["load.average"]} kind="count" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.memorySwap")} series={state.series} keys={["memory.used", "swap.used"]} kind="percent" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.disk")} series={state.series} keys={["disk.used"]} kind="percent" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.network")} series={state.series} keys={["net.in.rate", "net.out.rate"]} kind="rate" node={node} taskNames={taskNames} />
-          <MetricChart title={t("atlas.charts.processConnections")} series={state.series} keys={["process.count", "connections.tcp", "connections.udp"]} kind="count" node={node} taskNames={taskNames} />
+          <MetricChart title={t("atlas.charts.cpu")} series={state.series} keys={["cpu.usage"]} kind="percent" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+          <MetricChart title={t("atlas.charts.systemLoad")} series={state.series} keys={["load.average"]} kind="count" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+          <MetricChart title={t("atlas.charts.memorySwap")} series={state.series} keys={["memory.used", "swap.used"]} kind="percent" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+          <MetricChart title={t("atlas.charts.disk")} series={state.series} keys={["disk.used"]} kind="percent" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+          <MetricChart title={t("atlas.charts.network")} series={state.series} keys={["net.in.rate", "net.out.rate"]} kind="rate" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+          <MetricChart title={t("atlas.charts.processConnections")} series={state.series} keys={["process.count", "connections.tcp", "connections.udp"]} kind="count" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
           {hasGpu && (
             <>
-              <MetricChart title={t("atlas.charts.gpuUsage")} series={state.series} keys={["gpu.usage", "gpu.device.usage"]} kind="percent" node={node} taskNames={taskNames} />
-              <MetricChart title={t("atlas.charts.gpuMemory")} series={state.series} keys={["gpu.memory.used", "gpu.memory.total"]} kind="bytes" node={node} taskNames={taskNames} />
-              <MetricChart title={t("atlas.charts.gpuTemperature")} series={state.series} keys={["gpu.temperature"]} kind="temperature" node={node} taskNames={taskNames} />
+              <MetricChart title={t("atlas.charts.gpuUsage")} series={state.series} keys={["gpu.usage", "gpu.device.usage"]} kind="percent" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+              <MetricChart title={t("atlas.charts.gpuMemory")} series={state.series} keys={["gpu.memory.used", "gpu.memory.total"]} kind="bytes" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
+              <MetricChart title={t("atlas.charts.gpuTemperature")} series={state.series} keys={["gpu.temperature"]} kind="temperature" node={node} taskNames={taskNames} timeDomain={state.timeDomain} />
             </>
           )}
         </>
