@@ -106,9 +106,15 @@ create_package() {
     PROJECT_DIR=$(pwd)
     PACKAGE_DIR=$(mktemp -d)
     trap 'rm -rf "$PACKAGE_DIR"' EXIT
+
+    PREVIEW_FILE=$(node -e 'const fs = require("fs"); process.stdout.write(JSON.parse(fs.readFileSync("komari-theme.json", "utf8")).preview || "")')
+    if [[ ! "$PREVIEW_FILE" =~ ^[A-Za-z0-9._-]+$ ]]; then
+        print_error "Invalid preview filename in komari-theme.json"
+        exit 1
+    fi
     
     # Copy required files
-    cp preview.png "$PACKAGE_DIR/"
+    cp preview.png "$PACKAGE_DIR/$PREVIEW_FILE"
     cp komari-theme.json "$PACKAGE_DIR/"
     cp -r dist/ "$PACKAGE_DIR/"
     

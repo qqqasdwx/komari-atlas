@@ -33,10 +33,10 @@ Completing and validating a user-requested product feature or bug fix constitute
 
 - Apply this policy to completed changes that affect the theme's runtime behavior or user interface. Do not auto-release analysis, documentation-only changes, experiments, local development setup, or reference-repository updates.
 - Run lint, type checking, tests, and a production build before publishing. Stop and report the failure instead of releasing when a required check fails.
-- Increment the patch version in `package.json`, `package-lock.json`, and `komari-theme.json`, then create a release commit and matching `vX.Y.Z` tag.
+- Increment the patch version in `package.json`, `package-lock.json`, and `komari-theme.json`. Set the packaged preview filename in `komari-theme.json` to `preview-vX.Y.Z.png` so Komari does not reuse an older cached image, then create a release commit and matching `vX.Y.Z` tag.
 - Push `main` and the tag, wait for the main CI workflow to pass, and create a non-draft, non-prerelease GitHub Release with concise release notes.
 - Wait for the release workflow to upload `komari-atlas.zip`. Download the uploaded asset, verify the packaged theme version, and calculate its SHA-256 digest.
-- Update `v1.json` with the released version, download URL, and verified digest in a separate market-metadata commit. Push it, wait for CI, and verify the remote release asset and market metadata before reporting completion.
+- Update `v1.json` with the released version, download URL, verified digest, and a preview URL pinned to the matching release tag in a separate market-metadata commit. Push it, wait for CI, and verify the remote release asset and market metadata before reporting completion.
 - Publish one patch release after the entire requested change set is complete; do not release partially implemented work.
 
 ## Configuration & Security

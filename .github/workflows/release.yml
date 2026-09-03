@@ -27,9 +27,15 @@ jobs:
         run: npm run build
         
       - name: Archive build artifacts
+        shell: bash
         run: |
           mkdir -p theme-package
-          cp preview.png theme-package/
+          preview_file="$(node -e 'const fs = require("fs"); process.stdout.write(JSON.parse(fs.readFileSync("komari-theme.json", "utf8")).preview || "")')"
+          if [[ ! "$preview_file" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Invalid preview filename in komari-theme.json" >&2
+            exit 1
+          fi
+          cp preview.png "theme-package/$preview_file"
           cp komari-theme.json theme-package/
           cp -r dist theme-package/
           cd theme-package
