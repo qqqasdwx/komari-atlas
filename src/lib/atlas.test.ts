@@ -27,6 +27,15 @@ describe("normalizeAtlasSettings", () => {
         node: {
           trafficResetDay: 31,
           cardPingTaskIds: [2, "2", -1, 4.5, 7],
+          pingThresholds: {
+            "07": {
+              latency: { greenMax: 120, yellowMax: 260 },
+              loss: { greenMax: 2, yellowMax: 8 },
+            },
+            invalid: {
+              latency: { greenMax: 1, yellowMax: 2 },
+            },
+          },
         },
       },
     })).toEqual({
@@ -35,6 +44,12 @@ describe("normalizeAtlasSettings", () => {
         node: {
           trafficResetDay: 31,
           cardPingTaskIds: [2, 7],
+          pingThresholds: {
+            "7": {
+              latency: { greenMax: 120, yellowMax: 260 },
+              loss: { greenMax: 2, yellowMax: 8 },
+            },
+          },
         },
       },
     });

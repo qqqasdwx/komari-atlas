@@ -9,6 +9,7 @@ import type {
   PingTask,
   TrafficLimitType,
 } from "@/types/atlas";
+import { normalizePingTaskThresholds } from "./pingThresholds";
 
 const SHANGHAI_OFFSET_MS = 8 * 60 * 60 * 1000;
 const MINUTE_MS = 60 * 1000;
@@ -60,12 +61,26 @@ export function normalizeAtlasSettings(input: unknown): AtlasSettingsV2 {
           ),
         )
       : [];
+    const pingThresholds = isRecord(value.pingThresholds)
+      ? Object.fromEntries(
+          Object.entries(value.pingThresholds)
+            .filter(([taskId, thresholds]) => {
+              const numericTaskId = Number(taskId);
+              return Number.isInteger(numericTaskId) && numericTaskId > 0 && isRecord(thresholds);
+            })
+            .map(([taskId, thresholds]) => [
+              String(Number(taskId)),
+              normalizePingTaskThresholds(thresholds),
+            ]),
+        )
+      : {};
 
     nodes[uuid] = {
       ...(Number.isInteger(resetDay) && resetDay >= 1 && resetDay <= 31
         ? { trafficResetDay: resetDay }
         : {}),
       cardPingTaskIds: pingIds,
+      ...(Object.keys(pingThresholds).length > 0 ? { pingThresholds } : {}),
     };
   }
 

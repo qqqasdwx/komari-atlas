@@ -19,7 +19,7 @@ import {
   SlidersHorizontal,
   WalletCards,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
@@ -31,6 +31,7 @@ import {
 } from "@/components/v2/HistoricalCharts";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAssetValues } from "@/contexts/AssetValueContext";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
@@ -44,8 +45,14 @@ import {
   type HealthTone,
 } from "@/lib/atlas";
 import { resolveExpiry } from "@/lib/expiry";
+import {
+  normalizePingTaskThresholds,
+  PING_THRESHOLD_MAXIMUMS,
+  resolvePingTaskThresholds,
+} from "@/lib/pingThresholds";
 import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
+import type { PingMetricThresholds } from "@/types/atlas";
 import { formatBytes } from "@/utils/unitHelper";
 
 const RANGES: HistoryRange[] = ["1h", "6h", "24h", "7d", "30d"];
@@ -88,6 +95,130 @@ function pingTone(value: number, warning: number, danger: number) {
     : tone === "warning"
       ? "text-amber-500"
       : "text-emerald-500";
+}
+
+function ThresholdInput({
+  label,
+  value,
+  min,
+  max,
+  step,
+  unit,
+  tone,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+  tone: "green" | "yellow";
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState(String(value));
+
+  useEffect(() => setDraft(String(value)), [value]);
+
+  const commit = () => {
+    const numericValue = Number(draft);
+    if (!draft.trim() || !Number.isFinite(numericValue)) {
+      setDraft(String(value));
+      return;
+    }
+    const nextValue = Math.max(min, Math.min(max, numericValue));
+    setDraft(String(nextValue));
+    if (nextValue !== value) onCommit(nextValue);
+  };
+
+  return (
+    <label className="min-w-0 space-y-1">
+      <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <span className={cn(
+          "h-2 w-2 shrink-0 rounded-[2px]",
+          tone === "green" ? "bg-emerald-500" : "bg-amber-500",
+        )} />
+        {label}
+      </span>
+      <span className="relative block">
+        <Input
+          type="number"
+          inputMode="decimal"
+          min={min}
+          max={max}
+          step={step}
+          value={draft}
+          className="h-9 pr-10 text-right text-xs tabular-nums"
+          onChange={(event) => setDraft(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") event.currentTarget.blur();
+            if (event.key === "Escape") {
+              setDraft(String(value));
+              event.currentTarget.blur();
+            }
+          }}
+        />
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-[10px] text-muted-foreground">
+          {unit}
+        </span>
+      </span>
+    </label>
+  );
+}
+
+function PingThresholdRow({
+  label,
+  thresholds,
+  maximum,
+  step,
+  unit,
+  greenLabel,
+  yellowLabel,
+  redLabel,
+  onChange,
+}: {
+  label: string;
+  thresholds: PingMetricThresholds;
+  maximum: number;
+  step: number;
+  unit: string;
+  greenLabel: string;
+  yellowLabel: string;
+  redLabel: string;
+  onChange: (thresholds: PingMetricThresholds) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-medium">{label}</div>
+      <div className="grid grid-cols-2 gap-2">
+        <ThresholdInput
+          label={greenLabel}
+          value={thresholds.greenMax}
+          min={0}
+          max={thresholds.yellowMax}
+          step={step}
+          unit={unit}
+          tone="green"
+          onCommit={(greenMax) => onChange({ ...thresholds, greenMax })}
+        />
+        <ThresholdInput
+          label={yellowLabel}
+          value={thresholds.yellowMax}
+          min={thresholds.greenMax}
+          max={maximum}
+          step={step}
+          unit={unit}
+          tone="yellow"
+          onCommit={(yellowMax) => onChange({ ...thresholds, yellowMax })}
+        />
+      </div>
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+        <span className="h-2 w-2 shrink-0 rounded-[2px] bg-red-500" />
+        {redLabel}
+      </div>
+    </div>
+  );
 }
 
 function HistoryRangeToolbar({
@@ -162,6 +293,23 @@ export function NodeDetail({ uuid }: { uuid: string }) {
     uuid,
   );
   const nodeSettings = persistedNodeSettings || { cardPingTaskIds: selectedPingTaskIds };
+  const updatePingThresholds = (
+    taskId: number,
+    metric: "latency" | "loss",
+    metricThresholds: PingMetricThresholds,
+  ) => {
+    const currentThresholds = resolvePingTaskThresholds(nodeSettings, taskId);
+    const nextThresholds = normalizePingTaskThresholds({
+      ...currentThresholds,
+      [metric]: metricThresholds,
+    });
+    updateNodeSettings(uuid, {
+      pingThresholds: {
+        ...nodeSettings.pingThresholds,
+        [String(taskId)]: nextThresholds,
+      },
+    });
+  };
   const traffic = trafficByNode[uuid] || { status: "loading" as const };
   const trafficResetDay = traffic.status === "unconfigured" ? undefined : traffic.resetDay;
   const cpu = live?.cpu.usage ?? 0;
@@ -419,26 +567,85 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 <div className="p-4 sm:p-5">
                   <h3 className="text-sm font-medium">{t("atlas.detail.homePingTasks")}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">{t("atlas.detail.homePingDescription")}</p>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <p className="mt-1 text-xs text-muted-foreground">{t("atlas.detail.pingThresholdDescription")}</p>
+                  <div className="mt-4 divide-y divide-border/50">
                     {availablePingTasks.length === 0 ? (
                       <p className="text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</p>
                     ) : availablePingTasks.map((task) => {
                       const checked = selectedPingTaskIds.includes(task.id);
+                      const thresholds = resolvePingTaskThresholds(nodeSettings, task.id);
                       return (
-                        <label key={task.id} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-border/60 bg-background/25 px-3 py-2 text-sm">
-                          <Checkbox
-                            checked={checked}
-                            onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
-                              cardPingTaskIds: nextChecked
-                                ? [...selectedPingTaskIds, task.id]
-                                : selectedPingTaskIds.filter((id) => id !== task.id),
-                            })}
-                          />
-                          <span className="min-w-0 truncate">{task.name}</span>
-                        </label>
+                        <div key={task.id} className="py-4 first:pt-0 last:pb-0">
+                          <label className="flex min-h-9 cursor-pointer items-center gap-3 text-sm font-medium">
+                            <Checkbox
+                              checked={checked}
+                              onCheckedChange={(nextChecked) => updateNodeSettings(uuid, {
+                                cardPingTaskIds: nextChecked
+                                  ? [...selectedPingTaskIds, task.id]
+                                  : selectedPingTaskIds.filter((id) => id !== task.id),
+                              })}
+                            />
+                            <span className="min-w-0 truncate">{task.name}</span>
+                          </label>
+                          <div className="mt-3 grid gap-4 sm:grid-cols-2 sm:pl-7">
+                            <PingThresholdRow
+                              label={t("atlas.ping.latency")}
+                              thresholds={thresholds.latency}
+                              maximum={PING_THRESHOLD_MAXIMUMS.latency}
+                              step={1}
+                              unit="ms"
+                              greenLabel={t("atlas.ping.greenMaximum")}
+                              yellowLabel={t("atlas.ping.yellowMaximum")}
+                              redLabel={t("atlas.ping.redAbove", {
+                                value: thresholds.latency.yellowMax,
+                                unit: "ms",
+                              })}
+                              onChange={(nextThresholds) => updatePingThresholds(
+                                task.id,
+                                "latency",
+                                nextThresholds,
+                              )}
+                            />
+                            <PingThresholdRow
+                              label={t("atlas.ping.loss")}
+                              thresholds={thresholds.loss}
+                              maximum={PING_THRESHOLD_MAXIMUMS.loss}
+                              step={0.1}
+                              unit="%"
+                              greenLabel={t("atlas.ping.greenMaximum")}
+                              yellowLabel={t("atlas.ping.yellowMaximum")}
+                              redLabel={t("atlas.ping.redAbove", {
+                                value: thresholds.loss.yellowMax,
+                                unit: "%",
+                              })}
+                              onChange={(nextThresholds) => updatePingThresholds(
+                                task.id,
+                                "loss",
+                                nextThresholds,
+                              )}
+                            />
+                          </div>
+                        </div>
                       );
                     })}
                   </div>
+                  {availablePingTasks.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2 border-t border-border/50 pt-3 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-[2px] bg-muted-foreground/20" />
+                        {t("atlas.ping.noDataColor")}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span
+                          className="h-2 w-2 rounded-[2px] bg-amber-500 ring-1 ring-inset ring-amber-300/90"
+                          style={{
+                            backgroundImage: "repeating-linear-gradient(135deg, transparent 0 2px, rgb(252 211 77 / 0.9) 2px 3px)",
+                          }}
+                        />
+                        {t("atlas.ping.partialDataColor")}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>

@@ -92,9 +92,22 @@ export interface CardPingHistory {
   buckets: CardPingHistoryBucket[];
 }
 
+export type PingMetric = "latency" | "loss";
+
+export interface PingMetricThresholds {
+  greenMax: number;
+  yellowMax: number;
+}
+
+export interface PingTaskThresholds {
+  latency: PingMetricThresholds;
+  loss: PingMetricThresholds;
+}
+
 export interface AtlasNodeSettings {
   trafficResetDay?: number;
   cardPingTaskIds: number[];
+  pingThresholds?: Record<string, PingTaskThresholds>;
 }
 
 export interface AtlasSettingsV2 {

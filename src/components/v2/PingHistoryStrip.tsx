@@ -6,7 +6,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { CardPingHistoryBucket } from "@/types/atlas";
+import { pingMetricTone, type PingTone } from "@/lib/pingThresholds";
+import type {
+  CardPingHistoryBucket,
+  PingMetric,
+  PingTaskThresholds,
+} from "@/types/atlas";
 import { cn } from "@/lib/utils";
 
 const EMPTY_BUCKETS: CardPingHistoryBucket[] = Array.from({ length: 24 }, () => ({
@@ -17,19 +22,25 @@ const EMPTY_BUCKETS: CardPingHistoryBucket[] = Array.from({ length: 24 }, () => 
   coverage: null,
 }));
 
-type PingMetric = "latency" | "loss";
 const PARTIAL_COVERAGE_THRESHOLD = 0.95;
 
-function metricTone(metric: PingMetric, value: number | null) {
-  if (value === null) return "bg-muted-foreground/20";
-  if (metric === "latency") {
-    if (value <= 80) return "bg-emerald-500";
-    if (value <= 180) return "bg-amber-500";
-    return "bg-red-500";
-  }
-  if (value <= 1) return "bg-emerald-500";
-  if (value <= 5) return "bg-amber-500";
-  return "bg-red-500";
+const backgroundTone: Record<PingTone, string> = {
+  neutral: "bg-muted-foreground/20",
+  good: "bg-emerald-500",
+  warning: "bg-amber-500",
+  danger: "bg-red-500",
+};
+
+const textTone: Record<PingTone, string> = {
+  neutral: "text-muted-foreground",
+  good: "text-emerald-500",
+  warning: "text-amber-500",
+  danger: "text-red-500",
+};
+
+function formatMetricValue(metric: PingMetric, value: number | null, noData: string) {
+  if (value === null) return noData;
+  return metric === "latency" ? `${Math.round(value)} ms` : `${value.toFixed(1)}%`;
 }
 
 function formatBucketTime(bucket: CardPingHistoryBucket, locale: string) {
@@ -50,19 +61,29 @@ export function PingHistoryStrip({
   label,
   buckets,
   metric,
+  thresholds,
 }: {
   label: string;
   buckets: CardPingHistoryBucket[] | undefined;
   metric: PingMetric;
+  thresholds: PingTaskThresholds;
 }) {
   const { t, i18n } = useTranslation();
   const displayBuckets = buckets?.length ? buckets : EMPTY_BUCKETS;
   const locale = i18n.resolvedLanguage || "en";
+  const latestValue = displayBuckets.at(-1)?.[metric] ?? null;
+  const latestTone = pingMetricTone(metric, latestValue, thresholds);
+  const latestLabel = formatMetricValue(metric, latestValue, "--");
 
   return (
     <TooltipProvider>
       <div className="min-w-0 space-y-1">
-        <div className="text-[10px] text-muted-foreground">{label}</div>
+        <div className="flex items-center justify-between gap-2 text-[10px]">
+          <span className="text-muted-foreground">{label}</span>
+          <span className={cn("shrink-0 font-semibold tabular-nums", textTone[latestTone])}>
+            {latestLabel}
+          </span>
+        </div>
         <div
           className="relative z-30 grid h-4 gap-0.5"
           style={{ gridTemplateColumns: `repeat(${displayBuckets.length}, minmax(0, 1fr))` }}
@@ -74,9 +95,7 @@ export function PingHistoryStrip({
               : t("atlas.ping.dataCoverage", { percent: Math.round(bucket.coverage * 100) });
             const valueLabel = value === null
               ? t("atlas.noData")
-              : metric === "latency"
-                ? `${Math.round(value)} ms`
-                : `${value.toFixed(1)}%`;
+              : formatMetricValue(metric, value, t("atlas.noData"));
             const timeLabel = formatBucketTime(bucket, locale);
             const detailLabel = coverageLabel ? `${valueLabel} · ${coverageLabel}` : valueLabel;
             const title = timeLabel ? `${timeLabel} · ${detailLabel}` : detailLabel;
@@ -85,27 +104,32 @@ export function PingHistoryStrip({
               && value !== null
               && bucket.coverage !== null
               && bucket.coverage < PARTIAL_COVERAGE_THRESHOLD;
+            const tone = pingMetricTone(metric, value, thresholds);
             return (
               <Tooltip key={`${bucket.start}-${index}`}>
                 <TooltipTrigger asChild>
                   <span
-                    className={cn(
-                      "relative min-w-0 cursor-help rounded-[2px] outline-none transition-transform duration-150 ease-out hover:z-10 hover:scale-[1.65] hover:ring-1 hover:ring-background focus-visible:z-10 focus-visible:scale-[1.65] focus-visible:ring-2 focus-visible:ring-ring",
-                      metricTone(metric, value),
-                      hasPartialCoverage && "ring-1 ring-inset ring-amber-300/90",
-                    )}
-                    style={hasPartialCoverage ? {
-                      backgroundImage: "repeating-linear-gradient(135deg, transparent 0 2px, rgb(252 211 77 / 0.9) 2px 3px)",
-                    } : undefined}
+                    className="group/ping-bucket relative min-w-0 cursor-help outline-none hover:z-10"
                     aria-label={title}
-                  />
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none absolute inset-0 rounded-[2px] transition-transform duration-150 ease-out group-hover/ping-bucket:scale-[1.65] group-hover/ping-bucket:outline group-hover/ping-bucket:outline-2 group-hover/ping-bucket:outline-background",
+                        backgroundTone[tone],
+                        hasPartialCoverage && "ring-1 ring-inset ring-amber-300/90",
+                      )}
+                      style={hasPartialCoverage ? {
+                        backgroundImage: "repeating-linear-gradient(135deg, transparent 0 2px, rgb(252 211 77 / 0.9) 2px 3px)",
+                      } : undefined}
+                    />
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent className="w-48">
                   {timeLabel && (
                     <div className="font-medium tabular-nums">{timeLabel}</div>
                   )}
                   <div className={cn("flex items-center gap-2", timeLabel && "mt-1.5")}>
-                    <span className={cn("h-2 w-2 shrink-0 rounded-[2px]", metricTone(metric, value))} />
+                    <span className={cn("h-2 w-2 shrink-0 rounded-[2px]", backgroundTone[tone])} />
                     <span className="text-muted-foreground">{label}</span>
                     <span className="ml-auto font-semibold tabular-nums">{valueLabel}</span>
                   </div>

@@ -68,6 +68,7 @@
       "noPingTasks": "该节点没有可用的延迟监测任务",
       "nodeNotFound": "找不到这个节点",
       "nodeSettings": "节点设置",
+      "pingThresholdDescription": "颜色阈值按节点和任务保存，并用于首页的历史方格与最新数值。",
       "pingTask": "延迟监测任务 {{id}}",
       "pingStatus": "实时延迟监测",
       "price": "价格",
@@ -130,9 +131,14 @@
     "noMatchingNodes": "没有符合条件的节点",
     "ping": {
       "dataCoverage": "数据完整度 {{percent}}%",
+      "greenMaximum": "绿色上限",
       "latency": "延迟",
       "loss": "丢包",
-      "window24h": "最近 24h"
+      "noDataColor": "灰色：无数据",
+      "partialDataColor": "斜纹：数据不完整",
+      "redAbove": "红色：高于 {{value}} {{unit}}",
+      "window24h": "最近 24h",
+      "yellowMaximum": "黄色上限"
     },
     "retry": "重试",
     "saveState": {

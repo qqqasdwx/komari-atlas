@@ -68,6 +68,7 @@
       "noPingTasks": "No latency monitoring tasks are available for this node",
       "nodeNotFound": "Node not found",
       "nodeSettings": "Node settings",
+      "pingThresholdDescription": "Color thresholds are saved per node and task, and apply to home history blocks and latest values.",
       "pingTask": "Latency monitoring task {{id}}",
       "pingStatus": "Live latency monitoring",
       "price": "Price",
@@ -130,9 +131,14 @@
     "noMatchingNodes": "No matching nodes",
     "ping": {
       "dataCoverage": "Data coverage {{percent}}%",
+      "greenMaximum": "Green maximum",
       "latency": "Latency",
       "loss": "Loss",
-      "window24h": "Last 24h"
+      "noDataColor": "Gray: no data",
+      "partialDataColor": "Striped: incomplete data",
+      "redAbove": "Red: above {{value}} {{unit}}",
+      "window24h": "Last 24h",
+      "yellowMaximum": "Yellow maximum"
     },
     "retry": "Retry",
     "saveState": {

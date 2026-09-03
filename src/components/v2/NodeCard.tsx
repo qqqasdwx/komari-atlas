@@ -20,6 +20,7 @@ import {
 } from "@/lib/atlas";
 import { resolveExpiry } from "@/lib/expiry";
 import { cardPingHistoryKey } from "@/lib/pingHistory";
+import { resolvePingTaskThresholds } from "@/lib/pingThresholds";
 import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
@@ -133,6 +134,7 @@ export function NodeCard({
     name: pingTasks.find((task) => task.id === taskId)?.name
       || t("atlas.detail.pingTask", { id: taskId }),
     history: historiesByKey[cardPingHistoryKey(node.uuid, taskId) || ""],
+    thresholds: resolvePingTaskThresholds(settings.nodes[node.uuid], taskId),
   }));
   const traffic = trafficByNode[node.uuid] || { status: "loading" as const };
   const trafficPercent = traffic.status === "ready" && node.traffic_limit > 0
@@ -279,7 +281,7 @@ export function NodeCard({
           <div className="space-y-4 border-t border-border/50 pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
             {selectedPing.length > 0 && (
               <section className="space-y-3">
-                {selectedPing.map(({ taskId, name, history }, index) => (
+                {selectedPing.map(({ taskId, name, history, thresholds }, index) => (
                   <div key={taskId} className="space-y-1.5">
                     <div className="flex items-center justify-between gap-3 text-xs">
                       <div className="flex min-w-0 items-center gap-1 text-muted-foreground">
@@ -323,11 +325,13 @@ export function NodeCard({
                         label={t("atlas.ping.latency")}
                         buckets={history?.buckets}
                         metric="latency"
+                        thresholds={thresholds}
                       />
                       <PingHistoryStrip
                         label={t("atlas.ping.loss")}
                         buckets={history?.buckets}
                         metric="loss"
+                        thresholds={thresholds}
                       />
                     </div>
                   </div>
