@@ -290,15 +290,6 @@ export function resourceTone(
   return "good";
 }
 
-export function expiryTone(expiredAt: string, now = new Date()): HealthTone {
-  const timestamp = new Date(expiredAt).getTime();
-  if (!Number.isFinite(timestamp)) return "neutral";
-  const days = (timestamp - now.getTime()) / (24 * 60 * 60 * 1000);
-  if (days <= 7) return "danger";
-  if (days <= 30) return "warning";
-  return "good";
-}
-
 export function compareVersions(left: string, right: string): number {
   const parse = (value: string) =>
     value

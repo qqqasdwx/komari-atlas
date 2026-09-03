@@ -24,7 +24,7 @@ import { resolvePingTaskThresholds } from "@/lib/pingThresholds";
 import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
-import type { Record as LiveRecord } from "@/types/LiveData";
+import type { LiveRecord } from "@/types/LiveData";
 import { formatBytes } from "@/utils/unitHelper";
 
 const toneClass: Record<HealthTone, string> = {

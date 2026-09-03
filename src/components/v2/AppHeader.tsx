@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Eye, EyeOff, LogOut, Settings, Wifi, WifiOff } from "lucide-react";
+import { Eye, EyeOff, LogOut, Settings, Wifi, WifiOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
@@ -81,7 +81,6 @@ export function AppHeader({
           </div>
         </TooltipProvider>
       </div>
-      <Activity className="sr-only" />
     </header>
   );
 }

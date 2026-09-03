@@ -2,7 +2,7 @@ import { STORAGE_KEYS } from "@/lib/storageKeys";
 
 export type RateMap = Record<string, number>;
 
-export type CachedRates = {
+type CachedRates = {
   fetchedAt: string;
   base: string;
   rates: RateMap;
@@ -69,7 +69,7 @@ function getCachedRates(now: Date = new Date()): (CachedRates & { isFresh: boole
   }
 }
 
-export function writeRatesCache(cache: CachedRates) {
+function writeRatesCache(cache: CachedRates) {
   if (!hasLocalStorage()) {
     return;
   }

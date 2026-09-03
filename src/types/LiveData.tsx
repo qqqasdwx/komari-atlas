@@ -1,9 +1,8 @@
-export type LiveData = {
-    online: string[];
-    data: { [key: string]: Record };
+type LiveData = {
+  data: { [key: string]: LiveRecord };
 };
 
-export type Record = {
+export type LiveRecord = {
   cpu: {
     usage: number;
   };
@@ -13,38 +12,18 @@ export type Record = {
   swap: {
     used: number;
   };
-  load: {
-    load1: number;
-    load5: number;
-    load15: number;
-  };
   disk: {
     used: number;
   };
   network: {
     up: number;
     down: number;
-    totalUp: number;
-    totalDown: number;
   };
   connections: {
     tcp: number;
     udp: number;
   };
-  gpu?: {
-    count: number;
-    average_usage: number;
-    detailed_info: {
-      name: string;
-      memory_total: number;
-      memory_used: number;
-      utilization: number;
-      temperature: number;
-    }[];
-  };
   uptime: number;
-  process: number;
-  message: string;
   updated_at: string;
   online?: boolean;
   ping?: {
@@ -62,5 +41,4 @@ export type Record = {
 
 export type LiveDataResponse = {
   data: LiveData;
-  status: string;
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { LiveDataResponse } from "../types/LiveData";
 import { useRPC2Call } from "./RPC2Context";
 
@@ -8,34 +8,18 @@ import { useRPC2Call } from "./RPC2Context";
 interface LiveDataContextType {
   live_data: LiveDataResponse | null;
   showCallout: boolean;
-  onRefresh: (callback: (data: LiveDataResponse) => void) => () => void;
 }
 
 const LiveDataContext = createContext<LiveDataContextType>({
   live_data: null,
   showCallout: true,
-  onRefresh: () => () => { },
 });
 
 // 创建Provider组件
 export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [live_data, setLiveData] = useState<LiveDataResponse | null>(null);
   const [showCallout, setShowCallout] = useState(false);
-  const refreshCallbacksRef = useRef<Set<(data: LiveDataResponse) => void>>(new Set());
   const { call } = useRPC2Call();
-
-  // 注册刷新回调函数
-  const onRefresh = useCallback((callback: (data: LiveDataResponse) => void) => {
-    refreshCallbacksRef.current.add(callback);
-    return () => {
-      refreshCallbacksRef.current.delete(callback);
-    };
-  }, []);
-
-  // 当数据更新时通知所有回调函数
-  const notifyRefreshCallbacks = useCallback((data: LiveDataResponse) => {
-    refreshCallbacksRef.current.forEach(callback => callback(data));
-  }, []);
 
   // 采用 RPC2 轮询最新状态，替代 WebSocket
   useEffect(() => {
@@ -54,10 +38,6 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // 策略由 RPC2Client 内部实现
         const result: Record<string, any> = await call("common:getNodesLatestStatus");
         // 将返回转换为 LiveDataResponse 结构
-        const online = Object.values(result)
-          .filter((v: any) => v?.online)
-          .map((v: any) => v.client as string);
-
         const dataMap: Record<string, any> = {};
         for (const [uuid, v] of Object.entries(result)) {
           const rec = v as any;
@@ -65,26 +45,16 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             cpu: { usage: typeof rec.cpu === "number" ? rec.cpu : 0 },
             ram: { used: rec.ram ?? 0 },
             swap: { used: rec.swap ?? 0 },
-            load: {
-              load1: rec.load ?? 0,
-              load5: rec.load5 ?? 0,
-              load15: rec.load15 ?? 0,
-            },
             disk: { used: rec.disk ?? 0 },
             network: {
               up: rec.net_out ?? 0,
               down: rec.net_in ?? 0,
-              totalUp: rec.net_total_up ?? 0,
-              totalDown: rec.net_total_down ?? 0,
             },
             connections: {
               tcp: Math.max(0, (rec.connections ?? 0) - (rec.connections_udp ?? 0)),
               udp: rec.connections_udp ?? 0,
             },
-            gpu: rec.gpu !== undefined ? { count: 0, average_usage: rec.gpu, detailed_info: [] } : undefined,
             uptime: rec.uptime ?? 0,
-            process: rec.process ?? 0,
-            message: "",
             updated_at: rec.time ?? 0,
             online: Boolean(rec.online),
             ping: rec.ping ?? {},
@@ -93,14 +63,11 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         const live: LiveDataResponse = {
           data: {
-            online,
             data: dataMap,
           },
-          status: "ok",
         };
         setLiveData(live);
         setShowCallout(true);
-        notifyRefreshCallbacks(live);
       } catch (e) {
         console.error("RPC2 获取最新状态失败:", e);
         setShowCallout(false);
@@ -118,11 +85,11 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       stopped = true;
       if (timer) window.clearTimeout(timer);
     };
-  }, [call, notifyRefreshCallbacks]);
+  }, [call]);
 
   const contextValue = useMemo(
-    () => ({ live_data, showCallout, onRefresh }),
-    [live_data, showCallout, onRefresh]
+    () => ({ live_data, showCallout }),
+    [live_data, showCallout]
   );
 
   return (
@@ -133,5 +100,3 @@ export const LiveDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 };
 
 export const useLiveData = () => useContext(LiveDataContext);
-
-export default LiveDataContext;

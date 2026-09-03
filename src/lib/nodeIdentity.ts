@@ -97,7 +97,7 @@ export function countryCodeFromRegion(region: string | null | undefined): string
   return countryCode ?? null;
 }
 
-export type OperatingSystemLogo =
+type OperatingSystemLogo =
   | "almalinux"
   | "alpine"
   | "arch"

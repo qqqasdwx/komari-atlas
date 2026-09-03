@@ -6,7 +6,7 @@ import {
   type DashboardSortKey,
 } from "./dashboardSort";
 import type { AtlasNode } from "@/types/atlas";
-import type { Record as LiveRecord } from "@/types/LiveData";
+import type { LiveRecord } from "@/types/LiveData";
 
 function node(uuid: string, patch: Partial<AtlasNode> = {}): AtlasNode {
   return {
@@ -14,7 +14,6 @@ function node(uuid: string, patch: Partial<AtlasNode> = {}): AtlasNode {
     name: uuid,
     cpu_name: "",
     cpu_cores: 1,
-    cpu_physical_cores: 1,
     virtualization: "",
     arch: "amd64",
     os: "Linux",
@@ -32,15 +31,11 @@ function node(uuid: string, patch: Partial<AtlasNode> = {}): AtlasNode {
     weight: 0,
     price: 0,
     billing_cycle: 0,
-    auto_renewal: false,
     currency: "CNY",
     expired_at: "",
     group: "",
-    tags: "",
     traffic_limit: 0,
     traffic_limit_type: "sum",
-    created_at: "",
-    updated_at: "",
     ...patch,
   };
 }
@@ -57,18 +52,13 @@ function live(patch: {
     cpu: { usage: patch.cpu ?? 0 },
     ram: { used: patch.memory ?? 0 },
     swap: { used: 0 },
-    load: { load1: 0, load5: 0, load15: 0 },
     disk: { used: patch.disk ?? 0 },
     network: {
       up: patch.upload ?? 0,
       down: patch.download ?? 0,
-      totalUp: 0,
-      totalDown: 0,
     },
     connections: { tcp: patch.tcp ?? 0, udp: 0 },
     uptime: 0,
-    process: 0,
-    message: "",
     updated_at: "",
     online: true,
   };

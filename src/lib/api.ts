@@ -1,4 +1,4 @@
-export interface SettingsResponse {
+interface SettingsResponse {
   theme_settings?: unknown;
   [key: string]: unknown;
 }

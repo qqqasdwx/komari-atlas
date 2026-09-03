@@ -1,22 +1,11 @@
 import React from "react";
 
-// 账户数据类型
-export type Account = {
+type Account = {
   logged_in: boolean;
-  sso_id: string;
-  sso_type: string;
-  username: string;
-  uuid: string;
-  "2fa_enabled": boolean;
 };
 
 const anonymousAccount: Account = {
   logged_in: false,
-  sso_id: "",
-  sso_type: "",
-  username: "",
-  uuid: "",
-  "2fa_enabled": false,
 };
 
 // Context

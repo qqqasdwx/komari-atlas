@@ -2,15 +2,10 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { RPC2Client } from "../lib/rpc2";
-import type { RPC2ConnectionStateType } from "../types/rpc2";
 
 interface RPC2ContextType {
   client: RPC2Client;
-  connectionState: RPC2ConnectionStateType;
   isConnected: boolean;
-  error: string | null;
-  connect: () => Promise<void>;
-  disconnect: () => void;
 }
 
 const RPC2Context = createContext<RPC2ContextType | undefined>(undefined);
@@ -28,7 +23,6 @@ export const RPC2Provider: React.FC<{ children: React.ReactNode }> = ({ children
     return __rpc2_singleton__;
   });
   const [connectionState, setConnectionState] = useState(client.state);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     __rpc2_refcount++;
@@ -36,22 +30,15 @@ export const RPC2Provider: React.FC<{ children: React.ReactNode }> = ({ children
     client.setEventListeners({
       onConnect: () => {
         setConnectionState(client.state);
-        setError(null);
       },
       onDisconnect: () => {
         setConnectionState(client.state);
       },
-      onError: (err) => {
-        setError(err.message);
+      onError: () => {
         setConnectionState(client.state);
       },
-      onReconnecting: (attempt) => {
+      onReconnecting: () => {
         setConnectionState(client.state);
-        console.log(`RPC2 重连尝试 ${attempt}`);
-      },
-      onMessage: (data) => {
-        // 可以在这里处理全局消息
-        console.debug("RPC2 消息:", data);
       },
     });
 
@@ -65,31 +52,13 @@ export const RPC2Provider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [client]);
 
-  const connect = async () => {
-    try {
-      setError(null);
-      await client.connect();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "连接失败");
-      throw err;
-    }
-  };
-
-  const disconnect = () => {
-    client.disconnect();
-  };
-
   const isConnected = connectionState === "connected";
 
   return (
     <RPC2Context.Provider
       value={{
         client,
-        connectionState,
         isConnected,
-        error,
-        connect,
-        disconnect
       }}
     >
       {children}
@@ -116,26 +85,15 @@ export const useRPC2Call = () => {
     options?: any
   ): Promise<TResult> => client.call(method, params, options), [client]);
 
-  const callViaWebSocket = useCallback(<TParams = any, TResult = any>(
-    method: string,
-    params?: TParams,
-    options?: any
-  ): Promise<TResult> => client.callViaWebSocket(method, params, options), [client]);
-
   const callViaHTTP = useCallback(<TParams = any, TResult = any>(
     method: string,
     params?: TParams,
     options?: any
   ): Promise<TResult> => client.callViaHTTP(method, params, options), [client]);
 
-  const batchCall = useCallback((requests: Array<{ method: string; params?: any; notification?: boolean }>) =>
-    client.batchCall(requests), [client]);
-
   return {
     call,
-    callViaWebSocket,
     callViaHTTP,
-    batchCall,
     isConnected,
   };
 }

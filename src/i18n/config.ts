@@ -24,7 +24,7 @@ const resources = {
 
 const supportedLanguages = Object.keys(resources);
 
-export function normalizeLanguage(language: string | null | undefined): string | undefined {
+function normalizeLanguage(language: string | null | undefined): string | undefined {
   if (!language) {
     return undefined;
   }
@@ -91,4 +91,3 @@ i18next
   });
 
 export default i18next;
-export { resources };

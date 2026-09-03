@@ -1,33 +1,18 @@
 "use client";
 
 import React from "react";
-//import { useRPC2Call } from "./RPC2Context";
 
-export interface PublicInfo {
-  allow_cors: boolean;
-  custom_body: string;
-  custom_head: string;
-  description: string;
+interface PublicInfo {
   disable_password_login: boolean;
-  oauth_provider: string;
-  oauth_enable: boolean;
+  oauth_provider?: string;
+  oauth_enable?: boolean;
   o_auth_provider?: string;
   o_auth_enabled?: boolean;
-  ping_record_preserve_time: number;
-  record_enabled: boolean;
-  record_preserve_time: number;
-  sitename: string;
-  private_site: boolean;
-  theme: string;
-  theme_settings: any;
-  [property: string]: any;
+  sitename?: string;
 }
 
 interface Response {
-  data: PublicInfo;
-  message: string;
-  status: string;
-  [property: string]: any;
+  data?: PublicInfo;
 }
 
 interface PublicInfoContextType {
@@ -47,8 +32,6 @@ export const PublicInfoProvider: React.FC<{ children: React.ReactNode }> = ({
   const [publicInfo, setPublicInfo] = React.useState<PublicInfo | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
-  //const { call } = useRPC2Call();
-  // 公共信息使用public，避免在私有站点的情况下RPC返回401
   const refresh = () => {
     setError(null);
     setIsLoading(true);

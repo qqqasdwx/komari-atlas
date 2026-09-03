@@ -5,7 +5,6 @@ export interface AtlasNode {
   name: string;
   cpu_name: string;
   cpu_cores: number;
-  cpu_physical_cores: number;
   virtualization: string;
   arch: string;
   os: string;
@@ -23,51 +22,11 @@ export interface AtlasNode {
   weight: number;
   price: number;
   billing_cycle: number;
-  auto_renewal: boolean;
   currency: string;
   expired_at: string;
   group: string;
-  tags: string;
   traffic_limit: number;
   traffic_limit_type: TrafficLimitType;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface PingSnapshot {
-  name: string;
-  latest: number;
-  avg: number;
-  tail: number;
-  loss: number;
-  min: number;
-  max: number;
-}
-
-export interface LiveNodeSnapshot {
-  client: string;
-  time: string;
-  online: boolean;
-  cpu: number;
-  gpu: number;
-  ram: number;
-  ram_total: number;
-  swap: number;
-  swap_total: number;
-  load: number;
-  load5: number;
-  load15: number;
-  disk: number;
-  disk_total: number;
-  net_in: number;
-  net_out: number;
-  net_total_up: number;
-  net_total_down: number;
-  process: number;
-  connections: number;
-  connections_udp: number;
-  uptime: number;
-  ping: Record<string, PingSnapshot>;
 }
 
 export interface PingTask {

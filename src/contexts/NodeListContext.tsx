@@ -31,7 +31,6 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
   const { call } = useRPC2Call();
 
   const refresh = React.useCallback(() => {
-    // setIsLoading(true);
     setError(null);
     // 通过 RPC2 获取节点基本信息
     call<{ uuid?: string }, Record<string, any>>("common:getNodes")
@@ -45,7 +44,6 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           uuid: String(n.uuid ?? ""),
           name: String(n.name ?? n.uuid ?? ""),
           cpu_name: String(n.cpu_name ?? ""),
-          cpu_physical_cores: n.cpu_physical_cores ?? n.cpu_cores ?? 0,
           virtualization: String(n.virtualization ?? ""),
           arch: String(n.arch ?? ""),
           cpu_cores: Number(n.cpu_cores) || 0,
@@ -59,16 +57,12 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           version: String(n.version ?? ""),
           weight: n.weight ?? 0,
           price: n.price ?? 0,
-          tags: String(n.tags ?? ""),
           billing_cycle: n.billing_cycle ?? 0,
-          auto_renewal: Boolean(n.auto_renewal),
           currency: String(n.currency ?? ""),
           group: String(n.group ?? ""),
           traffic_limit: normalizeTrafficLimit(n.traffic_limit),
           traffic_limit_type: n.traffic_limit_type ?? "sum",
           expired_at: String(n.expired_at ?? ""),
-          created_at: String(n.created_at ?? ""),
-          updated_at: String(n.updated_at ?? ""),
           ipv4: String(n.ipv4 ?? ""),
           ipv6: String(n.ipv6 ?? ""),
           remark: String(n.remark ?? ""),

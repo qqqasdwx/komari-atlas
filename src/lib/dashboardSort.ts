@@ -1,21 +1,18 @@
 import { percentage } from "./atlas";
 import { resolveExpiryTimestamp } from "./expiry";
 import type { AtlasNode } from "../types/atlas";
-import type { Record as LiveRecord } from "../types/LiveData";
+import type { LiveRecord } from "../types/LiveData";
 
-export const DASHBOARD_SORT_KEYS = [
-  "default",
-  "cpu",
-  "memory",
-  "disk",
-  "tcp",
-  "upload",
-  "download",
-  "monthlyCost",
-  "expiry",
-] as const;
-
-export type DashboardSortKey = (typeof DASHBOARD_SORT_KEYS)[number];
+export type DashboardSortKey =
+  | "default"
+  | "cpu"
+  | "memory"
+  | "disk"
+  | "tcp"
+  | "upload"
+  | "download"
+  | "monthlyCost"
+  | "expiry";
 export type DashboardSortDirection = "asc" | "desc";
 
 type MonthlyCostMap = Record<string, { monthlyCost: number | null } | undefined>;

@@ -1,8 +1,6 @@
 import type {
   JSONRPC2Request,
   JSONRPC2Response,
-  JSONRPC2BatchRequest,
-  JSONRPC2BatchResponse,
   RPC2ConnectionStateType,
   RPC2ConnectionOptions,
   RPC2CallOptions,
@@ -251,48 +249,6 @@ export class RPC2Client {
   }
 
   /**
-   * 批量调用（仅支持 HTTP）
-   */
-  async batchCall(requests: Array<{
-    method: string;
-    params?: any;
-    notification?: boolean;
-  }>): Promise<any[]> {
-    const batchRequest: JSONRPC2BatchRequest = requests.map(req => ({
-      jsonrpc: "2.0",
-      method: req.method,
-      params: req.params,
-      id: req.notification ? undefined : this.generateRequestId(),
-    }));
-
-    try {
-      const response = await fetch(this.baseUrl, {
-        method: "POST",
-        headers: this.options.headers,
-        body: JSON.stringify(batchRequest),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const jsonResponse: JSONRPC2BatchResponse = await response.json();
-      
-      return jsonResponse.map(res => {
-        if ("error" in res) {
-          throw new Error(`RPC Error ${res.error.code}: ${res.error.message}`);
-        }
-        return res.result;
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error("批量请求失败", { cause: error });
-    }
-  }
-
-  /**
    * 自动选择调用方式（优先使用 WebSocket）
    */
   async call<TParams = any, TResult = any>(
@@ -346,7 +302,6 @@ export class RPC2Client {
       try {
         const data = JSON.parse(event.data);
         this.handleMessage(data);
-        this.eventListeners.onMessage?.(data);
       } catch (error) {
         console.error("解析 WebSocket 消息失败:", error);
       }

@@ -1,7 +1,7 @@
 const DAY_MS = 24 * 60 * 60 * 1000;
 const LONG_TERM_DAYS = 36500;
 
-export type ExpiryState =
+type ExpiryState =
   | { kind: "unset" }
   | { kind: "long-term" }
   | { kind: "scheduled"; timestamp: number; daysRemaining: number }
