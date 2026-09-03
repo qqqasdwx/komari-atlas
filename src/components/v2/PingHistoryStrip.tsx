@@ -57,7 +57,7 @@ export function PingHistoryStrip({
     <div className="min-w-0 space-y-1">
       <div className="text-[10px] text-muted-foreground">{label}</div>
       <div
-        className="grid h-4 gap-0.5"
+        className="relative z-30 grid h-4 gap-0.5"
         style={{ gridTemplateColumns: `repeat(${displayBuckets.length}, minmax(0, 1fr))` }}
       >
         {displayBuckets.map((bucket, index) => {
@@ -82,7 +82,7 @@ export function PingHistoryStrip({
             <span
               key={`${bucket.start}-${index}`}
               className={cn(
-                "min-w-0 rounded-[2px]",
+                "min-w-0 cursor-help rounded-[2px]",
                 metricTone(metric, value),
                 hasPartialCoverage && "ring-1 ring-inset ring-amber-300/90",
               )}
