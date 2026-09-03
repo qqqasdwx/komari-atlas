@@ -27,6 +27,18 @@ Place Vitest files beside the code under test as `*.test.ts` or `*.test.tsx`; no
 
 Use short, action-oriented subjects such as `Fix #57`; locale automation uses `chore(i18n): ...`. Create one focused local commit per completed task and never push without explicit instruction. Pull requests should describe behavior and validation, link issues, and include before/after screenshots for UI changes.
 
+## Automatic Release Policy
+
+Completing and validating a user-requested product feature or bug fix constitutes standing explicit authorization to publish the next patch release. Do not wait for a separate request to push or release.
+
+- Apply this policy to completed changes that affect the theme's runtime behavior or user interface. Do not auto-release analysis, documentation-only changes, experiments, local development setup, or reference-repository updates.
+- Run lint, type checking, tests, and a production build before publishing. Stop and report the failure instead of releasing when a required check fails.
+- Increment the patch version in `package.json`, `package-lock.json`, and `komari-theme.json`, then create a release commit and matching `vX.Y.Z` tag.
+- Push `main` and the tag, wait for the main CI workflow to pass, and create a non-draft, non-prerelease GitHub Release with concise release notes.
+- Wait for the release workflow to upload `komari-atlas.zip`. Download the uploaded asset, verify the packaged theme version, and calculate its SHA-256 digest.
+- Update `v1.json` with the released version, download URL, and verified digest in a separate market-metadata commit. Push it, wait for CI, and verify the remote release asset and market metadata before reporting completion.
+- Publish one patch release after the entire requested change set is complete; do not release partially implemented work.
+
 ## Configuration & Security
 
 Set `NEXT_PUBLIC_API_TARGET` in ignored `.env.local`; it defaults to `http://127.0.0.1:25774`. Never commit credentials, environment files, or generated theme archives.
