@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -69,6 +70,7 @@ export function PingHistoryStrip({
   thresholds: PingTaskThresholds;
 }) {
   const { t, i18n } = useTranslation();
+  const [activeBucketIndex, setActiveBucketIndex] = useState<number | null>(null);
   const displayBuckets = buckets?.length ? buckets : EMPTY_BUCKETS;
   const locale = i18n.resolvedLanguage || "en";
   const latestValue = displayBuckets.at(-1)?.[metric] ?? null;
@@ -76,7 +78,7 @@ export function PingHistoryStrip({
   const latestLabel = formatMetricValue(metric, latestValue, "--");
 
   return (
-    <TooltipProvider>
+    <TooltipProvider disableHoverableContent delayDuration={0} skipDelayDuration={0}>
       <div className="min-w-0 space-y-1">
         <div className="flex items-center justify-between gap-2 text-[10px]">
           <span className="text-muted-foreground">{label}</span>
@@ -106,11 +108,31 @@ export function PingHistoryStrip({
               && bucket.coverage < PARTIAL_COVERAGE_THRESHOLD;
             const tone = pingMetricTone(metric, value, thresholds);
             return (
-              <Tooltip key={`${bucket.start}-${index}`}>
+              <Tooltip
+                key={`${bucket.start}-${index}`}
+                open={activeBucketIndex === index}
+                onOpenChange={(open) => {
+                  setActiveBucketIndex((currentIndex) => (
+                    open ? index : currentIndex === index ? null : currentIndex
+                  ));
+                }}
+              >
                 <TooltipTrigger asChild>
                   <span
                     className="group/ping-bucket relative min-w-0 cursor-help outline-none hover:z-10"
                     aria-label={title}
+                    onPointerEnter={() => setActiveBucketIndex(index)}
+                    onPointerLeave={() => {
+                      setActiveBucketIndex((currentIndex) => (
+                        currentIndex === index ? null : currentIndex
+                      ));
+                    }}
+                    onFocus={() => setActiveBucketIndex(index)}
+                    onBlur={() => {
+                      setActiveBucketIndex((currentIndex) => (
+                        currentIndex === index ? null : currentIndex
+                      ));
+                    }}
                   >
                     <span
                       className={cn(
@@ -124,7 +146,7 @@ export function PingHistoryStrip({
                     />
                   </span>
                 </TooltipTrigger>
-                <TooltipContent className="w-48">
+                <TooltipContent className="w-48 data-[state=closed]:hidden">
                   {timeLabel && (
                     <div className="font-medium tabular-nums">{timeLabel}</div>
                   )}

@@ -156,7 +156,14 @@ export function NodeCard({
   };
 
   return (
-    <Card className="atlas-node-card relative h-full overflow-hidden border-border/60 p-0 transition duration-200 hover:-translate-y-0.5 hover:border-primary/45 hover:shadow-lg focus-within:ring-2 focus-within:ring-primary">
+    <Card
+      className={cn(
+        "atlas-node-card relative h-full overflow-hidden p-0 transition duration-200 hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-primary",
+        online
+          ? "border-border/60 hover:border-primary/45 hover:shadow-lg"
+          : "border-red-500/80 shadow-[0_0_0_1px_rgb(239_68_68/0.18),0_0_18px_rgb(239_68_68/0.22)] hover:border-red-400 hover:shadow-[0_0_0_1px_rgb(248_113_113/0.28),0_0_24px_rgb(239_68_68/0.32)]",
+      )}
+    >
       <SpaLink
         href={`/instance/${node.uuid}`}
         className="absolute inset-0 z-20 rounded-[inherit] focus-visible:outline-none"
