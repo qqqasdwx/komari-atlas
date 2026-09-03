@@ -39,6 +39,37 @@ export type RemainingValueSnapshot = {
   skipped: SkippedRemainingValueNode[];
 };
 
+export type NodeValueCalculationInput = {
+  renewalAmount: number;
+  exchangeRate: number;
+  billingMonths: number;
+  expiryDate: string;
+  transactionDate: string;
+  salePrice?: number;
+};
+
+export type NodeValueCalculationResult = {
+  renewalPriceCny: number;
+  annualPriceCny: number;
+  remainingDays: number;
+  remainingValueCny: number;
+  salePriceCny: number | null;
+  premiumAmountCny: number | null;
+  premiumRate: number | null;
+};
+
+export type NodeValueCalculationError =
+  | "invalid_renewal_amount"
+  | "invalid_exchange_rate"
+  | "invalid_billing_cycle"
+  | "invalid_date"
+  | "expiry_not_after_transaction"
+  | "invalid_sale_price";
+
+export type NodeValueCalculation =
+  | { ok: true; result: NodeValueCalculationResult }
+  | { ok: false; error: NodeValueCalculationError };
+
 const SYMBOL_TO_ISO: Record<string, string> = {
   "\u00a5": "CNY",
   "$": "USD",
@@ -52,6 +83,77 @@ const SYMBOL_TO_ISO: Record<string, string> = {
 };
 
 const LONG_TERM_THRESHOLD_MS = 36500 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const FINANCIAL_YEAR_DAYS = 360;
+
+function parseCalendarDate(value: string): number | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const timestamp = Date.UTC(year, month - 1, day);
+  const parsed = new Date(timestamp);
+
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return timestamp;
+}
+
+export function calculateNodeRemainingValue(
+  input: NodeValueCalculationInput,
+): NodeValueCalculation {
+  if (!Number.isFinite(input.renewalAmount) || input.renewalAmount <= 0) {
+    return { ok: false, error: "invalid_renewal_amount" };
+  }
+  if (!Number.isFinite(input.exchangeRate) || input.exchangeRate <= 0) {
+    return { ok: false, error: "invalid_exchange_rate" };
+  }
+  if (!Number.isFinite(input.billingMonths) || input.billingMonths <= 0) {
+    return { ok: false, error: "invalid_billing_cycle" };
+  }
+  if (input.salePrice !== undefined && (!Number.isFinite(input.salePrice) || input.salePrice < 0)) {
+    return { ok: false, error: "invalid_sale_price" };
+  }
+
+  const expiryTimestamp = parseCalendarDate(input.expiryDate);
+  const transactionTimestamp = parseCalendarDate(input.transactionDate);
+  if (expiryTimestamp === null || transactionTimestamp === null) {
+    return { ok: false, error: "invalid_date" };
+  }
+
+  const remainingDays = (expiryTimestamp - transactionTimestamp) / DAY_MS;
+  if (remainingDays <= 0) {
+    return { ok: false, error: "expiry_not_after_transaction" };
+  }
+
+  const renewalPriceCny = input.renewalAmount * input.exchangeRate;
+  const annualPriceCny = renewalPriceCny * (12 / input.billingMonths);
+  const remainingValueCny = (annualPriceCny / FINANCIAL_YEAR_DAYS) * remainingDays;
+  const salePriceCny = input.salePrice ?? null;
+  const premiumAmountCny = salePriceCny === null ? null : salePriceCny - remainingValueCny;
+  const premiumRate = premiumAmountCny === null ? null : premiumAmountCny / remainingValueCny;
+
+  return {
+    ok: true,
+    result: {
+      renewalPriceCny,
+      annualPriceCny,
+      remainingDays,
+      remainingValueCny,
+      salePriceCny,
+      premiumAmountCny,
+      premiumRate,
+    },
+  };
+}
 
 function createSkippedNode(node: NodeBasicInfo, skipReason: SkipReason): SkippedRemainingValueNode {
   return {

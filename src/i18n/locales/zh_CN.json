@@ -656,6 +656,92 @@
       "days": "{{count}} 天",
       "once": "一次性"
     },
+    "calculator": {
+      "backToNodes": "返回节点列表",
+      "calculate": "计算剩余价值",
+      "currencies": {
+        "AUD": "澳元",
+        "CAD": "加拿大元",
+        "CHF": "瑞士法郎",
+        "CNY": "人民币",
+        "EUR": "欧元",
+        "GBP": "英镑",
+        "HKD": "港元",
+        "JPY": "日元",
+        "KRW": "韩元",
+        "SGD": "新加坡元",
+        "USD": "美元"
+      },
+      "cycles": {
+        "1": "月付",
+        "3": "季付",
+        "6": "半年付",
+        "12": "年付",
+        "24": "两年付",
+        "36": "三年付",
+        "48": "四年付",
+        "60": "五年付"
+      },
+      "editAgain": "返回修改",
+      "errors": {
+        "expiry_not_after_transaction": "到期日期必须晚于交易日期",
+        "invalid_billing_cycle": "请选择有效的付款周期",
+        "invalid_date": "请填写有效的交易日期和到期日期",
+        "invalid_exchange_rate": "请输入大于 0 的计算汇率",
+        "invalid_renewal_amount": "请输入大于 0 的续费金额",
+        "invalid_sale_price": "售价不能小于 0"
+      },
+      "fields": {
+        "bandwidth": "带宽",
+        "billingCycle": "付款周期",
+        "cpu": "CPU",
+        "currency": "币种",
+        "customRate": "计算汇率",
+        "expiryDate": "到期日期",
+        "features": "产品特色",
+        "location": "机房位置",
+        "memory": "内存",
+        "productName": "产品名称",
+        "referenceRate": "参考汇率（兑人民币）",
+        "renewalAmount": "续费金额",
+        "salePrice": "售价（人民币，可选）",
+        "storage": "存储",
+        "trafficLimit": "流量限制",
+        "transactionDate": "交易日期",
+        "vendor": "VPS 商家"
+      },
+      "formDescription": "节点估值参数",
+      "nodeExpiryUnset": "未填写到期时间",
+      "nodePriceUnset": "未填写续费价格",
+      "rate": {
+        "loading": "获取中",
+        "stale": "缓存汇率",
+        "unavailable": "暂不可用",
+        "updatedAt": "更新于 {{value}}"
+      },
+      "result": {
+        "annualPrice": "折合年费",
+        "days": "{{count}} 天",
+        "exchangeRate": "计算汇率",
+        "expiryDate": "到期日期",
+        "locationUnset": "机房未填写",
+        "premium": "溢价金额 / 溢价率",
+        "remainingDays": "剩余天数",
+        "remainingValue": "当前剩余价值",
+        "renewalPlan": "续费方案",
+        "renewalPrice": "本周期续费价",
+        "salePrice": "售价",
+        "transactionDate": "交易日期",
+        "vendorUnset": "商家未填写"
+      },
+      "resultDescription": "节点估值结果",
+      "sections": {
+        "calculation": "计算结果",
+        "pricing": "价格与日期",
+        "product": "产品信息",
+        "specifications": "配置与网络"
+      }
+    },
     "card": {
       "expiredValue": "剩余价值 0",
       "originalPrice": "原价 {{amount}} / {{cycle}}",
@@ -678,6 +764,7 @@
       "skipped": "未纳入 {{count}}"
     },
     "monthlyCost": "月成本",
+    "nodeCount": "{{count}} 台节点",
     "placeholderPending": "暂未换算",
     "rateProvider": "在线汇率由 Frankfurter 提供，仅会在你打开计算器后发起查询。",
     "rateStatus": {
@@ -694,6 +781,7 @@
     "section": {
       "active": "可计算节点",
       "expired": "已过期节点",
+      "nodes": "节点",
       "skipped": "未纳入节点"
     },
     "skipReason": {

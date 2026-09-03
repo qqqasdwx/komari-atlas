@@ -1043,6 +1043,7 @@
     "total": "Total Remaining Value",
     "totalValue": "Total Value",
     "monthlyCost": "Monthly Cost",
+    "nodeCount": "{{count}} nodes",
     "placeholderPending": "Pending conversion",
     "refreshRates": "Refresh Rates",
     "rateProvider": "Online exchange rates are powered by Frankfurter and are only requested after you open the calculator.",
@@ -1050,6 +1051,92 @@
     "billingCycle": {
       "once": "One-time",
       "days": "{{count}} days"
+    },
+    "calculator": {
+      "backToNodes": "Back to nodes",
+      "calculate": "Calculate remaining value",
+      "currencies": {
+        "AUD": "Australian dollar",
+        "CAD": "Canadian dollar",
+        "CHF": "Swiss franc",
+        "CNY": "Chinese yuan",
+        "EUR": "Euro",
+        "GBP": "British pound",
+        "HKD": "Hong Kong dollar",
+        "JPY": "Japanese yen",
+        "KRW": "South Korean won",
+        "SGD": "Singapore dollar",
+        "USD": "US dollar"
+      },
+      "cycles": {
+        "1": "Monthly",
+        "3": "Quarterly",
+        "6": "Every six months",
+        "12": "Yearly",
+        "24": "Every two years",
+        "36": "Every three years",
+        "48": "Every four years",
+        "60": "Every five years"
+      },
+      "editAgain": "Edit values",
+      "errors": {
+        "expiry_not_after_transaction": "The expiry date must be later than the transaction date",
+        "invalid_billing_cycle": "Select a valid billing cycle",
+        "invalid_date": "Enter valid transaction and expiry dates",
+        "invalid_exchange_rate": "Enter an exchange rate greater than 0",
+        "invalid_renewal_amount": "Enter a renewal amount greater than 0",
+        "invalid_sale_price": "The sale price cannot be negative"
+      },
+      "fields": {
+        "bandwidth": "Bandwidth",
+        "billingCycle": "Billing cycle",
+        "cpu": "CPU",
+        "currency": "Currency",
+        "customRate": "Calculation rate",
+        "expiryDate": "Expiry date",
+        "features": "Product features",
+        "location": "Datacenter location",
+        "memory": "Memory",
+        "productName": "Product name",
+        "referenceRate": "Reference rate to CNY",
+        "renewalAmount": "Renewal amount",
+        "salePrice": "Sale price in CNY (optional)",
+        "storage": "Storage",
+        "trafficLimit": "Traffic limit",
+        "transactionDate": "Transaction date",
+        "vendor": "VPS vendor"
+      },
+      "formDescription": "Node valuation inputs",
+      "nodeExpiryUnset": "Expiry not set",
+      "nodePriceUnset": "Renewal price not set",
+      "rate": {
+        "loading": "Loading",
+        "stale": "Cached rate",
+        "unavailable": "Unavailable",
+        "updatedAt": "Updated {{value}}"
+      },
+      "result": {
+        "annualPrice": "Annualized cost",
+        "days": "{{count}} days",
+        "exchangeRate": "Calculation rate",
+        "expiryDate": "Expiry date",
+        "locationUnset": "Datacenter not set",
+        "premium": "Premium / premium rate",
+        "remainingDays": "Days remaining",
+        "remainingValue": "Current remaining value",
+        "renewalPlan": "Renewal plan",
+        "renewalPrice": "Renewal cost per cycle",
+        "salePrice": "Sale price",
+        "transactionDate": "Transaction date",
+        "vendorUnset": "Vendor not set"
+      },
+      "resultDescription": "Node valuation result",
+      "sections": {
+        "calculation": "Calculation",
+        "pricing": "Price and dates",
+        "product": "Product details",
+        "specifications": "Specifications and network"
+      }
     },
     "remainingTime": {
       "longTerm": "Long term",
@@ -1081,7 +1168,8 @@
     "section": {
       "active": "Included Nodes",
       "skipped": "Skipped Nodes",
-      "expired": "Expired Nodes"
+      "expired": "Expired Nodes",
+      "nodes": "Nodes"
     },
     "empty": {
       "none": "There are no nodes to display right now",
