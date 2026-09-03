@@ -5,6 +5,7 @@ import {
   compareVersions,
   getTrafficUsed,
   normalizeAtlasSettings,
+  orderPingTasksByCardSelection,
   resolveBillingWindow,
   resolveCardPingTaskIds,
   resourceTone,
@@ -74,6 +75,24 @@ describe("resolveCardPingTaskIds", () => {
       "node-a",
     )).toEqual([7, 3]);
     expect(resolveCardPingTaskIds({ cardPingTaskIds: [] }, tasks, "node-a")).toEqual([]);
+  });
+});
+
+describe("orderPingTasksByCardSelection", () => {
+  const tasks = [
+    { id: 3, weight: 3, name: "Global", clients: ["node-a"], default_on: false, type: "icmp", interval: 60 },
+    { id: 7, weight: 2, name: "Asia", clients: ["node-a"], default_on: false, type: "icmp", interval: 60 },
+    { id: 9, weight: 1, name: "Europe", clients: ["node-a"], default_on: false, type: "icmp", interval: 60 },
+    { id: 11, weight: 0, name: "Backup", clients: ["node-a"], default_on: false, type: "icmp", interval: 60 },
+  ];
+
+  it("puts displayed tasks first in card order and preserves the remaining order", () => {
+    expect(orderPingTasksByCardSelection(tasks, [9, 3]).map((task) => task.id)).toEqual([
+      9,
+      3,
+      7,
+      11,
+    ]);
   });
 });
 

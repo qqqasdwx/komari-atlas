@@ -49,6 +49,7 @@ import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
 import { useLiveData } from "@/contexts/LiveDataContext";
 import { useNodeList } from "@/contexts/NodeListContext";
 import {
+  orderPingTasksByCardSelection,
   percentage,
   resolveCardPingTaskIds,
   resourceTone,
@@ -431,6 +432,10 @@ export function NodeDetail({ uuid }: { uuid: string }) {
     pingTasks,
     uuid,
   );
+  const orderedSettingsPingTasks = orderPingTasksByCardSelection(
+    availablePingTasks,
+    selectedPingTaskIds,
+  );
   const nodeSettings = persistedNodeSettings || { cardPingTaskIds: selectedPingTaskIds };
   const updatePingThresholds = (
     taskId: number,
@@ -445,9 +450,10 @@ export function NodeDetail({ uuid }: { uuid: string }) {
   };
   const traffic = trafficByNode[uuid] || { status: "loading" as const };
   const trafficResetDay = traffic.status === "unconfigured" ? undefined : traffic.resetDay;
-  const cpu = live?.cpu.usage ?? 0;
-  const ramPercent = live ? percentage(live.ram.used, node.mem_total) : 0;
-  const diskPercent = live ? percentage(live.disk.used, node.disk_total) : 0;
+  const currentLive = live?.online ? live : undefined;
+  const cpu = currentLive?.cpu.usage ?? 0;
+  const ramPercent = currentLive ? percentage(currentLive.ram.used, node.mem_total) : 0;
+  const diskPercent = currentLive ? percentage(currentLive.disk.used, node.disk_total) : 0;
   const assetValue = cnyByNode[uuid];
   const remainingValue = assetValue?.remainingValue == null
     ? "--"
@@ -514,15 +520,15 @@ export function NodeDetail({ uuid }: { uuid: string }) {
             <section className="atlas-detail-section">
               <div className="atlas-section-heading">
                 <div><span className="atlas-section-index">01</span><h2>{t("atlas.detail.liveStatus")}</h2></div>
-                <span>{live?.updated_at ? new Date(live.updated_at).toLocaleString(locale) : t("atlas.noData")}</span>
+                <span>{currentLive?.updated_at ? new Date(currentLive.updated_at).toLocaleString(locale) : t("atlas.noData")}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-                <DetailMetric icon={Cpu} label="CPU" value={live ? `${cpu.toFixed(1)}%` : "--"} tone={live ? resourceTone(cpu, 75, 90) : undefined} />
-                <DetailMetric icon={MemoryStick} label={t("atlas.metrics.memory")} value={live ? `${ramPercent.toFixed(1)}%` : "--"} tone={live ? resourceTone(ramPercent, 75, 90) : undefined} />
-                <DetailMetric icon={HardDrive} label={t("atlas.metrics.disk")} value={live ? `${diskPercent.toFixed(1)}%` : "--"} tone={live ? resourceTone(diskPercent, 80, 90) : undefined} />
-                <DetailMetric icon={ArrowUp} label={t("atlas.metrics.upload")} value={live ? `${formatBytes(live.network.up)}/s` : "--"} />
-                <DetailMetric icon={ArrowDown} label={t("atlas.metrics.download")} value={live ? `${formatBytes(live.network.down)}/s` : "--"} />
-                <DetailMetric icon={Gauge} label={t("atlas.detail.uptime")} value={live ? formatUptime(live.uptime, t) : "--"} />
+                <DetailMetric icon={Cpu} label="CPU" value={currentLive ? `${cpu.toFixed(1)}%` : "--"} tone={currentLive ? resourceTone(cpu, 75, 90) : undefined} />
+                <DetailMetric icon={MemoryStick} label={t("atlas.metrics.memory")} value={currentLive ? `${ramPercent.toFixed(1)}%` : "--"} tone={currentLive ? resourceTone(ramPercent, 75, 90) : undefined} />
+                <DetailMetric icon={HardDrive} label={t("atlas.metrics.disk")} value={currentLive ? `${diskPercent.toFixed(1)}%` : "--"} tone={currentLive ? resourceTone(diskPercent, 80, 90) : undefined} />
+                <DetailMetric icon={ArrowUp} label={t("atlas.metrics.upload")} value={currentLive ? `${formatBytes(currentLive.network.up)}/s` : "--"} />
+                <DetailMetric icon={ArrowDown} label={t("atlas.metrics.download")} value={currentLive ? `${formatBytes(currentLive.network.down)}/s` : "--"} />
+                <DetailMetric icon={Gauge} label={t("atlas.detail.uptime")} value={currentLive ? formatUptime(currentLive.uptime, t) : "--"} />
               </div>
             </section>
 
@@ -586,7 +592,7 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 {availablePingTasks.length === 0 ? (
                   <div className="atlas-glass-panel p-5 text-sm text-muted-foreground">{t("atlas.detail.noPingTasks")}</div>
                 ) : availablePingTasks.map((task) => {
-                  const snapshot = live?.ping?.[String(task.id)];
+                  const snapshot = currentLive?.ping?.[String(task.id)];
                   return (
                     <article key={task.id} className="atlas-glass-panel p-4">
                       <div className="flex items-center gap-2 text-sm font-medium">
@@ -711,7 +717,7 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                           <span>{t("atlas.ping.currentThresholds")}</span>
                           <span className="sr-only">{t("common.action")}</span>
                         </div>
-                        {availablePingTasks.map((task) => {
+                        {orderedSettingsPingTasks.map((task) => {
                           const checked = selectedPingTaskIds.includes(task.id);
                           const thresholds = resolvePingTaskThresholds(nodeSettings, task.id);
                           return (

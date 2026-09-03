@@ -31,7 +31,8 @@ function sortValue(
   monthlyCosts: MonthlyCostMap,
   key: Exclude<DashboardSortKey, "default">,
 ): number | null {
-  const current = live[node.uuid];
+  const snapshot = live[node.uuid];
+  const current = snapshot?.online ? snapshot : undefined;
 
   switch (key) {
     case "cpu":

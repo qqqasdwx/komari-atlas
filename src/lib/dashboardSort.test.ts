@@ -136,6 +136,19 @@ describe("sortDashboardNodeIds", () => {
     expect(sorted("default", "desc")).toEqual(["a", "b", "missing"]);
   });
 
+  it("treats cached metrics from offline nodes as missing", () => {
+    const offline = live({ cpu: 100 });
+    offline.online = false;
+
+    expect(sortDashboardNodeIds(
+      [node("offline"), node("online")],
+      { offline, online: live({ cpu: 50 }) },
+      {},
+      "cpu",
+      "desc",
+    )).toEqual(["online", "offline"]);
+  });
+
   it("returns a snapshot that is unaffected by later live updates", () => {
     const mutableLive = {
       a: live({ cpu: 10 }),

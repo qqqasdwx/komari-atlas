@@ -88,15 +88,16 @@ export function NodeCard({
   const { trafficByNode } = useBillingTraffic();
   const { historiesByKey } = useCardPingHistory();
   const online = Boolean(live?.online);
-  const cpu = live ? live.cpu.usage : null;
-  const ram = live && node.mem_total > 0
-    ? percentage(live.ram.used, node.mem_total)
+  const currentLive = online ? live : undefined;
+  const cpu = currentLive ? currentLive.cpu.usage : null;
+  const ram = currentLive && node.mem_total > 0
+    ? percentage(currentLive.ram.used, node.mem_total)
     : null;
-  const swap = live && node.swap_total > 0
-    ? percentage(live.swap.used, node.swap_total)
+  const swap = currentLive && node.swap_total > 0
+    ? percentage(currentLive.swap.used, node.swap_total)
     : null;
-  const disk = live && node.disk_total > 0
-    ? percentage(live.disk.used, node.disk_total)
+  const disk = currentLive && node.disk_total > 0
+    ? percentage(currentLive.disk.used, node.disk_total)
     : null;
   const cpuTone = cpu === null ? "neutral" : resourceTone(cpu, 75, 90);
   const ramTone = ram === null ? "neutral" : resourceTone(ram, 75, 90);
@@ -200,7 +201,7 @@ export function NodeCard({
             <span className="flex max-w-40 items-center gap-1 text-[10px] text-muted-foreground">
               <Clock3 className="h-3 w-3 shrink-0" />
               <span className="truncate">
-                {t("atlas.metrics.uptime")} {live ? formatUptime(live.uptime, t) : "--"}
+                {t("atlas.metrics.uptime")} {currentLive ? formatUptime(currentLive.uptime, t) : "--"}
               </span>
             </span>
           </div>
@@ -214,38 +215,38 @@ export function NodeCard({
                 label={t("atlas.metrics.memory")}
                 value={ram}
                 tone={ramTone}
-                detail={`${live ? formatBytes(live.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
+                detail={`${currentLive ? formatBytes(currentLive.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
               />
               <ResourceBar
                 label={t("atlas.metrics.disk")}
                 value={disk}
                 tone={diskTone}
-                detail={`${live ? formatBytes(live.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
+                detail={`${currentLive ? formatBytes(currentLive.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
               />
               <ResourceBar
                 label={t("atlas.metrics.swap")}
                 value={swap}
                 tone={swapTone}
-                detail={`${live ? formatBytes(live.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
+                detail={`${currentLive ? formatBytes(currentLive.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
               />
             </div>
 
             <section className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,.7fr)_minmax(0,.7fr)] gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-[11px]">
               <div className="min-w-0">
                 <div className="flex items-center gap-1 text-muted-foreground"><ArrowUp className="h-3 w-3" />{t("atlas.metrics.upload")}</div>
-                <div className="mt-1 truncate font-semibold tabular-nums">{live ? `${formatBytes(live.network.up)}/s` : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{currentLive ? `${formatBytes(currentLive.network.up)}/s` : "--"}</div>
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1 text-muted-foreground"><ArrowDown className="h-3 w-3" />{t("atlas.metrics.download")}</div>
-                <div className="mt-1 truncate font-semibold tabular-nums">{live ? `${formatBytes(live.network.down)}/s` : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{currentLive ? `${formatBytes(currentLive.network.down)}/s` : "--"}</div>
               </div>
               <div className="min-w-0">
                 <div className="text-muted-foreground">TCP</div>
-                <div className="mt-1 truncate font-semibold tabular-nums">{live ? live.connections.tcp : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{currentLive ? currentLive.connections.tcp : "--"}</div>
               </div>
               <div className="min-w-0">
                 <div className="text-muted-foreground">UDP</div>
-                <div className="mt-1 truncate font-semibold tabular-nums">{live ? live.connections.udp : "--"}</div>
+                <div className="mt-1 truncate font-semibold tabular-nums">{currentLive ? currentLive.connections.udp : "--"}</div>
               </div>
             </section>
 

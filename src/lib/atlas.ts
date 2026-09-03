@@ -102,6 +102,23 @@ export function resolveCardPingTaskIds(
   return nodeSettings.cardPingTaskIds.filter((taskId) => availableIdSet.has(taskId));
 }
 
+export function orderPingTasksByCardSelection(
+  pingTasks: PingTask[],
+  selectedTaskIds: number[],
+): PingTask[] {
+  const selectedRank = new Map(selectedTaskIds.map((taskId, index) => [taskId, index]));
+
+  return pingTasks
+    .map((task, index) => ({ task, index, rank: selectedRank.get(task.id) }))
+    .sort((left, right) => {
+      if (left.rank === undefined && right.rank === undefined) return left.index - right.index;
+      if (left.rank === undefined) return 1;
+      if (right.rank === undefined) return -1;
+      return left.rank - right.rank;
+    })
+    .map(({ task }) => task);
+}
+
 function daysInMonth(year: number, monthIndex: number): number {
   return new Date(Date.UTC(year, monthIndex + 1, 0)).getUTCDate();
 }
