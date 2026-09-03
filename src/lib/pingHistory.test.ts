@@ -43,11 +43,30 @@ describe("buildCardPingHistories", () => {
       start: "2026-09-01T00:00:00.000Z",
       end: "2026-09-01T01:00:00.000Z",
       loss: 25,
+      coverage: null,
     });
     expect(history.buckets[0].latency).toBeCloseTo(50, 8);
     expect(history.buckets[1]).toMatchObject({ latency: 60, loss: 0 });
     expect(history.buckets[2]).toMatchObject({ latency: null, loss: null });
     expect(cardPingHistoryKey("node-a", 7)).toBe("node-a:7");
+  });
+
+  it("reports partial sample coverage from the Ping task interval", () => {
+    const histories = buildCardPingHistories(response([
+      series("ping.latency_ms", [
+        { time: "2026-09-01T02:05:00.000Z", value: 35, count: 30 },
+      ], "3"),
+      series("ping.loss", [
+        { time: "2026-09-01T02:05:00.000Z", value: 0, count: 30 },
+      ], "3"),
+    ]), 24, 60);
+
+    expect(histories["node-a:3"].buckets[2]).toMatchObject({
+      latency: 35,
+      loss: 0,
+      coverage: 0.5,
+    });
+    expect(histories["node-a:3"].buckets[3].coverage).toBe(0);
   });
 
   it("combines several metric points in the same display bucket by sample count", () => {
@@ -86,6 +105,19 @@ describe("buildCardPingHistories", () => {
       latency: null,
       loss: null,
     });
+  });
+
+  it("does not treat explicit empty aggregates as real samples", () => {
+    const histories = buildCardPingHistories(response([
+      series("ping.latency_ms", [
+        { time: "2026-09-01T02:05:00.000Z", value: 0, count: 0 },
+      ], "3"),
+      series("ping.loss", [
+        { time: "2026-09-01T02:05:00.000Z", value: 0, count: 0 },
+      ], "3"),
+    ]));
+
+    expect(histories).toEqual({});
   });
 
   it("ignores invalid task IDs, timestamps and values", () => {

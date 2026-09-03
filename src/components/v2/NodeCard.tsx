@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, CalendarDays, Radio } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, Clock3, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
@@ -20,6 +20,7 @@ import {
 } from "@/lib/atlas";
 import { resolveExpiry } from "@/lib/expiry";
 import { cardPingHistoryKey } from "@/lib/pingHistory";
+import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { Record as LiveRecord } from "@/types/LiveData";
@@ -178,14 +179,22 @@ export function NodeCard({
               </div>
             )}
           </div>
-          <span className={cn(
-            "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium",
-            online
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-              : "border-red-500/30 bg-red-500/10 text-red-500",
-          )}>
-            {online ? t("atlas.status.online") : t("atlas.status.offline")}
-          </span>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span className={cn(
+              "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+              online
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                : "border-red-500/30 bg-red-500/10 text-red-500",
+            )}>
+              {online ? t("atlas.status.online") : t("atlas.status.offline")}
+            </span>
+            <span className="flex max-w-40 items-center gap-1 text-[10px] text-muted-foreground">
+              <Clock3 className="h-3 w-3 shrink-0" />
+              <span className="truncate">
+                {t("atlas.metrics.uptime")} {live ? formatUptime(live.uptime, t) : "--"}
+              </span>
+            </span>
+          </div>
         </div>
 
         <div className="atlas-node-card-body grid gap-4 p-4 sm:grid-cols-2 sm:gap-0">

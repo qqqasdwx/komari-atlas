@@ -18,6 +18,7 @@ import type { CardPingHistory, MetricsResponse } from "@/types/atlas";
 const REFRESH_INTERVAL_MS = 60 * 1000;
 const PING_WINDOW_HOURS = 24;
 const PING_BUCKET_COUNT = 24;
+const PING_QUERY_MAX_POINTS = 288;
 
 interface CardPingHistoryContextValue {
   historiesByKey: Record<string, CardPingHistory>;
@@ -43,7 +44,11 @@ export function CardPingHistoryProvider({ children }: { children: React.ReactNod
     }
     return [...entitiesByTask]
       .sort(([left], [right]) => left - right)
-      .map(([taskId, entityIds]) => ({ taskId, entityIds: [...entityIds].sort() }));
+      .map(([taskId, entityIds]) => ({
+        taskId,
+        entityIds: [...entityIds].sort(),
+        intervalSeconds: pingTasks.find((task) => task.id === taskId)?.interval,
+      }));
   }, [nodeList, pingTasks, settings.nodes]);
 
   useEffect(() => {
@@ -59,8 +64,10 @@ export function CardPingHistoryProvider({ children }: { children: React.ReactNod
       if (running) return;
       running = true;
       try {
-        const responses = await Promise.all(queries.map(({ taskId, entityIds }) =>
-          callViaHTTP<Record<string, unknown>, MetricsResponse>(
+        const responses = await Promise.all(queries.map(async ({ taskId, entityIds, intervalSeconds }) => ({
+          taskId,
+          intervalSeconds,
+          response: await callViaHTTP<Record<string, unknown>, MetricsResponse>(
             "public:queryMetrics",
             {
               metric_keys: ["ping.latency_ms", "ping.loss"],
@@ -68,15 +75,16 @@ export function CardPingHistoryProvider({ children }: { children: React.ReactNod
               tags: { task_id: String(taskId) },
               hours: PING_WINDOW_HOURS,
               aggregation: "avg",
-              max_points: PING_BUCKET_COUNT,
+              max_points: PING_QUERY_MAX_POINTS,
             },
             { timeout: 30_000 },
           ),
-        ));
+        })));
         if (!active) return;
         setHistoriesByKey(Object.assign(
           {},
-          ...responses.map((response) => buildCardPingHistories(response, PING_BUCKET_COUNT)),
+          ...responses.map(({ response, intervalSeconds }) =>
+            buildCardPingHistories(response, PING_BUCKET_COUNT, intervalSeconds)),
         ));
       } catch (error) {
         console.error("Failed to load 24-hour Ping history:", error);

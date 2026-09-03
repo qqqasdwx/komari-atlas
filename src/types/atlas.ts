@@ -85,6 +85,7 @@ export interface CardPingHistoryBucket {
   end: string;
   latency: number | null;
   loss: number | null;
+  coverage: number | null;
 }
 
 export interface CardPingHistory {

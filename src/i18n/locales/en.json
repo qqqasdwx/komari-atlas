@@ -123,11 +123,13 @@
       "download": "Download",
       "memory": "Memory",
       "swap": "Swap",
+      "uptime": "Uptime",
       "upload": "Upload"
     },
     "noData": "No data",
     "noMatchingNodes": "No matching nodes",
     "ping": {
+      "dataCoverage": "Data coverage {{percent}}%",
       "latency": "Latency",
       "loss": "Loss",
       "window24h": "Last 24h"

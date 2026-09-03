@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import { metricSeriesKey, percentage } from "@/lib/atlas";
+import { insertMetricGapMarkers } from "@/lib/chartHistory";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { MetricSeries, MetricsResponse } from "@/types/atlas";
@@ -142,7 +143,7 @@ function buildChart(
       label: metricLabel(series, index, taskNames, t),
       color: CHART_COLORS[index % CHART_COLORS.length],
     });
-    for (const point of series.points) {
+    for (const point of insertMetricGapMarkers(series)) {
       const row = rows.get(point.time) || { time: point.time };
       row[dataKey] = typeof point.value === "number"
         ? transformValue(series.metric_key, point.value, node)

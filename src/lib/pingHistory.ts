@@ -13,6 +13,8 @@ interface BucketAccumulator {
   latencySum: number;
   lossCount: number;
   lossSum: number;
+  reportedLatencyCount: number;
+  reportedLossCount: number;
 }
 
 function normalizeTaskId(taskId: string | number | undefined): string | null {
@@ -21,8 +23,8 @@ function normalizeTaskId(taskId: string | number | undefined): string | null {
 }
 
 function pointCount(point: MetricPoint): number {
-  if (typeof point.count === "number" && Number.isFinite(point.count) && point.count > 0) {
-    return point.count;
+  if (typeof point.count === "number") {
+    return Number.isFinite(point.count) && point.count > 0 ? point.count : 0;
   }
   return point.value == null ? 0 : 1;
 }
@@ -33,6 +35,8 @@ function emptyAccumulators(count: number): BucketAccumulator[] {
     latencySum: 0,
     lossCount: 0,
     lossSum: 0,
+    reportedLatencyCount: 0,
+    reportedLossCount: 0,
   }));
 }
 
@@ -46,6 +50,7 @@ export function cardPingHistoryKey(entityId: string, taskId: string | number): s
 export function buildCardPingHistories(
   response: MetricsResponse,
   bucketCount = 24,
+  expectedIntervalSeconds?: number,
 ): Record<string, CardPingHistory> {
   const startMs = Date.parse(response.start);
   const endMs = Date.parse(response.end);
@@ -83,13 +88,17 @@ export function buildCardPingHistories(
       const bucket = buckets[index];
 
       if (series.metric_key === PING_LATENCY_METRIC) {
-        if (typeof point.value === "number" && Number.isFinite(point.value)) {
+        if (typeof point.count === "number") bucket.reportedLatencyCount += count;
+        if (typeof point.value === "number" && Number.isFinite(point.value) && point.value >= 0) {
           bucket.latencyCount += count;
           bucket.latencySum += point.value * count;
         }
-      } else if (typeof point.value === "number" && Number.isFinite(point.value)) {
-        bucket.lossCount += count;
-        bucket.lossSum += Math.max(0, Math.min(1, point.value)) * count;
+      } else {
+        if (typeof point.count === "number") bucket.reportedLossCount += count;
+        if (typeof point.value === "number" && Number.isFinite(point.value) && point.value >= 0) {
+          bucket.lossCount += count;
+          bucket.lossSum += Math.max(0, Math.min(1, point.value)) * count;
+        }
       }
 
       accumulators.set(key, buckets);
@@ -98,6 +107,14 @@ export function buildCardPingHistories(
 
   const result: Record<string, CardPingHistory> = {};
   for (const [key, buckets] of accumulators) {
+    const hasCountMetadata = buckets.some(
+      (bucket) => bucket.reportedLatencyCount > 0 || bucket.reportedLossCount > 0,
+    );
+    const expectedSamples = typeof expectedIntervalSeconds === "number"
+      && Number.isFinite(expectedIntervalSeconds)
+      && expectedIntervalSeconds > 0
+      ? bucketDuration / 1000 / expectedIntervalSeconds
+      : 0;
     result[key] = {
       buckets: buckets.map((bucket, index): CardPingHistoryBucket => {
         const lossRatio = bucket.lossCount > 0
@@ -115,6 +132,12 @@ export function buildCardPingHistories(
           end: new Date(startMs + bucketDuration * (index + 1)).toISOString(),
           latency: latency !== null && Number.isFinite(latency) && latency >= 0 ? latency : null,
           loss: lossRatio === null ? null : lossRatio * 100,
+          coverage: hasCountMetadata && expectedSamples > 0
+            ? Math.max(0, Math.min(1, Math.max(
+                bucket.reportedLatencyCount,
+                bucket.reportedLossCount,
+              ) / expectedSamples))
+            : null,
         };
       }),
     };

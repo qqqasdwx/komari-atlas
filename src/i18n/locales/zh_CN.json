@@ -123,11 +123,13 @@
       "download": "下载",
       "memory": "内存",
       "swap": "交换空间",
-      "upload": "上传"
+      "upload": "上传",
+      "uptime": "在线时间"
     },
     "noData": "暂无数据",
     "noMatchingNodes": "没有符合条件的节点",
     "ping": {
+      "dataCoverage": "数据完整度 {{percent}}%",
       "latency": "延迟",
       "loss": "丢包",
       "window24h": "最近 24h"

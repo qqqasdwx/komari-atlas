@@ -44,19 +44,11 @@ import {
   type HealthTone,
 } from "@/lib/atlas";
 import { resolveExpiry } from "@/lib/expiry";
+import { formatUptime } from "@/lib/uptime";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/utils/unitHelper";
 
 const RANGES: HistoryRange[] = ["1h", "6h", "24h", "7d", "30d"];
-
-function formatUptime(seconds: number, t: (key: string, options?: Record<string, unknown>) => string) {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "--";
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  return days > 0
-    ? t("atlas.detail.uptimeDays", { days, hours })
-    : t("atlas.detail.uptimeHours", { hours });
-}
 
 function DetailMetric({ icon: Icon, label, value, tone }: {
   icon: typeof Cpu;
