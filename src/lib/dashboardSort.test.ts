@@ -22,6 +22,7 @@ function node(uuid: string, patch: Partial<AtlasNode> = {}): AtlasNode {
     ipv4: "",
     ipv6: "",
     region: "",
+    tags: "",
     remark: "",
     public_remark: "",
     mem_total: 100,

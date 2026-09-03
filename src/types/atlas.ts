@@ -13,6 +13,7 @@ export interface AtlasNode {
   ipv4: string;
   ipv6: string;
   region: string;
+  tags: string;
   remark: string;
   public_remark: string;
   mem_total: number;

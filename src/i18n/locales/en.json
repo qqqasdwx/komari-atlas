@@ -71,6 +71,8 @@
       "pingTask": "Latency monitoring task {{id}}",
       "pingThresholdDescription": "Color thresholds are saved per node and task, and apply to home history blocks and latest values.",
       "price": "Price",
+      "privateRemark": "Private note",
+      "publicRemark": "Public note",
       "range": "Last {{range}}",
       "remainingValue": "Current remaining value",
       "resetDay": "Traffic reset day",

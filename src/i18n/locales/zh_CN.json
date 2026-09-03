@@ -71,6 +71,8 @@
       "pingTask": "延迟监测任务 {{id}}",
       "pingThresholdDescription": "颜色阈值按节点和任务保存，并用于首页的历史方格与最新数值。",
       "price": "价格",
+      "privateRemark": "私有备注",
+      "publicRemark": "公开备注",
       "range": "最近 {{range}}",
       "remainingValue": "当前剩余价值",
       "resetDay": "流量重置日",

@@ -1,10 +1,11 @@
 "use client";
 
-import { ArrowDown, ArrowUp, CalendarDays, Clock3, Radio } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, Clock3, MessageSquareText, Radio } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import SpaLink from "@/components/SpaLink";
 import { CountryFlag, OperatingSystemIcon } from "@/components/v2/NodeIdentity";
+import { NodeTags } from "@/components/v2/NodeTags";
 import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -145,6 +146,7 @@ export function NodeCard({
     : 0;
   const trafficTone = resourceTone(trafficPercent, 80, 95);
   const trafficResetDay = traffic.status === "unconfigured" ? undefined : traffic.resetDay;
+  const cardRemark = node.public_remark.trim() || node.remark.trim();
   const movePingTask = (taskId: number, offset: -1 | 1) => {
     const currentIndex = selectedPingIds.indexOf(taskId);
     const targetIndex = currentIndex + offset;
@@ -173,40 +175,49 @@ export function NodeCard({
         aria-label={node.name}
       />
       <div>
-        <div className="flex items-start justify-between gap-3 border-b border-border/55 px-4 py-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className={cn("h-2 w-2 shrink-0 rounded-full", online ? "bg-emerald-400" : "bg-red-500")} />
-              <h2 className="truncate text-sm font-semibold">{node.name}</h2>
-            </div>
-            {(node.region || node.os) && (
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
-                {node.region && <CountryFlag region={node.region} />}
-                {node.os && (
-                  <span className="flex min-w-0 items-center gap-1.5" title={node.os}>
-                    <OperatingSystemIcon os={node.os} />
-                    <span className="truncate">{node.os}</span>
-                  </span>
-                )}
+        <div className="border-b border-border/55 px-4 py-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className={cn("h-2 w-2 shrink-0 rounded-full", online ? "bg-emerald-400" : "bg-red-500")} />
+                <h2 className="truncate text-sm font-semibold">{node.name}</h2>
               </div>
-            )}
-          </div>
-          <div className="flex shrink-0 flex-col items-end gap-1">
-            <span className={cn(
-              "rounded-full border px-2 py-0.5 text-[10px] font-medium",
-              online
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
-                : "border-red-500/30 bg-red-500/10 text-red-500",
-            )}>
-              {online ? t("atlas.status.online") : t("atlas.status.offline")}
-            </span>
-            <span className="flex max-w-40 items-center gap-1 text-[10px] text-muted-foreground">
-              <Clock3 className="h-3 w-3 shrink-0" />
-              <span className="truncate">
-                {t("atlas.metrics.uptime")} {currentLive ? formatUptime(currentLive.uptime, t) : "--"}
+              {(node.region || node.os) && (
+                <div className="mt-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+                  {node.region && <CountryFlag region={node.region} />}
+                  {node.os && (
+                    <span className="flex min-w-0 items-center gap-1.5" title={node.os}>
+                      <OperatingSystemIcon os={node.os} />
+                      <span className="truncate">{node.os}</span>
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="flex shrink-0 flex-col items-end gap-1">
+              <span className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-medium",
+                online
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                  : "border-red-500/30 bg-red-500/10 text-red-500",
+              )}>
+                {online ? t("atlas.status.online") : t("atlas.status.offline")}
               </span>
-            </span>
+              <span className="flex max-w-40 items-center gap-1 text-[10px] text-muted-foreground">
+                <Clock3 className="h-3 w-3 shrink-0" />
+                <span className="truncate">
+                  {t("atlas.metrics.uptime")} {currentLive ? formatUptime(currentLive.uptime, t) : "--"}
+                </span>
+              </span>
+            </div>
           </div>
+          <NodeTags tags={node.tags} className="mt-2.5" />
+          {cardRemark && (
+            <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground" title={cardRemark}>
+              <MessageSquareText className="h-3 w-3 shrink-0" />
+              <span className="truncate">{cardRemark}</span>
+            </div>
+          )}
         </div>
 
         <div className="atlas-node-card-body grid gap-4 p-4 sm:grid-cols-2 sm:gap-0">

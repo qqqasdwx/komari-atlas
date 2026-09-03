@@ -65,6 +65,7 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
           expired_at: String(n.expired_at ?? ""),
           ipv4: String(n.ipv4 ?? ""),
           ipv6: String(n.ipv6 ?? ""),
+          tags: String(n.tags ?? ""),
           remark: String(n.remark ?? ""),
           public_remark: String(n.public_remark ?? ""),
         }));

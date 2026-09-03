@@ -12,6 +12,7 @@ import {
   Gauge,
   HardDrive,
   MemoryStick,
+  MessageSquareText,
   Network,
   Radio,
   Save,
@@ -29,6 +30,7 @@ import {
   LatencyCharts,
   type HistoryRange,
 } from "@/components/v2/HistoricalCharts";
+import { NodeTags } from "@/components/v2/NodeTags";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -495,6 +497,25 @@ export function NodeDetail({ uuid }: { uuid: string }) {
               </span>
             </div>
             <p className="mt-1 break-all text-xs text-muted-foreground">{node.uuid}</p>
+            <NodeTags tags={node.tags} className="mt-2.5" />
+            {(node.public_remark || node.remark) && (
+              <div className="mt-2.5 grid gap-1.5 text-xs text-muted-foreground">
+                {node.public_remark && (
+                  <div className="flex min-w-0 items-start gap-1.5">
+                    <MessageSquareText className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span className="shrink-0 font-medium text-foreground/80">{t("atlas.detail.publicRemark")}</span>
+                    <span className="break-words">{node.public_remark}</span>
+                  </div>
+                )}
+                {node.remark && (
+                  <div className="flex min-w-0 items-start gap-1.5">
+                    <MessageSquareText className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span className="shrink-0 font-medium text-foreground/80">{t("atlas.detail.privateRemark")}</span>
+                    <span className="break-words">{node.remark}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
