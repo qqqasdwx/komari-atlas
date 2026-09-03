@@ -11,12 +11,12 @@
         "zh-CN": "面向私人自用场景的 Komari 监控台，提供登录门禁、节点卡片、历史指标和计费周期流量。",
         "en": "A private Komari monitoring console with an authentication gate, node cards, metric history, and billing-period traffic."
       },
-      "version": "0.2.21",
+      "version": "0.2.22",
       "author": "qqqasdwx",
       "url": "https://github.com/qqqasdwx/komari-atlas",
       "preview": "https://raw.githubusercontent.com/qqqasdwx/komari-atlas/main/preview.png",
-      "download": "https://github.com/qqqasdwx/komari-atlas/releases/download/v0.2.21/komari-atlas.zip",
-      "sha256": "361264a41a018a0057f670ade8da76a6e19cb9d7a28e07cf7978378087f36e8c"
+      "download": "https://github.com/qqqasdwx/komari-atlas/releases/download/v0.2.22/komari-atlas.zip",
+      "sha256": "e55d8213abd4ac8cf5e8c598396e1a7bb7938e9558c489f1f9a87a2c4f6df800"
     }
   ]
 }
