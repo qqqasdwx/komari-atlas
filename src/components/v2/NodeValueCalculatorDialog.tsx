@@ -2,13 +2,20 @@
 
 import {
   ArrowLeft,
+  ArrowRight,
   Calculator,
   CalendarDays,
   Coins,
   Cpu,
+  Gauge,
+  HardDrive,
+  MapPin,
+  MemoryStick,
+  Network,
   RefreshCw,
   Server,
   Tag,
+  WalletCards,
 } from "lucide-react";
 import { type FormEvent, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { CountryFlag, OperatingSystemIcon } from "@/components/v2/NodeIdentity";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import { convertAmount, loadRates } from "@/lib/exchangeRates";
 import { resolveExpiry, resolveExpiryTimestamp } from "@/lib/expiry";
@@ -151,11 +159,41 @@ function FormField({
   );
 }
 
-function ResultItem({ label, value }: { label: string; value: string }) {
+function PosterStat({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
   return (
-    <div className="min-w-0 border-b border-border/55 py-3 last:border-b-0">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="mt-1 break-words text-sm font-medium tabular-nums">{value || "--"}</dd>
+    <div className="min-w-0 border-b border-r border-[#d9dddb] px-4 py-4 sm:px-5">
+      <dt className="text-[11px] font-semibold text-[#626966]">{label}</dt>
+      <dd className={cn("mt-1.5 break-words text-sm font-semibold tabular-nums text-[#171a19]", valueClassName)}>
+        {value || "--"}
+      </dd>
+    </div>
+  );
+}
+
+function PosterSpec({
+  icon,
+  label,
+  value,
+}: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0 border-b border-r border-[#d9dddb] px-4 py-3.5 sm:px-5">
+      <dt className="flex items-center gap-1.5 text-[11px] font-semibold text-[#69706d]">
+        {icon}
+        <span>{label}</span>
+      </dt>
+      <dd className="mt-1.5 break-words text-sm font-semibold text-[#171a19]">{value || "--"}</dd>
     </div>
   );
 }
@@ -281,10 +319,10 @@ export function NodeValueCalculatorDialog({
   };
 
   const premiumTone = calculation?.premiumAmountCny == null
-    ? ""
+    ? "text-[#171a19]"
     : calculation.premiumAmountCny > 0
-      ? "text-amber-600 dark:text-amber-400"
-      : "text-emerald-600 dark:text-emerald-400";
+      ? "text-[#9a431b]"
+      : "text-[#17613a]";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -302,10 +340,14 @@ export function NodeValueCalculatorDialog({
             <span className="sr-only">{t("remainingValue.calculator.backToNodes")}</span>
           </Button>
           <div className="min-w-0">
-            <DialogTitle className="truncate">{form.productName || node.name}</DialogTitle>
+            <DialogTitle className="truncate">
+              {calculation
+                ? t("remainingValue.calculator.posterTitle")
+                : form.productName || node.name}
+            </DialogTitle>
             <DialogDescription className="mt-1">
               {calculation
-                ? t("remainingValue.calculator.resultDescription")
+                ? form.productName || node.name
                 : t("remainingValue.calculator.formDescription")}
             </DialogDescription>
           </div>
@@ -313,95 +355,159 @@ export function NodeValueCalculatorDialog({
 
         {calculation ? (
           <div className="max-h-[calc(92vh-4.75rem)] overflow-y-auto">
-            <div className="space-y-6 p-5 sm:p-6">
-              <section className="rounded-md border border-[var(--accent-7)] bg-[var(--accent-3)] p-5">
-                <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <div className="flex items-center gap-2 text-sm text-[var(--accent-11)]">
+            <div className="bg-muted/35 p-3 sm:p-6">
+              <article className="mx-auto max-w-3xl overflow-hidden rounded-md border border-black/15 bg-[#f4f6f5] text-[#171a19] shadow-xl">
+                <header className="bg-[#171a19] px-5 py-5 text-white sm:px-7 sm:py-6">
+                  <div className="flex items-start justify-between gap-5">
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-semibold text-[#d5dc72]">
+                        {t("remainingValue.calculator.posterKicker")}
+                      </div>
+                      <h2 className="mt-2 break-words text-2xl font-semibold sm:text-3xl">
+                        {form.productName || node.name}
+                      </h2>
+                      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/70">
+                        <span className="flex items-center gap-1.5">
+                          <Server className="h-3.5 w-3.5" />
+                          {form.vendor || t("remainingValue.calculator.result.vendorUnset")}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <CountryFlag region={form.location} className="h-3.5" />
+                          {form.location || t("remainingValue.calculator.result.locationUnset")}
+                        </span>
+                        <span className="flex items-center gap-1.5">
+                          <OperatingSystemIcon os={node.os} className="h-3.5 w-3.5 opacity-100" />
+                          {node.os || "--"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center border border-white/20 bg-white/5">
+                      <WalletCards className="h-5 w-5 text-[#d5dc72]" />
+                    </div>
+                  </div>
+                </header>
+
+                <section className="grid border-b border-[#cfd4d1] sm:grid-cols-[minmax(0,3fr)_minmax(15rem,2fr)]">
+                  <div className="bg-[#d5dc72] px-5 py-6 sm:px-7 sm:py-8">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-black/60">
                       <Coins className="h-4 w-4" />
                       {t("remainingValue.calculator.result.remainingValue")}
                     </div>
-                    <div className="mt-2 text-3xl font-semibold tabular-nums text-[var(--accent-12)]">
+                    <div className="mt-3 break-all text-4xl font-semibold tabular-nums text-[#111412] sm:text-5xl">
                       {formatMoney(calculation.remainingValueCny, locale)}
                     </div>
+                    <div className="mt-4 inline-flex items-center gap-2 border border-black/15 bg-white/35 px-2.5 py-1.5 text-xs font-semibold text-black/65">
+                      <Gauge className="h-3.5 w-3.5" />
+                      {t("remainingValue.calculator.result.days", { count: calculation.remainingDays })}
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground sm:text-right">
-                    <div>{form.vendor || t("remainingValue.calculator.result.vendorUnset")}</div>
-                    <div className="mt-1">{form.location || t("remainingValue.calculator.result.locationUnset")}</div>
-                  </div>
-                </div>
-              </section>
+                  <dl className="grid grid-cols-2 bg-white sm:grid-cols-1">
+                    <div className="min-w-0 border-b border-r border-[#d9dddb] px-4 py-4 sm:border-r-0 sm:px-5">
+                      <dt className="text-[11px] font-semibold text-[#69706d]">
+                        {t("remainingValue.calculator.result.salePrice")}
+                      </dt>
+                      <dd className="mt-1.5 break-all text-lg font-semibold tabular-nums text-[#171a19]">
+                        {calculation.salePriceCny === null ? "--" : formatMoney(calculation.salePriceCny, locale)}
+                      </dd>
+                    </div>
+                    <div className="min-w-0 border-b border-[#d9dddb] px-4 py-4 sm:px-5">
+                      <dt className="text-[11px] font-semibold text-[#69706d]">
+                        {t("remainingValue.calculator.result.premium")}
+                      </dt>
+                      <dd className={cn("mt-1.5 break-words text-lg font-semibold tabular-nums", premiumTone)}>
+                        {calculation.premiumAmountCny === null || calculation.premiumRate === null
+                          ? "--"
+                          : `${formatMoney(calculation.premiumAmountCny, locale)} · ${new Intl.NumberFormat(locale, {
+                            style: "percent",
+                            minimumFractionDigits: 1,
+                            maximumFractionDigits: 1,
+                          }).format(calculation.premiumRate)}`}
+                      </dd>
+                    </div>
+                  </dl>
+                </section>
 
-              <section>
-                <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                  {t("remainingValue.calculator.sections.calculation")}
-                </h3>
-                <dl className="mt-2 grid grid-cols-2 gap-x-5 rounded-md border px-4 sm:grid-cols-3">
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.transactionDate")}
-                    value={form.transactionDate}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.expiryDate")}
-                    value={form.expiryDate}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.remainingDays")}
-                    value={t("remainingValue.calculator.result.days", { count: calculation.remainingDays })}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.exchangeRate")}
-                    value={`1 ${form.currency} = ${formatRate(Number(form.customRate))} CNY`}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.renewalPlan")}
-                    value={`${form.currency} ${Number(form.renewalAmount).toFixed(2)} · ${t(`remainingValue.calculator.cycles.${form.billingMonths}`)}`}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.renewalPrice")}
-                    value={formatMoney(calculation.renewalPriceCny, locale)}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.annualPrice")}
-                    value={formatMoney(calculation.annualPriceCny, locale)}
-                  />
-                  <ResultItem
-                    label={t("remainingValue.calculator.result.salePrice")}
-                    value={calculation.salePriceCny === null ? "--" : formatMoney(calculation.salePriceCny, locale)}
-                  />
-                  <div className="min-w-0 border-b border-border/55 py-3 last:border-b-0">
-                    <dt className="text-xs text-muted-foreground">{t("remainingValue.calculator.result.premium")}</dt>
-                    <dd className={cn("mt-1 break-words text-sm font-semibold tabular-nums", premiumTone)}>
-                      {calculation.premiumAmountCny === null || calculation.premiumRate === null
-                        ? "--"
-                        : `${formatMoney(calculation.premiumAmountCny, locale)} (${new Intl.NumberFormat(locale, {
-                          style: "percent",
-                          minimumFractionDigits: 1,
-                          maximumFractionDigits: 1,
-                        }).format(calculation.premiumRate)})`}
-                    </dd>
+                <section className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-[#d9dddb] bg-white">
+                  <div className="min-w-0 px-4 py-4 sm:px-6">
+                    <div className="text-[11px] font-semibold text-[#69706d]">
+                      {t("remainingValue.calculator.result.transactionDate")}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold tabular-nums">{form.transactionDate}</div>
                   </div>
-                </dl>
-              </section>
+                  <ArrowRight className="h-5 w-5 text-[#929a96]" />
+                  <div className="min-w-0 px-4 py-4 text-right sm:px-6">
+                    <div className="text-[11px] font-semibold text-[#69706d]">
+                      {t("remainingValue.calculator.result.expiryDate")}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold tabular-nums">{form.expiryDate}</div>
+                  </div>
+                </section>
 
-              <section>
-                <h3 className="flex items-center gap-2 text-sm font-semibold">
-                  <Server className="h-4 w-4 text-muted-foreground" />
-                  {t("remainingValue.calculator.sections.product")}
-                </h3>
-                <dl className="mt-2 grid grid-cols-2 gap-x-5 rounded-md border px-4 sm:grid-cols-3">
-                  <ResultItem label={t("remainingValue.calculator.fields.vendor")} value={form.vendor} />
-                  <ResultItem label={t("remainingValue.calculator.fields.productName")} value={form.productName} />
-                  <ResultItem label={t("remainingValue.calculator.fields.location")} value={form.location} />
-                  <ResultItem label={t("remainingValue.calculator.fields.cpu")} value={form.cpu} />
-                  <ResultItem label={t("remainingValue.calculator.fields.memory")} value={form.memory} />
-                  <ResultItem label={t("remainingValue.calculator.fields.storage")} value={form.storage} />
-                  <ResultItem label={t("remainingValue.calculator.fields.bandwidth")} value={form.bandwidth} />
-                  <ResultItem label={t("remainingValue.calculator.fields.trafficLimit")} value={form.trafficLimit} />
-                  <ResultItem label={t("remainingValue.calculator.fields.features")} value={form.features} />
-                </dl>
-              </section>
+                <section className="border-b border-[#d9dddb] bg-[#eef1f0]">
+                  <div className="border-b border-[#d9dddb] px-4 py-3 sm:px-6">
+                    <h3 className="flex items-center gap-2 text-xs font-semibold">
+                      <CalendarDays className="h-4 w-4 text-[#69706d]" />
+                      {t("remainingValue.calculator.sections.calculation")}
+                    </h3>
+                  </div>
+                  <dl className="grid grid-cols-2 [&>*:nth-child(2n)]:border-r-0 sm:grid-cols-4 sm:[&>*:nth-child(2n)]:border-r sm:[&>*:nth-child(4n)]:border-r-0">
+                    <PosterStat
+                      label={t("remainingValue.calculator.result.renewalPlan")}
+                      value={`${form.currency} ${Number(form.renewalAmount).toFixed(2)} · ${t(`remainingValue.calculator.cycles.${form.billingMonths}`)}`}
+                    />
+                    <PosterStat
+                      label={t("remainingValue.calculator.result.renewalPrice")}
+                      value={formatMoney(calculation.renewalPriceCny, locale)}
+                    />
+                    <PosterStat
+                      label={t("remainingValue.calculator.result.annualPrice")}
+                      value={formatMoney(calculation.annualPriceCny, locale)}
+                    />
+                    <PosterStat
+                      label={t("remainingValue.calculator.result.exchangeRate")}
+                      value={`1 ${form.currency} = ${formatRate(Number(form.customRate))} CNY`}
+                    />
+                  </dl>
+                </section>
+
+                <section className="bg-white">
+                  <div className="border-b border-[#d9dddb] px-4 py-3 sm:px-6">
+                    <h3 className="flex items-center gap-2 text-xs font-semibold">
+                      <Server className="h-4 w-4 text-[#69706d]" />
+                      {t("remainingValue.calculator.sections.specifications")}
+                    </h3>
+                  </div>
+                  <dl className="grid grid-cols-2 [&>*:nth-child(2n)]:border-r-0 sm:grid-cols-3 sm:[&>*:nth-child(2n)]:border-r sm:[&>*:nth-child(3n)]:border-r-0">
+                    <PosterSpec icon={<Cpu className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.cpu")} value={form.cpu} />
+                    <PosterSpec icon={<MemoryStick className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.memory")} value={form.memory} />
+                    <PosterSpec icon={<HardDrive className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.storage")} value={form.storage} />
+                    <PosterSpec icon={<Network className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.bandwidth")} value={form.bandwidth} />
+                    <PosterSpec icon={<Gauge className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.trafficLimit")} value={form.trafficLimit} />
+                    <PosterSpec icon={<MapPin className="h-3.5 w-3.5" />} label={t("remainingValue.calculator.fields.location")} value={form.location} />
+                  </dl>
+                </section>
+
+                {form.features && (
+                  <section className="border-t border-[#bdc9e7] bg-[#e2e9f8] px-5 py-4 sm:px-7">
+                    <div className="flex gap-3">
+                      <Tag className="mt-0.5 h-4 w-4 shrink-0 text-[#53658f]" />
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-semibold text-[#53658f]">
+                          {t("remainingValue.calculator.fields.features")}
+                        </div>
+                        <p className="mt-1 whitespace-pre-wrap break-words text-sm font-medium text-[#202b43]">
+                          {form.features}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+                )}
+
+                <footer className="flex flex-wrap items-center justify-between gap-2 bg-[#171a19] px-5 py-3 text-[10px] font-medium text-white/55 sm:px-7">
+                  <span>Komari Atlas</span>
+                  <span>{t("remainingValue.calculator.result.basis")}</span>
+                </footer>
+              </article>
             </div>
 
             <DialogFooter className="sticky bottom-0 gap-2 border-t bg-card/95 px-5 py-4 backdrop-blur-xl sm:px-6">

@@ -713,6 +713,8 @@
       "formDescription": "节点估值参数",
       "nodeExpiryUnset": "未填写到期时间",
       "nodePriceUnset": "未填写续费价格",
+      "posterKicker": "VPS 资产估值",
+      "posterTitle": "估值海报",
       "rate": {
         "loading": "获取中",
         "stale": "缓存汇率",
@@ -721,6 +723,7 @@
       },
       "result": {
         "annualPrice": "折合年费",
+        "basis": "按 360 天财务年折算",
         "days": "{{count}} 天",
         "exchangeRate": "计算汇率",
         "expiryDate": "到期日期",

@@ -1109,6 +1109,8 @@
       "formDescription": "Node valuation inputs",
       "nodeExpiryUnset": "Expiry not set",
       "nodePriceUnset": "Renewal price not set",
+      "posterKicker": "VPS ASSET VALUATION",
+      "posterTitle": "Valuation poster",
       "rate": {
         "loading": "Loading",
         "stale": "Cached rate",
@@ -1117,6 +1119,7 @@
       },
       "result": {
         "annualPrice": "Annualized cost",
+        "basis": "Calculated on a 360-day financial year",
         "days": "{{count}} days",
         "exchangeRate": "Calculation rate",
         "expiryDate": "Expiry date",
