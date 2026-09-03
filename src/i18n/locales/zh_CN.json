@@ -101,6 +101,10 @@
       "twoFactorRequired": "请输入双重验证动态口令"
     },
     "logout": "退出登录",
+    "privacy": {
+      "disable": "关闭隐私模式，显示卡片中的费用和到期信息",
+      "enable": "开启隐私模式，模糊卡片中的费用和到期信息"
+    },
     "metricNames": {
       "connectionsTcp": "TCP 连接",
       "connectionsUdp": "UDP 连接",

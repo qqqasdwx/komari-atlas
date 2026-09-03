@@ -4,6 +4,7 @@ import { Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { HeaderTooltip, HEADER_TOOL_BUTTON_CLASS } from "@/components/v2/HeaderTooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,12 +29,19 @@ export function LanguageMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9" title={t("atlas.language")}>
-          <Languages className="h-4 w-4" />
-          <span className="sr-only">{t("atlas.language")}</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <HeaderTooltip label={t("atlas.language")}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={HEADER_TOOL_BUTTON_CLASS}
+            aria-label={t("atlas.language")}
+          >
+            <Languages className="h-4 w-4" />
+            <span className="sr-only">{t("atlas.language")}</span>
+          </Button>
+        </DropdownMenuTrigger>
+      </HeaderTooltip>
       <DropdownMenuContent align="end">
         {LANGUAGES.map((language) => (
           <DropdownMenuItem

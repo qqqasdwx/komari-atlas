@@ -8,6 +8,7 @@ import { AppearanceMenu } from "@/components/v2/AppearanceMenu";
 import { LanguageMenu } from "@/components/v2/LanguageMenu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAccount } from "@/contexts/AccountContext";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 
@@ -60,10 +61,12 @@ export function LoginScreen() {
 
   return (
     <main className="atlas-login-shell">
-      <div className="atlas-login-tools right-4 top-4 flex items-center gap-1 rounded-md border border-white/10 bg-black/20 p-1 text-white backdrop-blur-md">
-        <AppearanceMenu />
-        <LanguageMenu />
-      </div>
+      <TooltipProvider disableHoverableContent delayDuration={200} skipDelayDuration={100}>
+        <div className="atlas-login-tools right-4 top-4 flex items-center gap-1 rounded-md border border-white/10 bg-black/20 p-1 text-white backdrop-blur-md">
+          <AppearanceMenu />
+          <LanguageMenu />
+        </div>
+      </TooltipProvider>
 
       <section className="atlas-login-panel" aria-labelledby="login-title">
         <div className="mb-7 flex items-center gap-3">

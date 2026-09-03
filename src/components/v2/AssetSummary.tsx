@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { HeaderTooltip, HEADER_TOOL_BUTTON_CLASS } from "@/components/v2/HeaderTooltip";
 import {
   Dialog,
   DialogContent,
@@ -86,12 +87,19 @@ export function AssetSummary() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9" title={t("remainingValue.title")}>
-          <Coins className="h-4 w-4" />
-          <span className="sr-only">{t("remainingValue.title")}</span>
-        </Button>
-      </DialogTrigger>
+      <HeaderTooltip label={t("remainingValue.title")}>
+        <DialogTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={HEADER_TOOL_BUTTON_CLASS}
+            aria-label={t("remainingValue.title")}
+          >
+            <Coins className="h-4 w-4" />
+            <span className="sr-only">{t("remainingValue.title")}</span>
+          </Button>
+        </DialogTrigger>
+      </HeaderTooltip>
       <DialogContent className="max-h-[88vh] max-w-3xl overflow-hidden border-border/70 bg-card/95 p-0 backdrop-blur-xl">
         <div className="flex items-start justify-between gap-4 border-b px-5 py-4 pr-12">
           <div>

@@ -78,9 +78,11 @@ function ResourceBar({
 export function NodeCard({
   node,
   live,
+  privacyMode,
 }: {
   node: NodeBasicInfo;
   live: LiveRecord | undefined;
+  privacyMode: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const { cnyByNode, ratesUnavailable } = useAssetValues();
@@ -358,18 +360,27 @@ export function NodeCard({
             >
               <div className="min-w-0">
                 <div className="text-muted-foreground">{t("remainingValue.monthlyCost")}</div>
-                <div className="mt-0.5 truncate font-medium tabular-nums">{monthlyCost}</div>
+                <div className={cn(
+                  "mt-0.5 truncate font-medium tabular-nums transition-[filter] duration-150",
+                  privacyMode && "select-none blur-[5px]",
+                )}>{monthlyCost}</div>
               </div>
               <div className="min-w-0 text-right">
                 <div className="text-muted-foreground">{t("atlas.detail.remainingValue")}</div>
-                <div className="mt-0.5 truncate font-medium tabular-nums">{remainingValue}</div>
+                <div className={cn(
+                  "mt-0.5 truncate font-medium tabular-nums transition-[filter] duration-150",
+                  privacyMode && "select-none blur-[5px]",
+                )}>{remainingValue}</div>
               </div>
               <div className="col-span-2 flex items-center justify-between gap-3 border-t border-border/40 pt-2.5">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <CalendarDays className="h-3 w-3" />
                   {t("atlas.detail.expiry")}
                 </div>
-                <div className="flex flex-wrap justify-end gap-x-1.5 font-medium tabular-nums">
+                <div className={cn(
+                  "flex flex-wrap justify-end gap-x-1.5 font-medium tabular-nums transition-[filter] duration-150",
+                  privacyMode && "select-none blur-[5px]",
+                )}>
                   <span>{expiryDate}</span>
                   {expiryStatus && <span className="text-muted-foreground">· {expiryStatus}</span>}
                 </div>

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+import { HeaderTooltip, HEADER_TOOL_BUTTON_CLASS } from "@/components/v2/HeaderTooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,12 +29,19 @@ export function AppearanceMenu() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9" title={t("atlas.appearance")}>
-          {icon}
-          <span className="sr-only">{t("atlas.appearance")}</span>
-        </Button>
-      </DropdownMenuTrigger>
+      <HeaderTooltip label={t("atlas.appearance")}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={HEADER_TOOL_BUTTON_CLASS}
+            aria-label={t("atlas.appearance")}
+          >
+            {icon}
+            <span className="sr-only">{t("atlas.appearance")}</span>
+          </Button>
+        </DropdownMenuTrigger>
+      </HeaderTooltip>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onSelect={() => setTheme("light")}>
           <Sun className="h-4 w-4" />

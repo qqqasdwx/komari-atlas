@@ -145,6 +145,10 @@
       "window24h": "Last 24h",
       "yellowMaximum": "Yellow maximum"
     },
+    "privacy": {
+      "disable": "Disable privacy mode and show card costs and expiry details",
+      "enable": "Enable privacy mode and blur card costs and expiry details"
+    },
     "retry": "Retry",
     "saveState": {
       "error": "Save failed",

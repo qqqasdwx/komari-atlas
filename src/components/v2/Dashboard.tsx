@@ -43,7 +43,7 @@ function isExpiring(expiredAt: string) {
   return days >= 0 && days <= 30;
 }
 
-export function Dashboard() {
+export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
   const { t } = useTranslation();
   const { nodeList, isLoading, error, refresh } = useNodeList();
   const { live_data, showCallout } = useLiveData();
@@ -259,7 +259,12 @@ export function Dashboard() {
       ) : (
         <section className="atlas-node-grid">
           {displayedNodes.map((node) => (
-            <NodeCard key={node.uuid} node={node} live={live[node.uuid]} />
+            <NodeCard
+              key={node.uuid}
+              node={node}
+              live={live[node.uuid]}
+              privacyMode={privacyMode}
+            />
           ))}
         </section>
       )}
