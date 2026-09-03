@@ -1,71 +1,57 @@
 # Komari Atlas
 
-A monitoring console theme for private, self-hosted [Komari Monitor](https://github.com/komari-monitor/komari) instances.
+A monitoring console theme for personal, self-hosted [Komari Monitor](https://github.com/komari-monitor/komari) instances.
 
 [简体中文](README.md) · [Download the latest release](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip)
 
 ![Komari Atlas preview](preview.png)
 
-Komari Atlas is built with Next.js and exported as a static Komari theme. Its full-screen wallpaper, restrained glass panels, and dense two-column node cards are designed for authenticated personal monitoring rather than a public status page.
+Komari Atlas brings node status, metric history, network quality, billing traffic, and asset information into one dashboard for private Komari instances that require authentication.
 
-## Features
+## Core Features
 
-### Dashboard
+- **Node overview**: View all node states in one place, with search, grouping, and sorting by resources, network activity, cost, or expiry.
+- **Resource monitoring**: Track CPU, system load, memory, swap, disk, network rates, processes, and connections, with GPU metrics when available.
+- **History analysis**: Explore resource trends over `1h`, `6h`, `24h`, `7d`, or `30d` and identify offline periods.
+- **Latency monitoring**: Review 24-hour latency and packet-loss history for each monitoring route, then choose dashboard routes, ordering, and severity thresholds.
+- **Traffic accounting**: Track billing-period usage, traffic limits, daily upload and download totals, and monthly reset dates.
+- **Cost and assets**: Summarize monthly cost, expiry, and current remaining value, with long-term nodes, currency conversion, and per-node valuation.
+- **Everyday use**: Includes screenshot privacy mode, Simplified Chinese and English, light and dark appearances, and desktop and mobile layouts.
 
-- Authentication gate and Komari version check before node data is loaded
-- Totals for all, online, offline, and expiring nodes, plus the current aggregate network rate
-- Node search, group filtering, and Komari weight as the default order
-- Sorting by CPU, memory, disk, TCP connections, upload, download, monthly cost, or expiry
-- Snapshot-based sorting so live refreshes do not continuously move cards
-- Prominent red borders for offline nodes, with stale live metrics shown as unavailable
+## Installation
 
-### Node Cards
+### Install from the Theme Market (recommended)
 
-- Country or region flags, Linux distribution or operating-system icons, status, and uptime
-- Progress bars for CPU, memory, disk, and swap, including used and total capacity
-- Upload, download, TCP, and UDP values in one compact network row
-- Billing-period traffic, traffic limit, upload and download totals, and monthly reset day
-- Komari long-term expiry support, expiry dates, and remaining days
-- Monthly cost and current remaining value in CNY
-- 24-hour latency and packet-loss blocks for every selected monitoring task, with exact hover details
-- Per-node, per-task color thresholds for both history blocks and current values
-- Direct task reordering from each node card
+1. Open **Theme Market** in the Komari admin dashboard and select **Manage sources**.
+2. Add a source named `Komari Atlas` with this URL:
 
-### Node Details
+   ```text
+   https://raw.githubusercontent.com/qqqasdwx/komari-atlas/main/v1.json
+   ```
 
-- Five tabs: Overview, Charts, Latency Monitoring, Traffic, and Settings
-- Live resources, hardware, network, system, asset, and billing data in the overview
-- `1h`, `6h`, `24h`, `7d`, and `30d` ranges with a history selector that stays available while scrolling
-- CPU, system load, memory and swap, disk, network rate, process and connection charts, plus conditional GPU charts
-- Visible gaps for missing historical samples so offline periods remain identifiable
-- Independently toggleable latency-monitoring chart lines
-- Daily upload and download bar charts on the Traffic tab
-- Per-node traffic reset day, home-task visibility and order, and green/yellow/red latency and loss thresholds
-- Automatic persistence of node settings to Komari `theme_settings`
+3. Return to the Theme Market, find **Komari Atlas**, install it, and set it as the active theme.
 
-### Assets and Interface
+Once the source is added, later releases can be checked and installed from the Theme Market.
 
-- Portfolio totals for monthly cost, total value, and current remaining value
-- Exchange-rate conversion for CNY, USD, EUR, GBP, and other common currencies through Frankfurter, with a local cache for temporary outages
-- A per-node value calculator with editable renewal price, cycle, exchange rate, transaction date, sale price, and machine details
-- An Atlas-themed valuation summary for calculated results in both light and dark modes
-- Privacy mode that blurs monthly cost, remaining value, and expiry details on dashboard cards
-- Simplified Chinese and English interfaces with light, dark, and system appearance modes
-- Responsive desktop and mobile layouts, an admin shortcut, and sign-out control
+### Manual installation
+
+1. Download [`komari-atlas.zip`](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip).
+2. Upload the theme archive in the Komari admin dashboard.
+3. Set **Komari Atlas** as the active theme.
 
 ## Requirements
 
 - Komari `1.4.3` or newer
-- An authenticated private Komari site
-- Metric recording enabled; at least 35 days of retention is required for a complete monthly billing-traffic calculation
+- A private Komari instance that requires authentication
+- Metric recording enabled; a complete monthly billing-traffic calculation requires at least 35 days of retained metrics
 
-Billing boundaries use the `Asia/Shanghai` timezone. An explicit per-node traffic reset day takes priority over the expiry day; days 29 through 31 clamp to the last day of shorter months.
+Billing periods use the `Asia/Shanghai` timezone. A node's configured traffic reset day takes priority over its expiry day; days 29 through 31 use the last day of shorter months.
 
-## Installation
+## Configuration
 
-1. Download [`komari-atlas.zip`](https://github.com/qqqasdwx/komari-atlas/releases/latest/download/komari-atlas.zip).
-2. Upload the archive in the Komari admin dashboard.
-3. Select **Komari Atlas** as the active theme.
+Each node can configure its traffic reset day, dashboard latency routes, route order, and latency and packet-loss thresholds from the detail view. These settings are stored in Komari `theme_settings`.
+
+Interface language, appearance, and asset-summary currency are stored in the current browser. Privacy mode applies only to the current page session.
 
 ## Local Development
 
@@ -89,8 +75,6 @@ npm run build
 ```
 
 `npm run build` exports the static site to `dist/`. Run `./build-theme.sh` to install dependencies, build the project, and create `dist/komari-atlas-YY.MM.DD-COMMIT.zip`; the script also requires `zip`.
-
-Source code lives in `src/`, locale catalogs in `src/i18n/locales/`, static assets in `public/`, and theme metadata in `komari-theme.json`.
 
 ## Credits and License
 
