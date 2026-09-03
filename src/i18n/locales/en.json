@@ -144,8 +144,8 @@
       "yellowMaximum": "Yellow maximum"
     },
     "privacy": {
-      "disable": "Disable privacy mode and show card costs and expiry details",
-      "enable": "Enable privacy mode and blur card costs and expiry details"
+      "disable": "Disable privacy mode and show card tags, notes, costs, and expiry details",
+      "enable": "Enable privacy mode and blur card tags, notes, costs, and expiry details"
     },
     "retry": "Retry",
     "saveState": {

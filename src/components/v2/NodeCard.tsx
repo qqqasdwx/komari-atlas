@@ -211,9 +211,16 @@ export function NodeCard({
               </span>
             </div>
           </div>
-          <NodeTags tags={node.tags} className="mt-2.5" />
+          <NodeTags tags={node.tags} className="mt-2.5" concealed={privacyMode} />
           {cardRemark && (
-            <div className="mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground" title={cardRemark}>
+            <div
+              className={cn(
+                "mt-1.5 flex min-w-0 items-center gap-1.5 text-[11px] text-muted-foreground transition-[filter] duration-150",
+                privacyMode && "pointer-events-none select-none blur-[5px]",
+              )}
+              title={privacyMode ? undefined : cardRemark}
+              aria-hidden={privacyMode || undefined}
+            >
               <MessageSquareText className="h-3 w-3 shrink-0" />
               <span className="truncate">{cardRemark}</span>
             </div>

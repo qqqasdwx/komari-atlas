@@ -5,12 +5,28 @@ import { cn } from "@/lib/utils";
 
 type NodeTagStyle = CSSProperties & { "--node-tag-color": string };
 
-export function NodeTags({ tags, className }: { tags: string; className?: string }) {
+export function NodeTags({
+  tags,
+  className,
+  concealed = false,
+}: {
+  tags: string;
+  className?: string;
+  concealed?: boolean;
+}) {
   const parsedTags = parseNodeTags(tags);
   if (parsedTags.length === 0) return null;
 
   return (
-    <div className={cn("flex min-w-0 flex-wrap gap-1", className)} role="list">
+    <div
+      className={cn(
+        "flex min-w-0 flex-wrap gap-1 transition-[filter] duration-150",
+        concealed && "pointer-events-none select-none blur-[5px]",
+        className,
+      )}
+      role="list"
+      aria-hidden={concealed || undefined}
+    >
       {parsedTags.map((tag, index) => (
         <span
           key={`${tag.text}-${tag.color}-${index}`}
@@ -22,7 +38,7 @@ export function NodeTags({ tags, className }: { tags: string; className?: string
             backgroundColor: "color-mix(in srgb, var(--node-tag-color) 14%, var(--card))",
             borderColor: "color-mix(in srgb, var(--node-tag-color) 42%, var(--border))",
           } as NodeTagStyle}
-          title={tag.text}
+          title={concealed ? undefined : tag.text}
         >
           <span className="truncate">{tag.text}</span>
         </span>
