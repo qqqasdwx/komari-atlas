@@ -714,7 +714,7 @@
       "nodeExpiryUnset": "未填写到期时间",
       "nodePriceUnset": "未填写续费价格",
       "posterKicker": "VPS 资产估值",
-      "posterTitle": "估值海报",
+      "posterTitle": "估值摘要",
       "rate": {
         "loading": "获取中",
         "stale": "缓存汇率",

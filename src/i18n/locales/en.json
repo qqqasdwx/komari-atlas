@@ -1110,7 +1110,7 @@
       "nodeExpiryUnset": "Expiry not set",
       "nodePriceUnset": "Renewal price not set",
       "posterKicker": "VPS ASSET VALUATION",
-      "posterTitle": "Valuation poster",
+      "posterTitle": "Valuation summary",
       "rate": {
         "loading": "Loading",
         "stale": "Cached rate",

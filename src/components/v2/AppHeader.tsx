@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { usePublicInfo } from "@/contexts/PublicInfoContext";
 import { useRPC2 } from "@/contexts/RPC2Context";
-import { cn } from "@/lib/utils";
 
 export function AppHeader({
   privacyMode,
@@ -59,10 +58,7 @@ export function AppHeader({
               <Button
                 variant="ghost"
                 size="icon"
-                className={cn(
-                  HEADER_TOOL_BUTTON_CLASS,
-                  privacyMode && "bg-[var(--accent-6)] text-[var(--accent-12)]",
-                )}
+                className={HEADER_TOOL_BUTTON_CLASS}
                 onClick={() => onPrivacyModeChange(!privacyMode)}
                 aria-label={t(privacyMode ? "atlas.privacy.disable" : "atlas.privacy.enable")}
                 aria-pressed={privacyMode}
