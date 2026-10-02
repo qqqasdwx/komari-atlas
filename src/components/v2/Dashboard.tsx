@@ -43,6 +43,8 @@ function isExpiring(expiredAt: string) {
   return days >= 0 && days <= 30;
 }
 
+type SummaryFilter = "offline" | "expiring";
+
 export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
   const { t } = useTranslation();
   const { nodeList, isLoading, error, refresh } = useNodeList();
@@ -53,6 +55,7 @@ export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
   const [sortKey, setSortKey] = useState<DashboardSortKey>("default");
   const [sortDirection, setSortDirection] = useState<DashboardSortDirection>("asc");
   const [sortedNodeIds, setSortedNodeIds] = useState<string[] | null>(null);
+  const [summaryFilter, setSummaryFilter] = useState<SummaryFilter | "all">("all");
   const inputRef = useRef<HTMLInputElement>(null);
   const nodes = useMemo(() => nodeList || [], [nodeList]);
   const live = useMemo(() => live_data?.data.data || {}, [live_data]);
@@ -65,11 +68,13 @@ export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
     const term = search.trim().toLowerCase();
     return nodes.filter((node) => {
       if (group !== "all" && node.group !== group) return false;
+      if (summaryFilter === "offline" && live[node.uuid]?.online) return false;
+      if (summaryFilter === "expiring" && !isExpiring(node.expired_at)) return false;
       if (!term) return true;
       return [node.name, node.region, node.os, node.arch, node.group]
         .some((value) => value.toLowerCase().includes(term));
     });
-  }, [group, nodes, search]);
+  }, [group, live, nodes, search, summaryFilter]);
 
   const displayedNodes = useMemo(() => {
     if (!sortedNodeIds) return filteredNodes;
@@ -111,12 +116,18 @@ export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
     );
   }
 
-  const summary = [
+  const summary: Array<{
+    label: string;
+    value: number | string;
+    icon: typeof Server;
+    tone?: string;
+    filter?: SummaryFilter;
+  }> = [
     { label: t("atlas.summary.total"), value: nodes.length, icon: Server },
     { label: t("atlas.summary.online"), value: totals.online, icon: Activity, tone: "text-emerald-500" },
-    { label: t("atlas.summary.offline"), value: totals.offline, icon: AlertTriangle, tone: totals.offline ? "text-red-500" : "text-muted-foreground" },
-    { label: t("atlas.summary.expiring"), value: totals.expiring, icon: AlertTriangle, tone: totals.expiring ? "text-amber-500" : "text-muted-foreground" },
-    { label: t("atlas.summary.speed"), value: `↑ ${formatBytes(totals.up)}/s  ↓ ${formatBytes(totals.down)}/s`, icon: ArrowUp },
+    { label: t("atlas.summary.offline"), value: totals.offline, icon: AlertTriangle, tone: totals.offline ? "text-red-500" : "text-muted-foreground", filter: "offline" },
+    { label: t("atlas.summary.expiring"), value: totals.expiring, icon: AlertTriangle, tone: totals.expiring ? "text-amber-500" : "text-muted-foreground", filter: "expiring" },
+    { label: t("atlas.summary.speed"), value: `↑ ${formatBytes(totals.up)}/s  ↓ ${formatBytes(totals.down)}`, icon: ArrowUp },
   ];
   const sortOptions: Array<{ value: DashboardSortKey; label: string }> = [
     { value: "default", label: t("atlas.sort.default") },
@@ -155,17 +166,42 @@ export function Dashboard({ privacyMode }: { privacyMode: boolean }) {
       )}
 
       <section className="atlas-summary-strip" aria-label={t("atlas.summary.title")}>
-        {summary.map((item) => (
-          <div key={item.label} className="min-w-0 px-3 py-2 sm:px-4">
-            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <item.icon className="h-3.5 w-3.5" />
-              <span className="truncate">{item.label}</span>
+        {summary.map((item) => {
+          const filter = item.filter;
+          const active = filter !== undefined && summaryFilter === filter;
+          const content = (
+            <>
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <item.icon className="h-3.5 w-3.5" />
+                <span className="truncate">{item.label}</span>
+              </div>
+              <div className={cn("mt-1 truncate text-sm font-semibold tabular-nums sm:text-base", item.tone)}>
+                {item.value}
+              </div>
+            </>
+          );
+
+          return (
+            <div key={item.label} className="min-w-0">
+              {filter ? (
+                <button
+                  type="button"
+                  className={cn(
+                    "h-full w-full px-3 py-2 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:px-4",
+                    active && "bg-primary/10 ring-2 ring-inset ring-primary/45",
+                  )}
+                  aria-label={t(active ? "atlas.summary.clearFilter" : `atlas.summary.filter.${filter}`)}
+                  aria-pressed={active}
+                  onClick={() => setSummaryFilter(active ? "all" : filter)}
+                >
+                  {content}
+                </button>
+              ) : (
+                <div className="px-3 py-2 sm:px-4">{content}</div>
+              )}
             </div>
-            <div className={cn("mt-1 truncate text-sm font-semibold tabular-nums sm:text-base", item.tone)}>
-              {item.value}
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       <section className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

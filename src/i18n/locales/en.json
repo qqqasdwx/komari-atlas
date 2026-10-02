@@ -189,7 +189,12 @@
       "online": "Online"
     },
     "summary": {
+      "clearFilter": "Clear the current filter",
       "expiring": "Expiring in 30 days",
+      "filter": {
+        "expiring": "Filter nodes expiring in 30 days",
+        "offline": "Filter offline nodes"
+      },
       "offline": "Offline",
       "online": "Online",
       "speed": "Current total rate",
