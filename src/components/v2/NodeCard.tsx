@@ -232,23 +232,28 @@ export function NodeCard({
           <div className="space-y-4 sm:pr-4">
             <div className="space-y-3">
               <ResourceBar label="CPU" value={cpu} tone={cpuTone} />
-              <ResourceBar
-                label={t("atlas.metrics.memory")}
-                value={ram}
-                tone={ramTone}
-                detail={`${currentLive ? formatBytes(currentLive.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
-              />
+              <section className="space-y-3 rounded-md border border-border/50 bg-background/20 p-3">
+                <div className="text-[11px] font-medium text-muted-foreground">
+                  {t("atlas.charts.memorySwap")}
+                </div>
+                <ResourceBar
+                  label={t("atlas.metrics.memory")}
+                  value={ram}
+                  tone={ramTone}
+                  detail={`${currentLive ? formatBytes(currentLive.ram.used) : "--"} / ${formatBytes(node.mem_total)}`}
+                />
+                <ResourceBar
+                  label={t("atlas.metrics.swap")}
+                  value={swap}
+                  tone={swapTone}
+                  detail={`${currentLive ? formatBytes(currentLive.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
+                />
+              </section>
               <ResourceBar
                 label={t("atlas.metrics.disk")}
                 value={disk}
                 tone={diskTone}
                 detail={`${currentLive ? formatBytes(currentLive.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
-              />
-              <ResourceBar
-                label={t("atlas.metrics.swap")}
-                value={swap}
-                tone={swapTone}
-                detail={`${currentLive ? formatBytes(currentLive.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
               />
             </div>
 
