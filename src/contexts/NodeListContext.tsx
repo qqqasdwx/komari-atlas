@@ -4,6 +4,8 @@ import React from "react";
 import { useRPC2Call } from "./RPC2Context";
 import type { AtlasNode } from "@/types/atlas";
 
+const NODE_INFO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
 export type NodeBasicInfo = AtlasNode;
 
 interface NodeListContextType {
@@ -82,6 +84,8 @@ export const NodeListProvider: React.FC<{ children: React.ReactNode }> = ({
 
   React.useEffect(() => {
     refresh();
+    const timer = window.setInterval(refresh, NODE_INFO_REFRESH_INTERVAL_MS);
+    return () => window.clearInterval(timer);
   }, [refresh]);
 
   const contextValue = React.useMemo(
