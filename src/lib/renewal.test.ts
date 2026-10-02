@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateRenewedExpiry } from "./renewal";
+import {
+  calculateRenewedExpiry,
+  dateInputToTimestamp,
+  toDateInputValue,
+} from "./renewal";
 
 const now = Date.UTC(2026, 9, 2, 12);
 
@@ -58,5 +62,22 @@ describe("calculateRenewedExpiry", () => {
       ok: false,
       error: "long_term_expiry",
     });
+  });
+});
+
+describe("renewal date inputs", () => {
+  it("formats and parses a local calendar date while preserving the time", () => {
+    const reference = new Date(2026, 9, 11, 15, 30, 45, 250).getTime();
+    const value = toDateInputValue(reference);
+
+    expect(value).toBe("2026-10-11");
+    expect(dateInputToTimestamp("2026-10-20", reference)).toBe(
+      new Date(2026, 9, 20, 15, 30, 45, 250).getTime(),
+    );
+  });
+
+  it("rejects malformed and impossible calendar dates", () => {
+    expect(dateInputToTimestamp("", Date.now())).toBeNull();
+    expect(dateInputToTimestamp("2026-02-30", Date.now())).toBeNull();
   });
 });

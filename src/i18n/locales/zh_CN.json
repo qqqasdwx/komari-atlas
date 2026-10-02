@@ -96,9 +96,12 @@
       "confirm": "确认续期",
       "currentExpiry": "当前到期时间",
       "cycle": "续期周期",
+      "dateHint": "可选择日期，也可以手动输入。提交时会保留计算出的时间。",
+      "dateRequired": "请选择有效日期",
       "description": "按当前计费周期更新该服务器的到期时间。",
       "error": "续期失败，请检查管理员权限和 Komari 版本。",
       "expiredNotice": "该节点已到期，本次续期将从当前时间开始计算。",
+      "invalidDate": "请选择未来的有效到期日期。",
       "newExpiry": "续期后到期时间",
       "submitting": "正在更新",
       "title": "续期 {{name}}"

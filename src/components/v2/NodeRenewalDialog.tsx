@@ -14,9 +14,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { useNodeList, type NodeBasicInfo } from "@/contexts/NodeListContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
-import { calculateRenewedExpiry } from "@/lib/renewal";
+import {
+  calculateRenewedExpiry,
+  dateInputToTimestamp,
+  toDateInputValue,
+} from "@/lib/renewal";
 import { cn } from "@/lib/utils";
 
 function formatDateTime(timestamp: number, locale: string) {
@@ -39,22 +44,32 @@ export function NodeRenewalDialog({
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dateError, setDateError] = useState(false);
   const locale = i18n.resolvedLanguage || i18n.language;
   const calculation = useMemo(
     () => calculateRenewedExpiry(node.expired_at, node.billing_cycle),
     [node.billing_cycle, node.expired_at],
+  );
+  const [nextExpiryDate, setNextExpiryDate] = useState(
+    calculation.ok ? toDateInputValue(calculation.result.nextTimestamp) : "",
   );
 
   if (!calculation.ok) return null;
 
   const { result } = calculation;
   const handleConfirm = async () => {
+    const nextTimestamp = dateInputToTimestamp(nextExpiryDate, result.nextTimestamp);
+    if (nextTimestamp === null || nextTimestamp <= Date.now()) {
+      setDateError(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
       await call("admin:editClient", {
         uuid: node.uuid,
-        expired_at: new Date(result.nextTimestamp).toISOString(),
+        expired_at: new Date(nextTimestamp).toISOString(),
       });
       refresh();
       setOpen(false);
@@ -72,7 +87,11 @@ export function NodeRenewalDialog({
       open={open}
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen);
-        if (nextOpen) setError(null);
+        if (nextOpen) {
+          setNextExpiryDate(toDateInputValue(result.nextTimestamp));
+          setDateError(false);
+          setError(null);
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -112,11 +131,35 @@ export function NodeRenewalDialog({
           </div>
           <div className="flex items-center justify-between gap-4 py-3">
             <dt className="text-sm text-muted-foreground">{t("atlas.renewal.newExpiry")}</dt>
-            <dd className="text-right text-sm font-semibold tabular-nums text-primary">
-              {formatDateTime(result.nextTimestamp, locale)}
+            <dd className="flex min-w-0 flex-col items-end gap-1.5">
+              <Input
+                type="date"
+                value={nextExpiryDate}
+                min={toDateInputValue(Date.now())}
+                onChange={(event) => {
+                  setNextExpiryDate(event.target.value);
+                  setDateError(false);
+                }}
+                aria-label={t("atlas.renewal.newExpiry")}
+                aria-invalid={dateError}
+                className={cn(
+                  "h-9 w-44 text-right text-sm font-semibold tabular-nums text-primary",
+                  dateError && "border-red-500 focus-visible:ring-red-500",
+                )}
+              />
+              <span className="text-[11px] text-muted-foreground">
+                {nextExpiryDate
+                  ? formatDateTime(
+                      dateInputToTimestamp(nextExpiryDate, result.nextTimestamp) || result.nextTimestamp,
+                      locale,
+                    )
+                  : t("atlas.renewal.dateRequired")}
+              </span>
             </dd>
           </div>
         </dl>
+
+        <p className="text-xs text-muted-foreground">{t("atlas.renewal.dateHint")}</p>
 
         {result.startsFromNow && (
           <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
@@ -126,6 +169,11 @@ export function NodeRenewalDialog({
         {error && (
           <p role="alert" className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-300">
             {error}
+          </p>
+        )}
+        {dateError && (
+          <p role="alert" className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-300">
+            {t("atlas.renewal.invalidDate")}
           </p>
         )}
 

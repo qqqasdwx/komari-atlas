@@ -96,9 +96,12 @@
       "confirm": "Confirm renewal",
       "currentExpiry": "Current expiry",
       "cycle": "Renewal cycle",
+      "dateHint": "Choose a date or enter it manually. The calculated time is preserved when saving.",
+      "dateRequired": "Select a valid date",
       "description": "Update this server's expiry time using its configured billing cycle.",
       "error": "Renewal failed. Check administrator access and the Komari version.",
       "expiredNotice": "This node has expired; this renewal will start from the current time.",
+      "invalidDate": "Choose a valid expiry date in the future.",
       "newExpiry": "New expiry",
       "submitting": "Updating",
       "title": "Renew {{name}}"
