@@ -91,6 +91,18 @@
       "days": "{{count}} 天到期",
       "expired": "已到期"
     },
+    "renewal": {
+      "action": "续期",
+      "confirm": "确认续期",
+      "currentExpiry": "当前到期时间",
+      "cycle": "续期周期",
+      "description": "按当前计费周期更新该服务器的到期时间。",
+      "error": "续期失败，请检查管理员权限和 Komari 版本。",
+      "expiredNotice": "该节点已到期，本次续期将从当前时间开始计算。",
+      "newExpiry": "续期后到期时间",
+      "submitting": "正在更新",
+      "title": "续期 {{name}}"
+    },
     "language": "显示语言",
     "loading": "正在加载",
     "login": {

@@ -91,6 +91,18 @@
       "days": "Expires in {{count}} days",
       "expired": "Expired"
     },
+    "renewal": {
+      "action": "Renew",
+      "confirm": "Confirm renewal",
+      "currentExpiry": "Current expiry",
+      "cycle": "Renewal cycle",
+      "description": "Update this server's expiry time using its configured billing cycle.",
+      "error": "Renewal failed. Check administrator access and the Komari version.",
+      "expiredNotice": "This node has expired; this renewal will start from the current time.",
+      "newExpiry": "New expiry",
+      "submitting": "Updating",
+      "title": "Renew {{name}}"
+    },
     "language": "Language",
     "loading": "Loading",
     "login": {

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import SpaLink from "@/components/SpaLink";
 import { CountryFlag, OperatingSystemIcon } from "@/components/v2/NodeIdentity";
 import { NodeTags } from "@/components/v2/NodeTags";
+import { NodeRenewalDialog } from "@/components/v2/NodeRenewalDialog";
 import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -395,12 +396,15 @@ export function NodeCard({
                   <CalendarDays className="h-3 w-3" />
                   {t("atlas.detail.expiry")}
                 </div>
-                <div className={cn(
-                  "flex flex-wrap justify-end gap-x-1.5 font-medium tabular-nums transition-[filter] duration-150",
-                  privacyMode && "select-none blur-[5px]",
-                )}>
-                  <span>{expiryDate}</span>
-                  {expiryStatus && <span className="text-muted-foreground">· {expiryStatus}</span>}
+                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
+                  <div className={cn(
+                    "flex flex-wrap justify-end gap-x-1.5 font-medium tabular-nums transition-[filter] duration-150",
+                    privacyMode && "select-none blur-[5px]",
+                  )}>
+                    <span>{expiryDate}</span>
+                    {expiryStatus && <span className="text-muted-foreground">· {expiryStatus}</span>}
+                  </div>
+                  <NodeRenewalDialog node={node} compact />
                 </div>
               </div>
             </div>

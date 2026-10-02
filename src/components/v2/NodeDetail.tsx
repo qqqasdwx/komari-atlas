@@ -31,6 +31,7 @@ import {
   type HistoryRange,
 } from "@/components/v2/HistoricalCharts";
 import { NodeTags } from "@/components/v2/NodeTags";
+import { NodeRenewalDialog } from "@/components/v2/NodeRenewalDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -576,7 +577,10 @@ export function NodeDetail({ uuid }: { uuid: string }) {
             </section>
 
             <section className="atlas-detail-section">
-              <div className="atlas-section-heading"><div><span className="atlas-section-index">03</span><h2>{t("atlas.detail.assets")}</h2></div></div>
+              <div className="atlas-section-heading">
+                <div><span className="atlas-section-index">03</span><h2>{t("atlas.detail.assets")}</h2></div>
+                <NodeRenewalDialog node={node} />
+              </div>
               <div
                 className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
                 title={ratesUnavailable && assetValue?.remainingValue == null
