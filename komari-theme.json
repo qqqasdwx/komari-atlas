@@ -2,8 +2,8 @@
   "name": "Komari Atlas",
   "short": "atlas",
   "description": "A private monitoring console for Komari",
-  "version": "0.2.32",
+  "version": "0.2.33",
   "author": "qqqasdwx",
   "url": "https://github.com/qqqasdwx/komari-atlas",
-  "preview": "preview-v0.2.32.png"
+  "preview": "preview-v0.2.33.png"
 }

@@ -231,7 +231,9 @@ export function NodeCard({
         <div className="atlas-node-card-body grid gap-4 p-4 sm:grid-cols-2 sm:gap-0">
           <div className="space-y-4 sm:pr-4">
             <div className="space-y-3">
-              <ResourceBar label="CPU" value={cpu} tone={cpuTone} />
+              <section className="space-y-3 rounded-md border border-border/50 bg-background/20 p-3">
+                <ResourceBar label="CPU" value={cpu} tone={cpuTone} />
+              </section>
               <section className="space-y-3 rounded-md border border-border/50 bg-background/20 p-3">
                 <div className="text-[11px] font-medium text-muted-foreground">
                   {t("atlas.charts.memorySwap")}
@@ -249,12 +251,14 @@ export function NodeCard({
                   detail={`${currentLive ? formatBytes(currentLive.swap.used) : "--"} / ${formatBytes(node.swap_total)}`}
                 />
               </section>
-              <ResourceBar
-                label={t("atlas.metrics.disk")}
-                value={disk}
-                tone={diskTone}
-                detail={`${currentLive ? formatBytes(currentLive.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
-              />
+              <section className="space-y-3 rounded-md border border-border/50 bg-background/20 p-3">
+                <ResourceBar
+                  label={t("atlas.metrics.disk")}
+                  value={disk}
+                  tone={diskTone}
+                  detail={`${currentLive ? formatBytes(currentLive.disk.used) : "--"} / ${formatBytes(node.disk_total)}`}
+                />
+              </section>
             </div>
 
             <section className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1.3fr)_minmax(0,.7fr)_minmax(0,.7fr)] gap-2 rounded-md border border-border/50 bg-background/25 p-2.5 text-[11px]">
