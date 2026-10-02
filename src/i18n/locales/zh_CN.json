@@ -190,9 +190,9 @@
     },
     "summary": {
       "clearFilter": "清除当前筛选",
-      "expiring": "30 天内到期",
+      "expiring": "7 天内到期",
       "filter": {
-        "expiring": "筛选 30 天内到期节点",
+        "expiring": "筛选 7 天内到期节点",
         "offline": "筛选离线节点"
       },
       "offline": "离线",

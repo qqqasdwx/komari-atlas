@@ -36,11 +36,13 @@ import {
 import { cn } from "@/lib/utils";
 import { formatBytes } from "@/utils/unitHelper";
 
+const EXPIRING_WINDOW_DAYS = 7;
+
 function isExpiring(expiredAt: string) {
   const value = new Date(expiredAt).getTime();
   if (!Number.isFinite(value)) return false;
   const days = (value - Date.now()) / (24 * 60 * 60 * 1000);
-  return days >= 0 && days <= 30;
+  return days >= 0 && days <= EXPIRING_WINDOW_DAYS;
 }
 
 type SummaryFilter = "offline" | "expiring";

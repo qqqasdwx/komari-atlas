@@ -190,9 +190,9 @@
     },
     "summary": {
       "clearFilter": "Clear the current filter",
-      "expiring": "Expiring in 30 days",
+      "expiring": "Expiring in 7 days",
       "filter": {
-        "expiring": "Filter nodes expiring in 30 days",
+        "expiring": "Filter nodes expiring in 7 days",
         "offline": "Filter offline nodes"
       },
       "offline": "Offline",
