@@ -38,6 +38,9 @@
       "cpuModel": "CPU model",
       "days": "{{count}} days",
       "diskTotal": "Disk capacity",
+      "durationHours": "{{count}}h",
+      "durationHoursMinutes": "{{hours}}h {{minutes}}m",
+      "durationMinutes": "{{count}} min",
       "expiry": "Expiry",
       "followExpiry": "Follow expiry day",
       "gpuDevice": "GPU {{index}}",
@@ -53,6 +56,8 @@
       "liveStatus": "Live status",
       "loadingHistory": "Loading historical metrics",
       "loss": "Loss",
+      "maxLatency": "Max latency",
+      "maxLoss": "Max packet loss",
       "memoryTotal": "Memory capacity",
       "monthDay": "Day {{day}} of each month",
       "movePingTaskDown": "Move latency monitoring task down",
@@ -68,6 +73,7 @@
       "nodeSettings": "Node settings",
       "noPingTasks": "No latency monitoring tasks are available for this node",
       "pingStatus": "Live latency monitoring",
+      "pingSummary": "Latency anomaly summary",
       "pingTask": "Latency monitoring task {{id}}",
       "pingThresholdDescription": "Color thresholds are saved per node and task, and apply to home history blocks and latest values.",
       "price": "Price",
@@ -85,6 +91,9 @@
       "uptime": "Uptime",
       "uptimeDays": "{{days}}d {{hours}}h",
       "uptimeHours": "{{hours}}h",
+      "coverage": "Data coverage",
+      "longestAnomaly": "Longest anomaly",
+      "longestNoData": "Longest no data",
       "virtualization": "Virtualization"
     },
     "expiry": {
@@ -204,6 +213,9 @@
     "traffic": {
       "billingUsage": "Billing-period traffic",
       "resetOnDay": "Resets monthly on day {{day}}",
+      "todayNoData": "No samples are available for today",
+      "todayTitle": "Today's traffic",
+      "total": "Total",
       "unconfigured": "Set a reset day or expiry date in node settings"
     },
     "unavailable": "Unavailable",

@@ -137,6 +137,19 @@ function getShanghaiParts(date: Date) {
   };
 }
 
+export function getShanghaiDateKey(date: Date): string {
+  const parts = getShanghaiParts(date);
+  return `${parts.year}-${String(parts.monthIndex + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+}
+
+export function findTodayTraffic(
+  days: BillingTrafficDay[],
+  now = new Date(),
+): BillingTrafficDay | null {
+  const today = getShanghaiDateKey(now);
+  return days.find((day) => day.date === today) || null;
+}
+
 function expiryResetDay(expiredAt: string): number | null {
   if (!expiredAt.trim()) return null;
   const expiry = new Date(expiredAt);
@@ -241,8 +254,7 @@ export function buildDailyTrafficSeries(
 ): BillingTrafficDay[] {
   const days = new Map<string, BillingTrafficDay>();
   for (let time = start.getTime(); time <= end.getTime(); time += DAY_MS) {
-    const parts = getShanghaiParts(new Date(time));
-    const date = `${parts.year}-${String(parts.monthIndex + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+    const date = getShanghaiDateKey(new Date(time));
     days.set(date, { date, up: 0, down: 0 });
   }
 
@@ -256,8 +268,7 @@ export function buildDailyTrafficSeries(
       if (typeof point.value !== "number" || !Number.isFinite(point.value)) continue;
       const pointTime = new Date(point.time);
       if (!Number.isFinite(pointTime.getTime())) continue;
-      const parts = getShanghaiParts(pointTime);
-      const date = `${parts.year}-${String(parts.monthIndex + 1).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
+      const date = getShanghaiDateKey(pointTime);
       const day = days.get(date);
       if (!day) continue;
       day[series.metric_key === "traffic.up" ? "up" : "down"] += Math.max(0, point.value);

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildDailyTrafficSeries,
   compareVersions,
+  findTodayTraffic,
   getTrafficUsed,
   normalizeAtlasSettings,
   orderPingTasksByCardSelection,
@@ -227,6 +228,19 @@ describe("buildDailyTrafficSeries", () => {
       { date: "2026-09-01", up: 30, down: 0 },
       { date: "2026-09-02", up: 30, down: 40 },
     ]);
+  });
+});
+
+describe("findTodayTraffic", () => {
+  it("uses the Asia/Shanghai calendar date", () => {
+    const days = [
+      { date: "2026-09-01", up: 10, down: 20 },
+      { date: "2026-09-02", up: 30, down: 40 },
+    ];
+
+    expect(findTodayTraffic(days, new Date("2026-09-01T16:30:00.000Z"))).toEqual(days[1]);
+    expect(findTodayTraffic(days, new Date("2026-09-01T15:30:00.000Z"))).toEqual(days[0]);
+    expect(findTodayTraffic(days, new Date("2026-09-03T00:00:00.000Z"))).toBeNull();
   });
 });
 

@@ -14,10 +14,13 @@ import {
 } from "recharts";
 
 import { Button } from "@/components/ui/button";
+import { PingSummaryPanel } from "@/components/v2/PingSummaryPanel";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useRPC2Call } from "@/contexts/RPC2Context";
 import { metricSeriesKey, percentage } from "@/lib/atlas";
 import { insertMetricGapMarkers } from "@/lib/chartHistory";
+import { resolvePingTaskThresholds } from "@/lib/pingThresholds";
+import type { PingSummaryTaskInput } from "@/lib/pingSummary";
 import { cn } from "@/lib/utils";
 import type { NodeBasicInfo } from "@/contexts/NodeListContext";
 import type { MetricSeries, MetricsResponse } from "@/types/atlas";
@@ -325,7 +328,7 @@ function MetricHistoryCharts({
   mode: "system" | "ping";
 }) {
   const { t } = useTranslation();
-  const { pingTasks } = useAtlasSettings();
+  const { pingTasks, settings } = useAtlasSettings();
   const { callViaHTTP } = useRPC2Call();
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<{
@@ -381,6 +384,16 @@ function MetricHistoryCharts({
     () => new Map(pingTasks.map((task) => [String(task.id), task.name])),
     [pingTasks],
   );
+  const pingSummaryTasks = useMemo<PingSummaryTaskInput[]>(
+    () => pingTasks
+      .filter((task) => task.clients.includes(node.uuid))
+      .map((task) => ({
+        taskId: task.id,
+        label: task.name,
+        thresholds: resolvePingTaskThresholds(settings.nodes[node.uuid], task.id),
+      })),
+    [node.uuid, pingTasks, settings.nodes],
+  );
   const hasGpu = state.series.some(
     (series) => series.metric_key.startsWith("gpu.") && series.points.some((point) => point.value !== null),
   );
@@ -410,6 +423,11 @@ function MetricHistoryCharts({
     <div className="atlas-chart-grid" aria-busy={state.loading}>
       {mode === "ping" ? (
         <>
+          <PingSummaryPanel
+            series={state.series}
+            tasks={pingSummaryTasks}
+            timeDomain={state.timeDomain}
+          />
           <MetricChart title={t("atlas.charts.pingLatency")} series={state.series} keys={["ping.latency_ms"]} kind="latency" node={node} taskNames={taskNames} timeDomain={state.timeDomain} toggleable />
           <MetricChart title={t("atlas.charts.pingLoss")} series={state.series} keys={["ping.loss"]} kind="loss" node={node} taskNames={taskNames} timeDomain={state.timeDomain} toggleable />
         </>

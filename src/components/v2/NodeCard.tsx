@@ -10,11 +10,18 @@ import { NodeRenewalDialog } from "@/components/v2/NodeRenewalDialog";
 import { PingHistoryStrip } from "@/components/v2/PingHistoryStrip";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useAssetValues } from "@/contexts/AssetValueContext";
 import { useAtlasSettings } from "@/contexts/AtlasSettingsContext";
 import { useBillingTraffic } from "@/contexts/BillingTrafficContext";
 import { useCardPingHistory } from "@/contexts/CardPingHistoryContext";
 import {
+  findTodayTraffic,
   percentage,
   resolveCardPingTaskIds,
   resourceTone,
@@ -147,6 +154,13 @@ export function NodeCard({
     : 0;
   const trafficTone = resourceTone(trafficPercent, 80, 95);
   const trafficResetDay = traffic.status === "unconfigured" ? undefined : traffic.resetDay;
+  const todayTraffic = traffic.status === "ready" ? findTodayTraffic(traffic.daily) : null;
+  const todayTrafficDate = todayTraffic
+    ? new Date(`${todayTraffic.date}T00:00:00+08:00`).toLocaleDateString(locale, {
+        month: "2-digit",
+        day: "2-digit",
+      })
+    : null;
   const cardRemark = node.public_remark.trim() || node.remark.trim();
   const movePingTask = (taskId: number, offset: -1 | 1) => {
     const currentIndex = selectedPingIds.indexOf(taskId);
@@ -280,40 +294,86 @@ export function NodeCard({
               </div>
             </section>
 
-            <section className="space-y-1.5">
-              <div className="flex items-start justify-between gap-2 text-xs">
-                <span className="text-muted-foreground">
-                  {t("atlas.traffic.billingUsage")}
-                  {trafficResetDay && (
-                    <span className="mt-0.5 block text-[10px]">
-                      {t("atlas.traffic.resetOnDay", { day: trafficResetDay })}
-                    </span>
-                  )}
-                </span>
-                {traffic.status === "ready" && (
-                  <span className={cn("font-medium tabular-nums", toneClass[trafficTone])}>
-                    {formatBytes(traffic.used)}{node.traffic_limit > 0 ? ` / ${formatBytes(node.traffic_limit)}` : " / ∞"}
-                  </span>
-                )}
-              </div>
-              {traffic.status === "ready" ? (
-                <>
-                  {node.traffic_limit > 0 && <MetricBar value={trafficPercent} tone={trafficTone} />}
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>↑ {formatBytes(traffic.up)}</span>
-                    <span>↓ {formatBytes(traffic.down)}</span>
+            <TooltipProvider delayDuration={120} skipDelayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <section
+                    className="relative z-30 cursor-help space-y-1.5 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    tabIndex={0}
+                    aria-label={t("atlas.traffic.todayTitle")}
+                  >
+                    <div className="flex items-start justify-between gap-2 text-xs">
+                      <span className="text-muted-foreground">
+                        {t("atlas.traffic.billingUsage")}
+                        {trafficResetDay && (
+                          <span className="mt-0.5 block text-[10px]">
+                            {t("atlas.traffic.resetOnDay", { day: trafficResetDay })}
+                          </span>
+                        )}
+                      </span>
+                      {traffic.status === "ready" && (
+                        <span className={cn("font-medium tabular-nums", toneClass[trafficTone])}>
+                          {formatBytes(traffic.used)}{node.traffic_limit > 0 ? ` / ${formatBytes(node.traffic_limit)}` : " / ∞"}
+                        </span>
+                      )}
+                    </div>
+                    {traffic.status === "ready" ? (
+                      <>
+                        {node.traffic_limit > 0 && <MetricBar value={trafficPercent} tone={trafficTone} />}
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>↑ {formatBytes(traffic.up)}</span>
+                          <span>↓ {formatBytes(traffic.down)}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="rounded-md border border-dashed px-2 py-1.5 text-[11px] text-muted-foreground">
+                        {traffic.status === "loading"
+                          ? t("atlas.loading")
+                          : traffic.status === "unconfigured"
+                            ? t("atlas.traffic.unconfigured")
+                            : t("atlas.unavailable")}
+                      </div>
+                    )}
+                  </section>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="start" sideOffset={8} className="w-64 p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium">{t("atlas.traffic.todayTitle")}</span>
+                    {todayTrafficDate && (
+                      <span className="text-[10px] text-muted-foreground">{todayTrafficDate}</span>
+                    )}
                   </div>
-                </>
-              ) : (
-                <div className="rounded-md border border-dashed px-2 py-1.5 text-[11px] text-muted-foreground">
-                  {traffic.status === "loading"
-                    ? t("atlas.loading")
-                    : traffic.status === "unconfigured"
-                      ? t("atlas.traffic.unconfigured")
-                      : t("atlas.unavailable")}
-                </div>
-              )}
-            </section>
+                  {todayTraffic ? (
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-[11px]">
+                      <div>
+                        <div className="text-muted-foreground">{t("atlas.metrics.upload")}</div>
+                        <div className="mt-1 font-semibold tabular-nums">{formatBytes(todayTraffic.up)}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">{t("atlas.metrics.download")}</div>
+                        <div className="mt-1 font-semibold tabular-nums">{formatBytes(todayTraffic.down)}</div>
+                      </div>
+                      <div>
+                        <div className="text-muted-foreground">{t("atlas.traffic.total")}</div>
+                        <div className="mt-1 font-semibold tabular-nums">
+                          {formatBytes(todayTraffic.up + todayTraffic.down)}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      {traffic.status === "loading"
+                        ? t("atlas.loading")
+                        : traffic.status === "unconfigured"
+                          ? t("atlas.traffic.unconfigured")
+                          : traffic.status === "error"
+                            ? t("atlas.unavailable")
+                            : t("atlas.traffic.todayNoData")}
+                    </p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           <div className="space-y-4 border-t border-border/50 pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
