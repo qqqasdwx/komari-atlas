@@ -6,6 +6,38 @@
       "displayCurrency": "显示币种",
       "longTerm": "长期"
     },
+    "change": {
+      "clear": "清空记录",
+      "empty": "尚未发现节点信息变化",
+      "fields": {
+        "arch": "架构",
+        "billing_cycle": "计费周期",
+        "cpu_cores": "CPU 核心",
+        "cpu_name": "CPU 型号",
+        "currency": "货币",
+        "disk_total": "磁盘容量",
+        "expired_at": "到期时间",
+        "gpu_name": "GPU 型号",
+        "group": "分组",
+        "ipv4": "IPv4",
+        "ipv6": "IPv6",
+        "kernel_version": "内核版本",
+        "mem_total": "内存容量",
+        "name": "节点名称",
+        "os": "系统",
+        "price": "价格",
+        "public_remark": "公开备注",
+        "region": "地区",
+        "remark": "备注",
+        "swap_total": "Swap 容量",
+        "tags": "标签",
+        "traffic_limit": "流量限额",
+        "traffic_limit_type": "流量统计方式",
+        "version": "Agent 版本",
+        "virtualization": "虚拟化"
+      },
+      "title": "节点信息变化"
+    },
     "charts": {
       "cpu": "CPU 使用率",
       "dailyTraffic": "每日流量",

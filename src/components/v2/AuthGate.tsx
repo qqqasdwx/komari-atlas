@@ -12,6 +12,7 @@ import { AtlasSettingsProvider } from "@/contexts/AtlasSettingsContext";
 import { BillingTrafficProvider } from "@/contexts/BillingTrafficContext";
 import { CardPingHistoryProvider } from "@/contexts/CardPingHistoryContext";
 import { LiveDataProvider } from "@/contexts/LiveDataContext";
+import { NodeChangeProvider } from "@/contexts/NodeChangeContext";
 import { NodeListProvider } from "@/contexts/NodeListContext";
 import { RPC2Provider, useRPC2Call } from "@/contexts/RPC2Context";
 import { compareVersions } from "@/lib/atlas";
@@ -80,17 +81,19 @@ function AuthenticatedProviders({ children }: { children: React.ReactNode }) {
     <RPC2Provider>
       <VersionGate>
         <NodeListProvider>
-          <AssetValueProvider>
-            <LiveDataProvider>
-              <AtlasSettingsProvider>
-                <CardPingHistoryProvider>
-                  <BillingTrafficProvider>
-                    {children}
-                  </BillingTrafficProvider>
-                </CardPingHistoryProvider>
-              </AtlasSettingsProvider>
-            </LiveDataProvider>
-          </AssetValueProvider>
+          <NodeChangeProvider>
+            <AssetValueProvider>
+              <LiveDataProvider>
+                <AtlasSettingsProvider>
+                  <CardPingHistoryProvider>
+                    <BillingTrafficProvider>
+                      {children}
+                    </BillingTrafficProvider>
+                  </CardPingHistoryProvider>
+                </AtlasSettingsProvider>
+              </LiveDataProvider>
+            </AssetValueProvider>
+          </NodeChangeProvider>
         </NodeListProvider>
       </VersionGate>
     </RPC2Provider>

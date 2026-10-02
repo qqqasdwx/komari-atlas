@@ -17,7 +17,7 @@ function AuthenticatedApp() {
     <div className="atlas-app-shell">
       <AppHeader privacyMode={privacyMode} onPrivacyModeChange={setPrivacyMode} />
       {parts[0] === "instance" && parts[1]
-        ? <NodeDetail uuid={decodeURIComponent(parts[1])} />
+        ? <NodeDetail uuid={decodeURIComponent(parts[1])} privacyMode={privacyMode} />
         : <Dashboard privacyMode={privacyMode} />}
     </div>
   );

@@ -6,6 +6,38 @@
       "displayCurrency": "Display currency",
       "longTerm": "Long term"
     },
+    "change": {
+      "clear": "Clear history",
+      "empty": "No node information changes detected",
+      "fields": {
+        "arch": "Architecture",
+        "billing_cycle": "Billing cycle",
+        "cpu_cores": "CPU cores",
+        "cpu_name": "CPU model",
+        "currency": "Currency",
+        "disk_total": "Disk capacity",
+        "expired_at": "Expiry",
+        "gpu_name": "GPU model",
+        "group": "Group",
+        "ipv4": "IPv4",
+        "ipv6": "IPv6",
+        "kernel_version": "Kernel version",
+        "mem_total": "Memory capacity",
+        "name": "Node name",
+        "os": "Operating system",
+        "price": "Price",
+        "public_remark": "Public note",
+        "region": "Region",
+        "remark": "Note",
+        "swap_total": "Swap capacity",
+        "tags": "Tags",
+        "traffic_limit": "Traffic limit",
+        "traffic_limit_type": "Traffic calculation",
+        "version": "Agent version",
+        "virtualization": "Virtualization"
+      },
+      "title": "Node information changes"
+    },
     "charts": {
       "cpu": "CPU usage",
       "dailyTraffic": "Daily traffic",

@@ -31,6 +31,7 @@ import {
   type HistoryRange,
 } from "@/components/v2/HistoricalCharts";
 import { NodeTags } from "@/components/v2/NodeTags";
+import { NodeChangeHistory } from "@/components/v2/NodeChangeHistory";
 import { NodeRenewalDialog } from "@/components/v2/NodeRenewalDialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -398,7 +399,7 @@ function HistoryRangeToolbar({
   );
 }
 
-export function NodeDetail({ uuid }: { uuid: string }) {
+export function NodeDetail({ uuid, privacyMode }: { uuid: string; privacyMode: boolean }) {
   const { t, i18n } = useTranslation();
   const { nodeList, isLoading } = useNodeList();
   const { live_data } = useLiveData();
@@ -593,6 +594,7 @@ export function NodeDetail({ uuid }: { uuid: string }) {
                 <DetailMetric icon={WalletCards} label={t("atlas.detail.remainingValue")} value={remainingValue} />
               </div>
             </section>
+            <NodeChangeHistory uuid={uuid} privacyMode={privacyMode} />
           </TabsContent>
 
           <TabsContent value="charts" className="mt-0">
